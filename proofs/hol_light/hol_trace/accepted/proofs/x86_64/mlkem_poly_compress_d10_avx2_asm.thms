@@ -1,0 +1,113 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_poly_compress_d10_avx2_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mlkem_poly_compress_d10_avx2_asm MLKEM_POLY_COMPRESS_D10_NOIBT_SUBROUTINE_CORRECT
+  |- !r:int64 a:int64 data:int64 inlist:(int16 list) pc:num stackpointer:int64 returnaddress:int64.
+       LENGTH inlist = 256
+       /\ aligned 32 a
+       /\ aligned 32 data
+       /\ ALL (nonoverlapping (r, 320)) [(word pc : int64), LENGTH mlkem_poly_compress_d10_tmc;
+                                         a, 512; data, 32; stackpointer, 8]
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mlkem_poly_compress_d10_tmc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = stackpointer
+               /\ read (memory :> bytes64 stackpointer) s = returnaddress
+               /\ C_ARGUMENTS [r; a; data] s
+               /\ read (memory :> bytes (data, 32)) s
+                  = num_of_wordlist (MAP (iword : int -> byte) compress_d10_data)
+               /\ read (memory :> bytes (a, 512)) s = num_of_wordlist inlist
+               /\ (!i:num. i < 256 ==> &0 <= ival (EL i inlist) /\ ival (EL i inlist) <= &3328))
+             (\s:x86state.
+               read RIP s = returnaddress
+               /\ read RSP s = word_add stackpointer (word 8 : int64)
+               /\ read (memory :> bytes (r, 320)) s = num_of_wordlist (MAP compress_d10 inlist))
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (r, 320)])
+
+theorem mlkem_poly_compress_d10_avx2_asm MLKEM_POLY_COMPRESS_D10_NOIBT_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> int64 -> num -> int64 -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) r:int64 a:int64 data:int64 inlist:(int16 list) pc:num
+        stackpointer:int64 returnaddress:int64.
+         LENGTH inlist = 256
+         /\ aligned 32 a
+         /\ aligned 32 data
+         /\ ALL (nonoverlapping (r, 320)) [(word pc : int64), LENGTH mlkem_poly_compress_d10_tmc;
+                                           a, 512; data, 32; stackpointer, 8]
+         ==> ensures x86
+               (\s:x86state.
+                 bytes_loaded s (word pc : int64) mlkem_poly_compress_d10_tmc
+                 /\ read RIP s = (word pc : int64)
+                 /\ read RSP s = stackpointer
+                 /\ read (memory :> bytes64 stackpointer) s = returnaddress
+                 /\ C_ARGUMENTS [r; a; data] s
+                 /\ read events s = e)
+               (\s:x86state.
+                 read RIP s = returnaddress
+                 /\ read RSP s = word_add stackpointer (word 8 : int64)
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events a data r pc stackpointer returnaddress
+                      /\ memaccess_inbounds e2 [a, 512; data, 32; r, 320; stackpointer, 8]
+                           [r, 320; stackpointer, 8]))
+               (\s:x86state s':x86state. T)
+
+theorem mlkem_poly_compress_d10_avx2_asm MLKEM_POLY_COMPRESS_D10_SUBROUTINE_CORRECT
+  |- !r:int64 a:int64 data:int64 inlist:(int16 list) pc:num stackpointer:int64 returnaddress:int64.
+       LENGTH inlist = 256
+       /\ aligned 32 a
+       /\ aligned 32 data
+       /\ ALL (nonoverlapping (r, 320)) [(word pc : int64), LENGTH mlkem_poly_compress_d10_mc;
+                                         a, 512; data, 32; stackpointer, 8]
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mlkem_poly_compress_d10_mc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = stackpointer
+               /\ read (memory :> bytes64 stackpointer) s = returnaddress
+               /\ C_ARGUMENTS [r; a; data] s
+               /\ read (memory :> bytes (data, 32)) s
+                  = num_of_wordlist (MAP (iword : int -> byte) compress_d10_data)
+               /\ read (memory :> bytes (a, 512)) s = num_of_wordlist inlist
+               /\ (!i:num. i < 256 ==> &0 <= ival (EL i inlist) /\ ival (EL i inlist) <= &3328))
+             (\s:x86state.
+               read RIP s = returnaddress
+               /\ read RSP s = word_add stackpointer (word 8 : int64)
+               /\ read (memory :> bytes (r, 320)) s = num_of_wordlist (MAP compress_d10 inlist))
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (r, 320)])
+
+theorem mlkem_poly_compress_d10_avx2_asm MLKEM_POLY_COMPRESS_D10_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> int64 -> num -> int64 -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) r:int64 a:int64 data:int64 inlist:(int16 list) pc:num
+        stackpointer:int64 returnaddress:int64.
+         LENGTH inlist = 256
+         /\ aligned 32 a
+         /\ aligned 32 data
+         /\ ALL (nonoverlapping (r, 320)) [(word pc : int64), LENGTH mlkem_poly_compress_d10_mc;
+                                           a, 512; data, 32; stackpointer, 8]
+         ==> ensures x86
+               (\s:x86state.
+                 bytes_loaded s (word pc : int64) mlkem_poly_compress_d10_mc
+                 /\ read RIP s = (word pc : int64)
+                 /\ read RSP s = stackpointer
+                 /\ read (memory :> bytes64 stackpointer) s = returnaddress
+                 /\ C_ARGUMENTS [r; a; data] s
+                 /\ read events s = e)
+               (\s:x86state.
+                 read RIP s = returnaddress
+                 /\ read RSP s = word_add stackpointer (word 8 : int64)
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events a data r pc stackpointer returnaddress
+                      /\ memaccess_inbounds e2 [a, 512; data, 32; r, 320; stackpointer, 8]
+                           [r, 320; stackpointer, 8]))
+               (\s:x86state s':x86state. T)

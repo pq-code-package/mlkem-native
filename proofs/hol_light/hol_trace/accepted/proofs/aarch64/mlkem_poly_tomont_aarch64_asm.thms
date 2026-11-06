@@ -1,0 +1,48 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_poly_tomont_aarch64_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mlkem_poly_tomont_aarch64_asm MLKEM_POLY_TOMONT_SUBROUTINE_CORRECT
+  |- !ptr:int64 x:(num -> int16) pc:num returnaddress:int64.
+       nonoverlapping ((word pc : int64), LENGTH poly_tomont_asm_mc) (ptr, 512)
+       ==> ensures arm
+             (\s:armstate.
+               aligned_bytes_loaded s (word pc : int64) poly_tomont_asm_mc
+               /\ read PC s = (word pc : int64)
+               /\ read X30 s = returnaddress
+               /\ C_ARGUMENTS [ptr] s
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes16 (word_add ptr (word (2 * i) : int64))) s = x i))
+             (\s:armstate.
+               read PC s = returnaddress
+               /\ (!i:num.
+                    i < 256
+                    ==> (let z_i:int16 =
+                            read (memory :> bytes16 (word_add ptr (word (2 * i) : int64))) s in
+                        (ival z_i == tomont_3329 ((ival : int16 -> int) o x) i) (mod &3329)
+                        /\ abs (ival z_i) <= &3328)))
+             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,, MAYCHANGE [memory :> bytes (ptr, 512)])
+
+theorem mlkem_poly_tomont_aarch64_asm MLKEM_POLY_TOMONT_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> num -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) ptr:int64 pc:num returnaddress:int64.
+         nonoverlapping ((word pc : int64), LENGTH poly_tomont_asm_mc) (ptr, 512)
+         ==> ensures arm
+               (\s:armstate.
+                 aligned_bytes_loaded s (word pc : int64) poly_tomont_asm_mc
+                 /\ read PC s = (word pc : int64)
+                 /\ read X30 s = returnaddress
+                 /\ C_ARGUMENTS [ptr] s
+                 /\ read events s = e)
+               (\s:armstate.
+                 read PC s = returnaddress
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events ptr pc returnaddress
+                      /\ memaccess_inbounds e2 [ptr, 512] [ptr, 512]))
+               (\s:armstate s':armstate. T)

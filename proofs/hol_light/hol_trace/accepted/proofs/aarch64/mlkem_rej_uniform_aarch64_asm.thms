@@ -1,0 +1,67 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_rej_uniform_aarch64_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mlkem_rej_uniform_aarch64_asm MLKEM_REJ_UNIFORM_SUBROUTINE_CORRECT
+  |- !res:int64 buf:int64 buflen:int64 table:int64 inlist:((12 word) list) pc:num stackpointer:int64
+      returnaddress:int64.
+       num_divides 24 (val buflen)
+       /\ 8 * val buflen = 12 * LENGTH inlist
+       /\ ALL (nonoverlapping (word_sub stackpointer (word 576 : int64), 576))
+            [(word pc : int64), LENGTH mlkem_rej_uniform_mc; buf, val buflen; table, 4096]
+       /\ ALL (nonoverlapping (res, 512)) [(word pc : int64), LENGTH mlkem_rej_uniform_mc;
+                                           word_sub stackpointer (word 576 : int64), 576]
+       ==> ensures arm
+             (\s:armstate.
+               aligned_bytes_loaded s (word pc : int64) mlkem_rej_uniform_mc
+               /\ read PC s = (word pc : int64)
+               /\ read SP s = stackpointer
+               /\ read X30 s = returnaddress
+               /\ C_ARGUMENTS [res; buf; buflen; table] s
+               /\ read (memory :> bytes (table, 4096)) s = num_of_wordlist mlkem_rej_uniform_table
+               /\ read (memory :> bytes (buf, val buflen)) s = num_of_wordlist inlist)
+             (\s:armstate.
+               read PC s = returnaddress
+               /\ (let outlist:(int16 list) = SUB_LIST (0, 256) (REJ_SAMPLE inlist) in
+                  let outlen:num = LENGTH outlist in
+                  C_RETURN s = (word outlen : int64)
+                  /\ read (memory :> bytes (res, 2 * outlen)) s = num_of_wordlist outlist))
+             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (res, 512);
+                           memory :> bytes (word_sub stackpointer (word 576 : int64), 576)])
+
+theorem mlkem_rej_uniform_aarch64_asm MLKEM_REJ_UNIFORM_SUBROUTINE_MEMSAFE
+  |- !res:int64 buf:int64 buflen:int64 table:int64 inlist:((12 word) list) pc:num
+      e:((64 address_uarch_event) list) stackpointer:int64 returnaddress:int64.
+       num_divides 24 (val buflen)
+       /\ 8 * val buflen = 12 * LENGTH inlist
+       /\ ALL (nonoverlapping (word_sub stackpointer (word 576 : int64), 576))
+            [(word pc : int64), 588; buf, val buflen; table, 4096]
+       /\ ALL (nonoverlapping (res, 512)) [(word pc : int64), 588;
+                                           word_sub stackpointer (word 576 : int64), 576]
+       ==> ensures arm
+             (\s:armstate.
+               aligned_bytes_loaded s (word pc : int64) mlkem_rej_uniform_mc
+               /\ read PC s = (word pc : int64)
+               /\ read SP s = stackpointer
+               /\ read X30 s = returnaddress
+               /\ C_ARGUMENTS [res; buf; buflen; table] s
+               /\ (wordlist_from_memory (table, 4096) s : byte list) = mlkem_rej_uniform_table
+               /\ (wordlist_from_memory (buf, LENGTH inlist) s : (12 word) list) = inlist
+               /\ read events s = e)
+             (\s:armstate.
+               read PC s = returnaddress
+               /\ (?e2:((64 address_uarch_event) list).
+                    read events s = APPEND e2 e
+                    /\ memaccess_inbounds e2
+                         [buf, val buflen; table, 4096;
+                          word_sub stackpointer (word 576 : int64), 576]
+                         [word_sub stackpointer (word 576 : int64), 576; res, 512]))
+             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [events]
+             ,, MAYCHANGE [memory :> bytes (res, 512);
+                           memory :> bytes (word_sub stackpointer (word 576 : int64), 576)])

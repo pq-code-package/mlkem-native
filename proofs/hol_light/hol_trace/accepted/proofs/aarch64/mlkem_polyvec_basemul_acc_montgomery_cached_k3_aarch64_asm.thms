@@ -1,0 +1,123 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K3_SUBROUTINE_CORRECT
+  |- !srcA:int64 srcB:int64 srcBt:int64 dst:int64 x0:(num -> int16) y0:(num -> int16)
+      y0t:(num -> int16) x1:(num -> int16) y1:(num -> int16) y1t:(num -> int16) x2:(num -> int16)
+      y2:(num -> int16) y2t:(num -> int16) pc:num stackpointer:int64 returnaddress:int64.
+       aligned 16 stackpointer
+       /\ ALLPAIRS (nonoverlapping : int64 # num -> int64 # num -> bool)
+            [dst, 512; word_sub stackpointer (word 64 : int64), 64]
+            [(word pc : int64), LENGTH poly_basemul_acc_montgomery_cached_k3_mc; srcA, 1536;
+             srcB, 1536; srcBt, 768]
+       /\ nonoverlapping (dst, 512) (word_sub stackpointer (word 64 : int64), 64)
+       ==> ensures arm
+             (\s:armstate.
+               aligned_bytes_loaded s (word pc : int64) poly_basemul_acc_montgomery_cached_k3_mc
+               /\ read PC s = (word pc : int64)
+               /\ read SP s = stackpointer
+               /\ read X30 s = returnaddress
+               /\ C_ARGUMENTS [dst; srcA; srcB; srcBt] s
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes16 (word_add srcA (word (2 * i) : int64))) s = x0 i)
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes16 (word_add srcB (word (2 * i) : int64))) s = y0 i)
+               /\ (!i:num.
+                    i < 128
+                    ==> read (memory :> bytes16 (word_add srcBt (word (2 * i) : int64))) s = y0t i)
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes16 (word_add srcA (word (512 + 2 * i) : int64))) s
+                        = x1 i)
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes16 (word_add srcB (word (512 + 2 * i) : int64))) s
+                        = y1 i)
+               /\ (!i:num.
+                    i < 128
+                    ==> read (memory :> bytes16 (word_add srcBt (word (256 + 2 * i) : int64))) s
+                        = y1t i)
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes16 (word_add srcA (word (1024 + 2 * i) : int64))) s
+                        = x2 i)
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes16 (word_add srcB (word (1024 + 2 * i) : int64))) s
+                        = y2 i)
+               /\ (!i:num.
+                    i < 128
+                    ==> read (memory :> bytes16 (word_add srcBt (word (512 + 2 * i) : int64))) s
+                        = y2t i))
+             (\s:armstate.
+               read PC s = returnaddress
+               /\ ((!i:num.
+                    i < 256
+                    ==> abs (ival (x0 i)) <= &2 pow 12
+                        /\ abs (ival (x1 i)) <= &2 pow 12
+                        /\ abs (ival (x2 i)) <= &2 pow 12)
+                  ==> (!i:num.
+                        i < 128
+                        ==> (ival (read (memory :> bytes16 (word_add dst (word (4 * i) : int64))) s)
+                            == basemul3_even ((ival : int16 -> int) o x0)
+                                 ((ival : int16 -> int) o y0)
+                                 ((ival : int16 -> int) o y0t)
+                                 ((ival : int16 -> int) o x1)
+                                 ((ival : int16 -> int) o y1)
+                                 ((ival : int16 -> int) o y1t)
+                                 ((ival : int16 -> int) o x2)
+                                 ((ival : int16 -> int) o y2)
+                                 ((ival : int16 -> int) o y2t)
+                                 i) (mod &3329)
+                            /\ (ival (read
+                                 (memory :> bytes16 (word_add dst (word (4 * i + 2) : int64)))
+                                 s)
+                               == basemul3_odd ((ival : int16 -> int) o x0)
+                                    ((ival : int16 -> int) o y0)
+                                    ((ival : int16 -> int) o x1)
+                                    ((ival : int16 -> int) o y1)
+                                    ((ival : int16 -> int) o x2)
+                                    ((ival : int16 -> int) o y2)
+                                    i) (mod &3329))))
+             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (dst, 512);
+                           memory :> bytes (word_sub stackpointer (word 64 : int64), 64)])
+
+theorem mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K3_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> int64 -> int64 -> num -> int64 -> int64 ->
+          (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) srcA:int64 srcB:int64 srcBt:int64 dst:int64 pc:num
+        stackpointer:int64 returnaddress:int64.
+         aligned 16 stackpointer
+         /\ ALLPAIRS (nonoverlapping : int64 # num -> int64 # num -> bool)
+              [dst, 512; word_sub stackpointer (word 64 : int64), 64]
+              [(word pc : int64), LENGTH poly_basemul_acc_montgomery_cached_k3_mc; srcA, 1536;
+               srcB, 1536; srcBt, 768]
+         /\ nonoverlapping (dst, 512) (word_sub stackpointer (word 64 : int64), 64)
+         ==> ensures arm
+               (\s:armstate.
+                 aligned_bytes_loaded s (word pc : int64) poly_basemul_acc_montgomery_cached_k3_mc
+                 /\ read PC s = (word pc : int64)
+                 /\ read SP s = stackpointer
+                 /\ read X30 s = returnaddress
+                 /\ C_ARGUMENTS [dst; srcA; srcB; srcBt] s
+                 /\ read events s = e)
+               (\s:armstate.
+                 read PC s = returnaddress
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2
+                         = f_events srcA srcB srcBt dst pc (word_sub stackpointer (word 64 : int64))
+                             returnaddress
+                      /\ memaccess_inbounds e2
+                           [srcA, 1536; srcB, 1536; srcBt, 768; dst, 512;
+                            word_sub stackpointer (word 64 : int64), 64]
+                           [dst, 512; word_sub stackpointer (word 64 : int64), 64]))
+               (\s:armstate s':armstate. T)

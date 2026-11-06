@@ -1,0 +1,60 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_poly_decompress_d11_avx2_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mlkem_poly_decompress_d11_mc: 1238 bytes
+# sha256 4e59e8cdc37654b9660efb5f7905122348576b9c47771937896525f8fbe33e8c
+definition mlkem_poly_decompress_d11_mc
+  |- mlkem_poly_decompress_d11_mc
+     = #x[f3 0f 1e fa b8 01 0d 01 0d c5 f9 6e c0 c4 e2 7d 58 c0 b8 f0 7f f0 7f c5 f9 6e c8 c4 e2 7d
+          58 c9 c5 fd 6f 12 c5 fd 6f 5a 20 c5 fd 6f 62 40 c5 fd 6f 6a 60 c5 fa 6f 36 c5 f9 6e 7e 10
+          c5 c1 c4 7e 14 02 c4 e3 4d 38 f7 01 c4 e3 fd 00 f6 94 c4 e2 4d 00 f2 c4 e2 4d 45 f3 c4 e2
+          cd 45 f4 c5 cd d5 f5 c5 cd 71 d6 01 c5 cd db f1 c4 e2 4d 0b f0 c5 fe 7f 37 c5 fa 6f 76 16
+          c5 f9 6e 7e 26 c5 c1 c4 7e 2a 02 c4 e3 4d 38 f7 01 c4 e3 fd 00 f6 94 c4 e2 4d 00 f2 c4 e2
+          4d 45 f3 c4 e2 cd 45 f4 c5 cd d5 f5 c5 cd 71 d6 01 c5 cd db f1 c4 e2 4d 0b f0 c5 fe 7f 77
+          20 c5 fa 6f 76 2c c5 f9 6e 7e 3c c5 c1 c4 7e 40 02 c4 e3 4d 38 f7 01 c4 e3 fd 00 f6 94 c4
+          e2 4d 00 f2 c4 e2 4d 45 f3 c4 e2 cd 45 f4 c5 cd d5 f5 c5 cd 71 d6 01 c5 cd db f1 c4 e2 4d
+          0b f0 c5 fe 7f 77 40 c5 fa 6f 76 42 c5 f9 6e 7e 52 c5 c1 c4 7e 56 02 c4 e3 4d 38 f7 01 c4
+          e3 fd 00 f6 94 c4 e2 4d 00 f2 c4 e2 4d 45 f3 c4 e2 cd 45 f4 c5 cd d5 f5 c5 cd 71 d6 01 c5
+          cd db f1 c4 e2 4d 0b f0 c5 fe 7f 77 60 c5 fa 6f 76 58 c5 f9 6e 7e 68 c5 c1 c4 7e 6c 02 c4
+          e3 4d 38 f7 01 c4 e3 fd 00 f6 94 c4 e2 4d 00 f2 c4 e2 4d 45 f3 c4 e2 cd 45 f4 c5 cd d5 f5
+          c5 cd 71 d6 01 c5 cd db f1 c4 e2 4d 0b f0 c5 fe 7f b7 80 00 00 00 c5 fa 6f 76 6e c5 f9 6e
+          7e 7e c5 c1 c4 be 82 00 00 00 02 c4 e3 4d 38 f7 01 c4 e3 fd 00 f6 94 c4 e2 4d 00 f2 c4 e2
+          4d 45 f3 c4 e2 cd 45 f4 c5 cd d5 f5 c5 cd 71 d6 01 c5 cd db f1 c4 e2 4d 0b f0 c5 fe 7f b7
+          a0 00 00 00 c5 fa 6f b6 84 00 00 00 c5 f9 6e be 94 00 00 00 c5 c1 c4 be 98 00 00 00 02 c4
+          e3 4d 38 f7 01 c4 e3 fd 00 f6 94 c4 e2 4d 00 f2 c4 e2 4d 45 f3 c4 e2 cd 45 f4 c5 cd d5 f5
+          c5 cd 71 d6 01 c5 cd db f1 c4 e2 4d 0b f0 c5 fe 7f b7 c0 00 00 00 c5 fa 6f b6 9a 00 00 00
+          c5 f9 6e be aa 00 00 00 c5 c1 c4 be ae 00 00 00 02 c4 e3 4d 38 f7 01 c4 e3 fd 00 f6 94 c4
+          e2 4d 00 f2 c4 e2 4d 45 f3 c4 e2 cd 45 f4 c5 cd d5 f5 c5 cd 71 d6 01 c5 cd db f1 c4 e2 4d
+          0b f0 c5 fe 7f b7 e0 00 00 00 c5 fa 6f b6 b0 00 00 00 c5 f9 6e be c0 00 00 00 c5 c1 c4 be
+          c4 00 00 00 02 c4 e3 4d 38 f7 01 c4 e3 fd 00 f6 94 c4 e2 4d 00 f2 c4 e2 4d 45 f3 c4 e2 cd
+          45 f4 c5 cd d5 f5 c5 cd 71 d6 01 c5 cd db f1 c4 e2 4d 0b f0 c5 fe 7f b7 00 01 00 00 c5 fa
+          6f b6 c6 00 00 00 c5 f9 6e be d6 00 00 00 c5 c1 c4 be da 00 00 00 02 c4 e3 4d 38 f7 01 c4
+          e3 fd 00 f6 94 c4 e2 4d 00 f2 c4 e2 4d 45 f3 c4 e2 cd 45 f4 c5 cd d5 f5 c5 cd 71 d6 01 c5
+          cd db f1 c4 e2 4d 0b f0 c5 fe 7f b7 20 01 00 00 c5 fa 6f b6 dc 00 00 00 c5 f9 6e be ec 00
+          00 00 c5 c1 c4 be f0 00 00 00 02 c4 e3 4d 38 f7 01 c4 e3 fd 00 f6 94 c4 e2 4d 00 f2 c4 e2
+          4d 45 f3 c4 e2 cd 45 f4 c5 cd d5 f5 c5 cd 71 d6 01 c5 cd db f1 c4 e2 4d 0b f0 c5 fe 7f b7
+          40 01 00 00 c5 fa 6f b6 f2 00 00 00 c5 f9 6e be 02 01 00 00 c5 c1 c4 be 06 01 00 00 02 c4
+          e3 4d 38 f7 01 c4 e3 fd 00 f6 94 c4 e2 4d 00 f2 c4 e2 4d 45 f3 c4 e2 cd 45 f4 c5 cd d5 f5
+          c5 cd 71 d6 01 c5 cd db f1 c4 e2 4d 0b f0 c5 fe 7f b7 60 01 00 00 c5 fa 6f b6 08 01 00 00
+          c5 f9 6e be 18 01 00 00 c5 c1 c4 be 1c 01 00 00 02 c4 e3 4d 38 f7 01 c4 e3 fd 00 f6 94 c4
+          e2 4d 00 f2 c4 e2 4d 45 f3 c4 e2 cd 45 f4 c5 cd d5 f5 c5 cd 71 d6 01 c5 cd db f1 c4 e2 4d
+          0b f0 c5 fe 7f b7 80 01 00 00 c5 fa 6f b6 1e 01 00 00 c5 f9 6e be 2e 01 00 00 c5 c1 c4 be
+          32 01 00 00 02 c4 e3 4d 38 f7 01 c4 e3 fd 00 f6 94 c4 e2 4d 00 f2 c4 e2 4d 45 f3 c4 e2 cd
+          45 f4 c5 cd d5 f5 c5 cd 71 d6 01 c5 cd db f1 c4 e2 4d 0b f0 c5 fe 7f b7 a0 01 00 00 c5 fa
+          6f b6 34 01 00 00 c5 f9 6e be 44 01 00 00 c5 c1 c4 be 48 01 00 00 02 c4 e3 4d 38 f7 01 c4
+          e3 fd 00 f6 94 c4 e2 4d 00 f2 c4 e2 4d 45 f3 c4 e2 cd 45 f4 c5 cd d5 f5 c5 cd 71 d6 01 c5
+          cd db f1 c4 e2 4d 0b f0 c5 fe 7f b7 c0 01 00 00 c5 fa 6f b6 4a 01 00 00 c5 f9 6e be 5a 01
+          00 00 c5 c1 c4 be 5e 01 00 00 02 c4 e3 4d 38 f7 01 c4 e3 fd 00 f6 94 c4 e2 4d 00 f2 c4 e2
+          4d 45 f3 c4 e2 cd 45 f4 c5 cd d5 f5 c5 cd 71 d6 01 c5 cd db f1 c4 e2 4d 0b f0 c5 fe 7f b7
+          e0 01 00 00 c5 f8 77 c3]
+
+definition mlkem_poly_decompress_d11_tmc
+  |- mlkem_poly_decompress_d11_tmc = TRIM_LIST (4, 0) mlkem_poly_decompress_d11_mc

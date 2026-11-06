@@ -1,0 +1,47 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_reduce_avx2_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mlkem_reduce_mc: 862 bytes
+# sha256 45c235c4b814c4709ac7ced2d1489f47c7c8edc70a53bccc6a27a18f4d3b3c0c
+definition mlkem_reduce_mc
+  |- mlkem_reduce_mc
+     = #x[f3 0f 1e fa b8 01 0d 01 0d c5 f9 6e c0 c4 e2 7d 58 c0 b8 bf 4e bf 4e c5 f9 6e c8 c4 e2 7d
+          58 c9 c5 fd 6f 17 c5 fd 6f 5f 20 c5 fd 6f 67 40 c5 fd 6f 6f 60 c5 fd 6f b7 80 00 00 00 c5
+          fd 6f bf a0 00 00 00 c5 7d 6f 87 c0 00 00 00 c5 7d 6f 8f e0 00 00 00 c5 6d e5 e1 c4 c1 1d
+          71 e4 0a c5 1d d5 e0 c4 c1 6d f9 d4 c5 65 e5 e1 c4 c1 1d 71 e4 0a c5 1d d5 e0 c4 c1 65 f9
+          dc c5 5d e5 e1 c4 c1 1d 71 e4 0a c5 1d d5 e0 c4 c1 5d f9 e4 c5 55 e5 e1 c4 c1 1d 71 e4 0a
+          c5 1d d5 e0 c4 c1 55 f9 ec c5 4d e5 e1 c4 c1 1d 71 e4 0a c5 1d d5 e0 c4 c1 4d f9 f4 c5 45
+          e5 e1 c4 c1 1d 71 e4 0a c5 1d d5 e0 c4 c1 45 f9 fc c5 3d e5 e1 c4 c1 1d 71 e4 0a c5 1d d5
+          e0 c4 41 3d f9 c4 c5 35 e5 e1 c4 c1 1d 71 e4 0a c5 1d d5 e0 c4 41 35 f9 cc c5 ed f9 d0 c5
+          9d 71 e2 0f c5 1d db e0 c4 c1 6d fd d4 c5 e5 f9 d8 c5 9d 71 e3 0f c5 1d db e0 c4 c1 65 fd
+          dc c5 dd f9 e0 c5 9d 71 e4 0f c5 1d db e0 c4 c1 5d fd e4 c5 d5 f9 e8 c5 9d 71 e5 0f c5 1d
+          db e0 c4 c1 55 fd ec c5 cd f9 f0 c5 9d 71 e6 0f c5 1d db e0 c4 c1 4d fd f4 c5 c5 f9 f8 c5
+          9d 71 e7 0f c5 1d db e0 c4 c1 45 fd fc c5 3d f9 c0 c4 c1 1d 71 e0 0f c5 1d db e0 c4 41 3d
+          fd c4 c5 35 f9 c8 c4 c1 1d 71 e1 0f c5 1d db e0 c4 41 35 fd cc c5 fd 7f 17 c5 fd 7f 5f 20
+          c5 fd 7f 67 40 c5 fd 7f 6f 60 c5 fd 7f b7 80 00 00 00 c5 fd 7f bf a0 00 00 00 c5 7d 7f 87
+          c0 00 00 00 c5 7d 7f 8f e0 00 00 00 c5 fd 6f 97 00 01 00 00 c5 fd 6f 9f 20 01 00 00 c5 fd
+          6f a7 40 01 00 00 c5 fd 6f af 60 01 00 00 c5 fd 6f b7 80 01 00 00 c5 fd 6f bf a0 01 00 00
+          c5 7d 6f 87 c0 01 00 00 c5 7d 6f 8f e0 01 00 00 c5 6d e5 e1 c4 c1 1d 71 e4 0a c5 1d d5 e0
+          c4 c1 6d f9 d4 c5 65 e5 e1 c4 c1 1d 71 e4 0a c5 1d d5 e0 c4 c1 65 f9 dc c5 5d e5 e1 c4 c1
+          1d 71 e4 0a c5 1d d5 e0 c4 c1 5d f9 e4 c5 55 e5 e1 c4 c1 1d 71 e4 0a c5 1d d5 e0 c4 c1 55
+          f9 ec c5 4d e5 e1 c4 c1 1d 71 e4 0a c5 1d d5 e0 c4 c1 4d f9 f4 c5 45 e5 e1 c4 c1 1d 71 e4
+          0a c5 1d d5 e0 c4 c1 45 f9 fc c5 3d e5 e1 c4 c1 1d 71 e4 0a c5 1d d5 e0 c4 41 3d f9 c4 c5
+          35 e5 e1 c4 c1 1d 71 e4 0a c5 1d d5 e0 c4 41 35 f9 cc c5 ed f9 d0 c5 9d 71 e2 0f c5 1d db
+          e0 c4 c1 6d fd d4 c5 e5 f9 d8 c5 9d 71 e3 0f c5 1d db e0 c4 c1 65 fd dc c5 dd f9 e0 c5 9d
+          71 e4 0f c5 1d db e0 c4 c1 5d fd e4 c5 d5 f9 e8 c5 9d 71 e5 0f c5 1d db e0 c4 c1 55 fd ec
+          c5 cd f9 f0 c5 9d 71 e6 0f c5 1d db e0 c4 c1 4d fd f4 c5 c5 f9 f8 c5 9d 71 e7 0f c5 1d db
+          e0 c4 c1 45 fd fc c5 3d f9 c0 c4 c1 1d 71 e0 0f c5 1d db e0 c4 41 3d fd c4 c5 35 f9 c8 c4
+          c1 1d 71 e1 0f c5 1d db e0 c4 41 35 fd cc c5 fd 7f 97 00 01 00 00 c5 fd 7f 9f 20 01 00 00
+          c5 fd 7f a7 40 01 00 00 c5 fd 7f af 60 01 00 00 c5 fd 7f b7 80 01 00 00 c5 fd 7f bf a0 01
+          00 00 c5 7d 7f 87 c0 01 00 00 c5 7d 7f 8f e0 01 00 00 c5 f8 77 c3]
+
+definition mlkem_reduce_tmc
+  |- mlkem_reduce_tmc = TRIM_LIST (4, 0) mlkem_reduce_mc

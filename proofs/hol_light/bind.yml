@@ -18,4 +18,204 @@
 # - FUNC_tmc, on x86_64 only, is that code without ENDBR64. The proofs'
 #   NOIBT theorems are about it, and builds without CET contain it.
 # A kernel matches if its code has either hash.
-{}
+intt_aarch64_asm:
+  arch: aarch64
+  function: mlkem_intt_aarch64_asm
+  sha256:
+    mlkem_intt_mc: 7eac00f17f0f21a85521b826334bec742dfbe97acbfbc50200f67400070b5c80
+invntt_avx2_asm:
+  arch: x86_64
+  function: mlkem_intt_avx2_asm
+  sha256:
+    mlkem_intt_mc: 961d64e25774e5538b85b8356a4809969d4cb92735bc4e56a5bebc13beea9e4c
+    mlkem_intt_tmc: 3b8f744b261a4d6154f90dd293cdfbdb032befd27d2217e0ce5422949816765b
+keccak_f1600_x1_scalar_aarch64_asm:
+  arch: aarch64
+  function: keccak_f1600_x1_scalar_aarch64_asm
+  sha256:
+    keccak_f1600_x1_scalar_mc: d45ed9162249bf1d687fd21eacabfaa52916ec434c24e5afc44655b53f67f1e9
+keccak_f1600_x1_v84a_aarch64_asm:
+  arch: aarch64
+  function: keccak_f1600_x1_v84a_aarch64_asm
+  sha256:
+    keccak_f1600_x1_v84a_mc: e8843038318618ac3a19018d3611112d4ad70b74ad9c23d6fad63be9825d1e5c
+keccak_f1600_x2_v84a_aarch64_asm:
+  arch: aarch64
+  function: keccak_f1600_x2_v84a_aarch64_asm
+  sha256:
+    keccak_f1600_x2_v84a_mc: 9083fb5acd83da5c9aefb341d38af9653418d24974f55ada6f97815c4949d966
+keccak_f1600_x4_avx2_asm:
+  arch: x86_64
+  function: keccak_f1600_x4_avx2_asm
+  sha256:
+    keccak_f1600_x4_avx2_mc: ee110dfae2b73ec0b2eba6051f50f65d719b24362a8feb6c171a0907397f77e9
+    keccak_f1600_x4_avx2_tmc: 5ac2ff0190e7f749db5759cf178f3fff0e229b9477aa5163dc651889212cad40
+keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm:
+  arch: aarch64
+  function: keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm
+  sha256:
+    keccak_f1600_x4_v8a_scalar_mc: 37f341dc88063ac70a03797b63d860910077e80ce858e3a570aa9174f09fb4ef
+keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm:
+  arch: aarch64
+  function: keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm
+  sha256:
+    keccak_f1600_x4_v8a_v84a_scalar_mc: 82b65b521af101118eeabaf1fda5bed7dfb5179d38fb132d24daa2d3873356e4
+ntt_aarch64_asm:
+  arch: aarch64
+  function: mlkem_ntt_aarch64_asm
+  sha256:
+    mlkem_ntt_mc: 9b6de7092c86d30b56dd72a2a9bd4e4e8b790bdb97eac17f852d84aa627dad6b
+ntt_avx2_asm:
+  arch: x86_64
+  function: mlkem_ntt_avx2_asm
+  sha256:
+    mlkem_ntt_mc: 1c145ae5331d0324150e928ea31b15c8691ceb4820b69f701b5c7461114bec18
+    mlkem_ntt_tmc: ead43fe9882581bc656e2d8da929d3e7438e613b8b8e8cf93e6762056c38f6e6
+nttfrombytes_avx2_asm:
+  arch: x86_64
+  function: mlkem_nttfrombytes_avx2_asm
+  sha256:
+    mlkem_frombytes_mc: bbaedb33bb4c95ba771c7fb64c155b09bb6b4ae0b7b95b6feb5d10e2c5312e7d
+    mlkem_frombytes_tmc: a51989c4a2bcdba11e5e154d225e54f81407f22578542c92634e765a187cdd40
+ntttobytes_avx2_asm:
+  arch: x86_64
+  function: mlkem_ntttobytes_avx2_asm
+  sha256:
+    mlkem_tobytes_mc: 7a56f26c7669e5bb20997820890ef7a6bf5fded32e7a7e39e5d594cebb465314
+    mlkem_tobytes_tmc: 57907ec3f6c1a8127e88fba71825f5ae8815a31732a2f49bb48625e7c21a68ce
+nttunpack_avx2_asm:
+  arch: x86_64
+  function: mlkem_nttunpack_avx2_asm
+  sha256:
+    mlkem_unpack_mc: 5cf7f561b2dafcaa3b67cae5f4c87e36bcf6aef69bd89fd19dab1f256382fe55
+    mlkem_unpack_tmc: 70b823a371944d1c66f34309eee9280e6cd2e7e85fc8bc319a5d0db2324f1f9d
+poly_compress_d10_avx2_asm:
+  arch: x86_64
+  function: mlkem_poly_compress_d10_avx2_asm
+  sha256:
+    mlkem_poly_compress_d10_mc: 52d06fd1df1e04a70137ca051058343fb300a7439db803510a4b5924f52e9220
+    mlkem_poly_compress_d10_tmc: 56491b37a1762718401577c6ed55698310cdd33e71fdda3349e55e35a8d176e7
+poly_compress_d11_avx2_asm:
+  arch: x86_64
+  function: mlkem_poly_compress_d11_avx2_asm
+  sha256:
+    mlkem_poly_compress_d11_mc: 3f6adf0dea215987d8ad4b0ddf35bb957493ae74ea1a6bec1b313794bbfd62fa
+    mlkem_poly_compress_d11_tmc: 4c064cdbee8e7a0af08fcef46c80c5d30820d1cf3488cc6a00bebc1e7ca10dee
+poly_compress_d4_avx2_asm:
+  arch: x86_64
+  function: mlkem_poly_compress_d4_avx2_asm
+  sha256:
+    mlkem_poly_compress_d4_mc: 3772c93bb75889ae0c82782fe8e8c123d6f1f5309c61cc3846879994699ea88c
+    mlkem_poly_compress_d4_tmc: ecb67f5f448cd8afbbc42b1041c59c9c079652f6a7ec64d4e988609b9aa05c74
+poly_compress_d5_avx2_asm:
+  arch: x86_64
+  function: mlkem_poly_compress_d5_avx2_asm
+  sha256:
+    mlkem_poly_compress_d5_mc: f7970a8c94b9f0c8c2981a4e0f438e48f3a456cb017a17c96b9cba638ae807e3
+    mlkem_poly_compress_d5_tmc: 344065fae058191bc007bebdcab919ea058f4fe21c20f752ef56e21a3f519b14
+poly_decompress_d10_avx2_asm:
+  arch: x86_64
+  function: mlkem_poly_decompress_d10_avx2_asm
+  sha256:
+    mlkem_poly_decompress_d10_mc: e6af36ea7320ca35703720cb6f4c32ff6641d01c192c4b0a5ae37fc3f4d3508d
+    mlkem_poly_decompress_d10_tmc: 8571f2b585f362f2c3a5affb90a9848c0e5d99749fcffe65a31f9c02eac4c670
+poly_decompress_d11_avx2_asm:
+  arch: x86_64
+  function: mlkem_poly_decompress_d11_avx2_asm
+  sha256:
+    mlkem_poly_decompress_d11_mc: 4e59e8cdc37654b9660efb5f7905122348576b9c47771937896525f8fbe33e8c
+    mlkem_poly_decompress_d11_tmc: 728eb5231bbb21ce7ec93d0372a03fb485d14ed1f0a23ad4abdd6270d3d9b04d
+poly_decompress_d4_avx2_asm:
+  arch: x86_64
+  function: mlkem_poly_decompress_d4_avx2_asm
+  sha256:
+    mlkem_poly_decompress_d4_mc: b26307bd717671fc8a91bc801167c6221e7106c25fb977903c796c2adc70a48d
+    mlkem_poly_decompress_d4_tmc: 923ea4092c98b1fb062b5e8dedb6380ea7156a0eb3b3d600313efa7bd3c1edae
+poly_decompress_d5_avx2_asm:
+  arch: x86_64
+  function: mlkem_poly_decompress_d5_avx2_asm
+  sha256:
+    mlkem_poly_decompress_d5_mc: bb56abb86cd693483c91fd5435b54df30f18c0553f12212417a56df12c435e98
+    mlkem_poly_decompress_d5_tmc: 4d63b2fa3a9f020aabee97088da75adfeb3ec2f8fee2e1232986e5b4427bb8ed
+poly_mulcache_compute_aarch64_asm:
+  arch: aarch64
+  function: mlkem_poly_mulcache_compute_aarch64_asm
+  sha256:
+    poly_mulcache_compute_mc: 82005b257188f1ae158eb7ce4db78667bcefc8bf10e3e35f8fa2f936c046dffb
+poly_mulcache_compute_avx2_asm:
+  arch: x86_64
+  function: mlkem_poly_mulcache_compute_avx2_asm
+  sha256:
+    mlkem_mulcache_compute_mc: acbc0b0754b8003a6edb95bb3753ee1d9e68f16499ef419c2b1b7a9f7ec4957c
+    mlkem_mulcache_compute_tmc: d9d7b656679bb175b9d9e8f2c417e3742e8feb2e3db3c0dc442bd42b6e5f8369
+poly_reduce_aarch64_asm:
+  arch: aarch64
+  function: mlkem_poly_reduce_aarch64_asm
+  sha256:
+    mlkem_poly_reduce_mc: 5e7c08b8d4c19ecc8425ef8c30a9263b6f11ecd94109bebc07873fb3a2cf24f7
+poly_tobytes_aarch64_asm:
+  arch: aarch64
+  function: mlkem_poly_tobytes_aarch64_asm
+  sha256:
+    mlkem_poly_tobytes_mc: f4acc2296b8ea38eb5aa10fb133ec2f1a5365778e1acb1973b7160064a4c927d
+poly_tomont_aarch64_asm:
+  arch: aarch64
+  function: mlkem_poly_tomont_aarch64_asm
+  sha256:
+    poly_tomont_asm_mc: 064c8bdd8b021e44dfdf41b9fef250afc1443a4091cfad31c3ab6fa8c4b1ce50
+polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm:
+  arch: aarch64
+  function: mlkem_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm
+  sha256:
+    poly_basemul_acc_montgomery_cached_k2_mc: 983fc044b64f2e65bed2f0e047d86f87201985790970da8b1ec37e34c926da89
+polyvec_basemul_acc_montgomery_cached_k2_avx2_asm:
+  arch: x86_64
+  function: mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm
+  sha256:
+    mlkem_basemul_k2_mc: 6ecc95895ee60715c96999b472dcb9db5e8b5d3dd6276ddc6beeafdcf34e92d8
+    mlkem_basemul_k2_tmc: b1890f13d629235dbe31cda900a65895b2ec4377b9670bd01afda1d7dd3f4c4a
+polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm:
+  arch: aarch64
+  function: mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm
+  sha256:
+    poly_basemul_acc_montgomery_cached_k3_mc: e6044b1dc5e341ae0c2667ed53ac3d7882285ad227463a98f8eeb301c9f3842e
+polyvec_basemul_acc_montgomery_cached_k3_avx2_asm:
+  arch: x86_64
+  function: mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2_asm
+  sha256:
+    mlkem_basemul_k3_mc: 1f204e28235c82c3c75088bcdcfa6712ee6b726a9e2fe4aacfd3afc3b0689c2a
+    mlkem_basemul_k3_tmc: efa9cfd0e6ef1e776bce1c3b4e64cf305d309e1b7f656fe405f9100759a4d521
+polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm:
+  arch: aarch64
+  function: mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm
+  sha256:
+    poly_basemul_acc_montgomery_cached_k4_mc: 136812d4a44b6f1706954756308a4ee524897e798381db2c034e1f6a9a38be63
+polyvec_basemul_acc_montgomery_cached_k4_avx2_asm:
+  arch: x86_64
+  function: mlkem_polyvec_basemul_acc_montgomery_cached_k4_avx2_asm
+  sha256:
+    mlkem_basemul_k4_mc: 7798e32db6ec1f9d4d1d74283441b1772817c474cd09a9bec87d3f5073abff7f
+    mlkem_basemul_k4_tmc: 1edc855602e5913282dea9c63544e90deb244a56306c327c14616c6ff77ec34c
+reduce_avx2_asm:
+  arch: x86_64
+  function: mlkem_reduce_avx2_asm
+  sha256:
+    mlkem_reduce_mc: 45c235c4b814c4709ac7ced2d1489f47c7c8edc70a53bccc6a27a18f4d3b3c0c
+    mlkem_reduce_tmc: 61a596291538b684faea6d23aa6900ecbf2228385cb8fdff971de0e895325c8d
+rej_uniform_aarch64_asm:
+  arch: aarch64
+  function: mlkem_rej_uniform_aarch64_asm
+  sha256:
+    mlkem_rej_uniform_mc: eac14fee9ff461b03d8d2ffb9714706f206fcf4974c0fa9d9efead6077cb1001
+rej_uniform_avx2_asm:
+  arch: x86_64
+  function: mlkem_rej_uniform_avx2_asm
+  sha256:
+    mlkem_rej_uniform_mc: 47edd11bdb5f5fd28753d2dc41da4d911115d40a606673496ffdd5ce31c18006
+    mlkem_rej_uniform_tmc: beca24b1c8c3d329ff7e4ca95b750daca732130dbb55b648670362ebdd0b4ec9
+tomont_avx2_asm:
+  arch: x86_64
+  function: mlkem_tomont_avx2_asm
+  sha256:
+    mlkem_tomont_mc: 38098b101bcccdb9fb55e7b7cb8130a738e758f1323a332e5b7f9fe345aeec00
+    mlkem_tomont_tmc: 0fb4da5f7c3f423e5e471867a8bd63fcf9257f7553cd9f75fd3d0237ad8a5ca6
