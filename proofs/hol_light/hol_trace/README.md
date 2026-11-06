@@ -37,50 +37,42 @@ Light's own, and that the theorems it proves are the expected statements
 recorded in [accepted/](accepted). A proof script is thereby reduced to
 the kernel trace it emits, and any other potential kernel bypass is
 irrelevant at the trace level. In CI, this assumes that recording cannot
-change what runs after it; see the caveat "Not yet isolated" below.
+change what runs after it; see "Not yet isolated" below.
 
-HOLTrace's recommended check, `holtrace_restore`, runs in a HOL Light
-session that has the trusted libraries loaded, and refuses any
-definition in the trace that the session does not already have. We
-deviate from this: replay starts from core HOL Light only, without
-s2n-bignum or the specification files, and lets the trace make its own
-definitions. We then extract the constant and type definitions that a
-theorem relies on, and compare them against pinned recordings of
-trusted definitions. For example, most traces will begin
-by loading the HOL Light and s2n-bignum prelude, emitting a series of
-type and constant definitions, including the architecture models. Those
-definitions need to be generated in a trusted manner for every pin of
-HOL Light and s2n-bignum, and are compared against when replaying
-traces. If a definition that a theorem relies on has the name of a
-definition from the prelude but differs from it, the check fails. This
-catches cheating attempts where no new axioms are introduced, but the
-underlying definitions are simply not what comes from HOL Light and
-s2n-bignum.
+HOLTrace's own check, `holtrace_restore`, runs in a session that has the
+trusted libraries loaded and refuses any definition that the session
+lacks. We deviate from this: replay starts from core HOL Light only, and
+lets the trace make its definitions, including those of s2n-bignum and
+the specifications. We then compare every definition that the main
+theorems rely on with the base and spec layers of [accepted/](accepted),
+generated from the pinned HOL Light and s2n-bignum and from the
+specification files. A trace that defines a prelude constant
+differently, without adding an axiom, thus fails.
 
-Those type and constant definitions that a proof trace relies on but
-that are not part of the prelude or other pre-validated lists of
-definitions are emitted to a proof-specific file and need to be
-validated by eye. The proof's machine code is listed there too, as a
-byte list in hex with its SHA-256;
-[check-binary](../../../scripts/check-binary) checks that functions in
-binaries have exactly these bytes.
+The definitions that a proof uses beyond these layers, and its main
+theorems, form the proof layer of accepted/ and must be reviewed by
+hand. They include the proof's machine code, as a byte list in hex with
+its SHA-256; [check-binary](../../../scripts/check-binary) checks that
+functions in binaries have exactly these bytes.
 
 ## How it works
 
-1. **Record** (`hol-trace gen`): runs selected proofs under HOLTrace's
+1. **Record** (`hol-trace gen`): run selected proofs under HOLTrace's
    recording build, which appends every type, term, theorem, inference
-   and definition to a trace (`traces/ARCH/FUNC.50`), then prunes the trace
-   to what the main theorems (`ARCH/list_thms.sh`) need. Note that this is
-   a very memory-intensive process that takes hours and consumes
-   >100G of RAM and disk space.
-2. **Replay** (`hol-trace replay`): rebuild the trace in a separate HOL
-   Light process that loads no proof code ([restore.ml](restore.ml)), and
-   write the resulting theory to a result file; the result format is
-   described in [term_encoding.ml](term_encoding.ml).
+   and definition to a trace (`traces/ARCH/FUNC.50`), then prune the
+   trace to what the main theorems (`ARCH/list_thms.sh`) need. This can
+   take hours and over 100 GB of memory and disk per proof.
+2. **Replay** (`hol-trace replay --backend hol-light|hol-lean`): replay
+   the trace in a separate kernel that loads no proof code, and write the
+   resulting theory to a result file. The backends are
+   [restore.ml](restore.ml) for HOL Light and
+   [HolTraceAdapter.lean](../../../nix/hol_lean/HolTraceAdapter.lean) for
+   HolLean; [term_encoding.ml](term_encoding.ml) describes the result
+   format.
 3. **Compare** (`hol-trace compare`): check the result against
-   [accepted/](accepted) as described above; [conform.py](conform.py)
-   lists the exact rules, and [accepted/README.md](accepted/README.md)
-   the layout, the notation, and how each part is generated.
+   [accepted/](accepted); [conform.py](conform.py) lists the rules, and
+   [accepted/README.md](accepted/README.md) the layout, the notation and
+   how the files are generated.
 4. **Bind** (`check-binary`): check that the functions in binaries are the
    proved code. [../bind.yml](../bind.yml), which autogen generates from
    the accepted `.defs`, records each proved function's symbol and the
@@ -90,14 +82,10 @@ binaries have exactly these bytes.
    as `scripts/tests` does, runs it on every library and binary built;
    see [BUILDING.md](../../../BUILDING.md).
 
-`hol-trace check` is replay followed by compare.
-
-The accepted files themselves are written by `hol-trace outline` (or
-`scripts/autogen --hol-trace-defs`), which needs no trace: it loads each
-proof with `prove` asserting each goal instead of proving it, and writes
-the definitions and main theorems that result. An outline checks
-nothing; review its changes, then confirm them with `gen` and `check`,
-as CI does. See [accepted/README.md](accepted/README.md).
+`hol-trace check` is replay followed by compare. The accepted files are
+written by `hol-trace outline`, through `scripts/autogen
+--hol-trace-defs`, which needs no trace; see
+[accepted/README.md](accepted/README.md).
 
 ## Changing or adding a proof
 
@@ -105,7 +93,7 @@ Run these from the repository root in a HOL Light nix shell:
 `nix develop .#hol_light` for the host's architecture, or
 `nix develop .#hol_light-cross` for both. For a proof of the other
 architecture, add `--arch ARCH` to the `hol-trace` commands, as with
-`tests hol_light`. Only `gen` needs
+`tests hol_light`. Only `gen` and the HolLean backend need
 `nix develop .#hol_trace-cross`.
 
 **After editing a proof**, `ARCH/proofs/FUNC.ml` or its `.S` file:
@@ -159,23 +147,18 @@ yourself, use `hol-trace gen -p FUNC` and then
 ## Usage
 
 ```bash
-nix develop .#hol_trace-cross   # outline and HOL Light replay: any HOL Light shell
+nix develop .#hol_light          # outline and HOL Light replay; gen and HolLean: .#hol_trace-cross
 hol-trace list
-hol-trace outline [--base] [--specs] [-p FUNC ...] [--out DIR] [-j N]   # used by scripts/autogen --hol-trace-defs
+hol-trace outline [--base] [--specs] [-p FUNC ...] [--out DIR] [-j N]
 hol-trace gen [-p FUNC ...] [--no-prune] [-j N]
 hol-trace check [--backend BACKEND] [-p FUNC ...] [-j N] [--accept]
 check-binary [--show-all] [--force-all] FILE ...
 ```
 
-`check` is `replay` followed by `compare`; both are also available
-separately, and `compare` can be rerun without replaying. As with `tests
-hol_light`, each command works on one architecture: the host's, or the
-one given by `--arch aarch64|x86_64`. `-p` names functions of that
-architecture, such as `mlkem_ntt_aarch64_asm`; without `-p`, the
-commands select all of them (see `hol-trace list`). `hol-trace outline`
-also takes `--base` and `--specs` for the shared files, which always
-cover both architectures; these and `-p` combine, and with none of them
-it writes everything. `hol-trace --help` lists all options.
+Each command works on the proofs of one architecture, the host's or
+`--arch`'s; `-p` selects functions (see `hol-trace list`), also of the
+other architecture as `ARCH/FUNC`.
+`hol-trace --help` and `check-binary --help` list all options.
 
 ## CI
 
@@ -184,11 +167,12 @@ affected proofs with `proofs/hol_light/scripts/deps rev`, as HOL-Light
 CI does, and checks them on one EC2 runner, one step per phase:
 1. regenerate `accepted/base` and `accepted/spec` with
    `scripts/autogen --dry-run --hol-trace-defs base,specs`, and fail if any
-   of their files would change, appear or disappear;
-2. capture traces of every selected proof (`gen`);
+   of their files would change;
+2. capture traces of the selected proofs (`gen`);
 3. replay them with HOL Light;
-4. compare every replay result with the accepted files;
-5. check the proofs' object files with `check-binary --force-all`: each
+4. replay them with HolLean;
+5. compare every replay result with the accepted files;
+6. check the proofs' object files with `check-binary --force-all`: each
    must contain only proved functions, with the proved bytes.
 
 Step 1 is what ties `accepted/base` and `accepted/spec` to the pinned

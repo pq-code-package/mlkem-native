@@ -515,14 +515,17 @@ runtime operations.
 To remove the proof scripts and the OCaml runtime from the TCB, we use the
 HOLTrace[^HOLTrace] approach: we capture the kernel inferences that the
 proof scripts emit and store them in a trace file. This trace file is then
-replayed independently against the HOL Light kernel, in a process that loads
-neither s2n-bignum nor the proof scripts. During the replay, we record all
-definitions and theorems made. Finally, we check that no new axioms are
-introduced, and compare the definitions against trusted definitions
-generated from the pinned HOL Light and s2n-bignum, as well as against
-reviewed definitions and theorem statements expected from the proof at hand.
-See
+replayed independently against the HOL Light kernel or a re-implementation
+of it, in a process that loads neither s2n-bignum nor the proof scripts.
+During the replay, we record all definitions and theorems made. Finally, we
+check that no new axioms are introduced, and compare the definitions against
+trusted definitions generated from the pinned HOL Light and s2n-bignum, as
+well as against reviewed definitions and theorem statements expected from
+the proof at hand. See
 [`proofs/hol_light/hol_trace/README.md`](proofs/hol_light/hol_trace/README.md).
+
+We use HOL Light and [HolLean](https://github.com/hol-light-family/HolLean),
+a re-implementation of the HOL Light kernel in Lean, as replay kernels.
 
 **Residual risk:** CI records and replays every proof that a change affects,
 but runs the trace capture and the trace analysis in the same workflow. To

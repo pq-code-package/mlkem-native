@@ -463,8 +463,22 @@ def hol_light_replay(work):
     return [restore]
 
 
+def executable(name):
+    def command(work):
+        path = shutil.which(name)
+        if path is None:
+            die(f"{name} is not on PATH; run inside `nix develop .#hol_trace-cross`")
+        # Not a file that proof code could have planted in the checkout.
+        if not os.path.realpath(path).startswith("/nix/store/"):
+            die(f"{path} is not in the nix store")
+        return [path]
+
+    return command
+
+
 BACKENDS = {
     "hol-light": hol_light_replay,
+    "hol-lean": executable("hollean-holtrace"),
 }
 
 
