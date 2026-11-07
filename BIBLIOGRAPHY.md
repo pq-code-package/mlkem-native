@@ -270,12 +270,14 @@ source code and documentation.
   - [dev/aarch64_opt/src/mlkem_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S](dev/aarch64_opt/src/mlkem_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S)
   - [dev/aarch64_opt/src/mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S](dev/aarch64_opt/src/mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S)
   - [dev/aarch64_opt/src/mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S](dev/aarch64_opt/src/mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S)
+  - [dev/riscv64/README.md](dev/riscv64/README.md)
   - [mlkem/src/native/aarch64/README.md](mlkem/src/native/aarch64/README.md)
   - [mlkem/src/native/aarch64/src/mlkem_intt_aarch64_asm.S](mlkem/src/native/aarch64/src/mlkem_intt_aarch64_asm.S)
   - [mlkem/src/native/aarch64/src/mlkem_ntt_aarch64_asm.S](mlkem/src/native/aarch64/src/mlkem_ntt_aarch64_asm.S)
   - [mlkem/src/native/aarch64/src/mlkem_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S](mlkem/src/native/aarch64/src/mlkem_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S)
   - [mlkem/src/native/aarch64/src/mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S](mlkem/src/native/aarch64/src/mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S)
   - [mlkem/src/native/aarch64/src/mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S](mlkem/src/native/aarch64/src/mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S)
+  - [mlkem/src/native/riscv64/README.md](mlkem/src/native/riscv64/README.md)
   - [mlkem/src/poly.c](mlkem/src/poly.c)
   - [mlkem/src/poly_k.c](mlkem/src/poly_k.c)
   - [proofs/hol_light/aarch64/mlkem/mlkem_intt_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/mlkem_intt_aarch64_asm.S)
@@ -382,6 +384,15 @@ source code and documentation.
   - [proofs/hol_light/x86_64/mlkem/mlkem_poly_decompress_d5_avx2_asm.S](proofs/hol_light/x86_64/mlkem/mlkem_poly_decompress_d5_avx2_asm.S)
   - [proofs/hol_light/x86_64/mlkem/mlkem_reduce_avx2_asm.S](proofs/hol_light/x86_64/mlkem/mlkem_reduce_avx2_asm.S)
   - [proofs/hol_light/x86_64/mlkem/mlkem_tomont_avx2_asm.S](proofs/hol_light/x86_64/mlkem/mlkem_tomont_avx2_asm.S)
+
+### `RVPSABI`
+
+* RISC-V ABIs Specification
+* Author(s):
+  - RISC-V International
+* URL: https://github.com/riscv-non-isa/riscv-elf-psabi-doc
+* Referenced from:
+  - [test/abicheck/riscv64/abicheck_riscv64.c](test/abicheck/riscv64/abicheck_riscv64.c)
 
 ### `SLOTHY`
 
@@ -492,6 +503,7 @@ source code and documentation.
 * URL: https://github.com/awslabs/s2n-bignum/
 * Referenced from:
   - [SOUNDNESS.md](SOUNDNESS.md)
+  - [proofs/hol_light/riscv64/README.md](proofs/hol_light/riscv64/README.md)
 
 ### `s2n-bignum-soundness`
 

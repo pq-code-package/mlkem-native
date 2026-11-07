@@ -76,6 +76,9 @@ ifeq ($(ARCH),riscv64)
 # Test RVV support using C with inline assembly
 MK_COMPILER_SUPPORTS_RVV ?= $(shell echo 'int main() { __asm__("vadd.vv v0, v1, v2"); return 0; }' | $(CC) -march=rv64gcv -x c - -c -o /dev/null 2>/dev/null && echo 1 || echo 0)
 
+# Test Zbb support using C with inline assembly
+MK_COMPILER_SUPPORTS_ZBB ?= $(shell echo 'int main() { __asm__("rori a0, a0, 1"); return 0; }' | $(CC) -march=rv64gc_zbb -x c - -c -o /dev/null 2>/dev/null && echo 1 || echo 0)
+
 endif # riscv64 compiler detection
 
 # Define HOST_PLATFORM if not already defined
@@ -144,12 +147,15 @@ ifeq ($(HOST_PLATFORM),Linux-riscv64)
 # Format: rv64imafdcv_sscofpmf_... -- extract single-letter extensions
 # (before first '_') and check for 'v'
 MK_HOST_SUPPORTS_RVV := $(shell sed -n '/^isa/{s/.*rv64//;s/_.*//;p;q}' /proc/cpuinfo 2>/dev/null | grep -q v && echo 1 || echo 0)
+MK_HOST_SUPPORTS_ZBB := $(shell sed -n '/^isa/{p;q}' /proc/cpuinfo 2>/dev/null | grep -q '_zbb' && echo 1 || echo 0)
 else ifneq ($(CROSS_PREFIX),)
 # Cross-compilation: assume all features are supported
 MK_HOST_SUPPORTS_RVV := 1
+MK_HOST_SUPPORTS_ZBB := 1
 else
 # Other platforms: assume no support
 MK_HOST_SUPPORTS_RVV := 0
+MK_HOST_SUPPORTS_ZBB := 0
 endif # HOST_PLATFORM riscv64
 
 endif # riscv64
@@ -190,9 +196,19 @@ endif # aarch64_be
 ifeq ($(ARCH),riscv64)
 CFLAGS += -DMLK_FORCE_RISCV64
 
-# Add RVV flags only if both compiler and host support it
+# Add RVV and Zbb flags only if both compiler and host support them
+MK_RISCV64_MARCH := rv64gc
 ifeq ($(MK_COMPILER_SUPPORTS_RVV)$(MK_HOST_SUPPORTS_RVV),11)
-CFLAGS += -march=rv64gcv
+MK_RISCV64_MARCH := $(MK_RISCV64_MARCH)v
+endif
+ifeq ($(MK_COMPILER_SUPPORTS_ZBB)$(MK_HOST_SUPPORTS_ZBB),11)
+MK_RISCV64_MARCH := $(MK_RISCV64_MARCH)_zbb
+endif
+# Respect an -march given by the user
+ifeq ($(findstring -march=,$(CFLAGS)),)
+ifneq ($(MK_RISCV64_MARCH),rv64gc)
+CFLAGS += -march=$(MK_RISCV64_MARCH)
+endif
 endif
 endif # riscv64
 

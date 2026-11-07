@@ -36,6 +36,7 @@
 #include "aarch64/abicheck_aarch64.h"
 #include "armv81m/abicheck_armv81m.h"
 #include "ppc64le/abicheck_ppc64le.h"
+#include "riscv64/abicheck_riscv64.h"
 #include "x86_64/abicheck_x86_64.h"
 
 /* Shared registry shape: per-arch tables of (name, fn-ptr, expected count).
@@ -324,8 +325,72 @@ static const selftest_entry_t armv81m_entries[] = {
     {NULL, NULL, 0},
 };
 
+#elif defined(MLK_SYS_RISCV64)
+
+extern void selftest_riscv64_noop(void);
+/* GPRs s0..s11 (12) */
+extern void selftest_riscv64_corrupt_s0(void);
+extern void selftest_riscv64_corrupt_s1(void);
+extern void selftest_riscv64_corrupt_s2(void);
+extern void selftest_riscv64_corrupt_s3(void);
+extern void selftest_riscv64_corrupt_s4(void);
+extern void selftest_riscv64_corrupt_s5(void);
+extern void selftest_riscv64_corrupt_s6(void);
+extern void selftest_riscv64_corrupt_s7(void);
+extern void selftest_riscv64_corrupt_s8(void);
+extern void selftest_riscv64_corrupt_s9(void);
+extern void selftest_riscv64_corrupt_s10(void);
+extern void selftest_riscv64_corrupt_s11(void);
+#if defined(__riscv_float_abi_double)
+/* FPRs fs0..fs11 (12) */
+extern void selftest_riscv64_corrupt_fs0(void);
+extern void selftest_riscv64_corrupt_fs1(void);
+extern void selftest_riscv64_corrupt_fs2(void);
+extern void selftest_riscv64_corrupt_fs3(void);
+extern void selftest_riscv64_corrupt_fs4(void);
+extern void selftest_riscv64_corrupt_fs5(void);
+extern void selftest_riscv64_corrupt_fs6(void);
+extern void selftest_riscv64_corrupt_fs7(void);
+extern void selftest_riscv64_corrupt_fs8(void);
+extern void selftest_riscv64_corrupt_fs9(void);
+extern void selftest_riscv64_corrupt_fs10(void);
+extern void selftest_riscv64_corrupt_fs11(void);
+#endif /* __riscv_float_abi_double */
+
+static const selftest_entry_t riscv64_entries[] = {
+    {"noop", selftest_riscv64_noop, 0},
+    {"corrupt_s0", selftest_riscv64_corrupt_s0, 1},
+    {"corrupt_s1", selftest_riscv64_corrupt_s1, 1},
+    {"corrupt_s2", selftest_riscv64_corrupt_s2, 1},
+    {"corrupt_s3", selftest_riscv64_corrupt_s3, 1},
+    {"corrupt_s4", selftest_riscv64_corrupt_s4, 1},
+    {"corrupt_s5", selftest_riscv64_corrupt_s5, 1},
+    {"corrupt_s6", selftest_riscv64_corrupt_s6, 1},
+    {"corrupt_s7", selftest_riscv64_corrupt_s7, 1},
+    {"corrupt_s8", selftest_riscv64_corrupt_s8, 1},
+    {"corrupt_s9", selftest_riscv64_corrupt_s9, 1},
+    {"corrupt_s10", selftest_riscv64_corrupt_s10, 1},
+    {"corrupt_s11", selftest_riscv64_corrupt_s11, 1},
+#if defined(__riscv_float_abi_double)
+    {"corrupt_fs0", selftest_riscv64_corrupt_fs0, 1},
+    {"corrupt_fs1", selftest_riscv64_corrupt_fs1, 1},
+    {"corrupt_fs2", selftest_riscv64_corrupt_fs2, 1},
+    {"corrupt_fs3", selftest_riscv64_corrupt_fs3, 1},
+    {"corrupt_fs4", selftest_riscv64_corrupt_fs4, 1},
+    {"corrupt_fs5", selftest_riscv64_corrupt_fs5, 1},
+    {"corrupt_fs6", selftest_riscv64_corrupt_fs6, 1},
+    {"corrupt_fs7", selftest_riscv64_corrupt_fs7, 1},
+    {"corrupt_fs8", selftest_riscv64_corrupt_fs8, 1},
+    {"corrupt_fs9", selftest_riscv64_corrupt_fs9, 1},
+    {"corrupt_fs10", selftest_riscv64_corrupt_fs10, 1},
+    {"corrupt_fs11", selftest_riscv64_corrupt_fs11, 1},
+#endif /* __riscv_float_abi_double */
+    {NULL, NULL, 0},
+};
+
 #endif /* !MLK_SYS_AARCH64 && !(MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED) && \
-          !MLK_SYS_PPC64LE_POWER8_VECTOR && MLK_SYS_ARMV81M_MVE */
+          !MLK_SYS_PPC64LE_POWER8_VECTOR && !MLK_SYS_ARMV81M_MVE &&          \
+          MLK_SYS_RISCV64 */
 
 int abicheck_selftest(void)
 {
@@ -369,11 +434,18 @@ int abicheck_selftest(void)
                     init_armv81m_register_state, asm_call_stub_armv81m,
                     check_armv81m_aapcs32_compliance, armv81m_entries,
                     (void (*)(void)));
+#elif defined(MLK_SYS_RISCV64)
+  SELFTEST_RUN_ARCH("riscv64", struct riscv64_register_state,
+                    init_riscv64_register_state, asm_call_stub_riscv64,
+                    check_riscv64_lp64d_compliance, riscv64_entries,
+                    (void (*)(void)));
 #else  /* !MLK_SYS_AARCH64 && !(MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED) && \
-          !MLK_SYS_PPC64LE_POWER8_VECTOR && MLK_SYS_ARMV81M_MVE */
+          !MLK_SYS_PPC64LE_POWER8_VECTOR && !MLK_SYS_ARMV81M_MVE &&          \
+          MLK_SYS_RISCV64 */
   /* No abicheck support on this architecture. */
 #endif /* !MLK_SYS_AARCH64 && !(MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED) && \
-          !MLK_SYS_PPC64LE_POWER8_VECTOR && !MLK_SYS_ARMV81M_MVE */
+          !MLK_SYS_PPC64LE_POWER8_VECTOR && !MLK_SYS_ARMV81M_MVE &&          \
+          !MLK_SYS_RISCV64 */
 
   return failures;
 }
