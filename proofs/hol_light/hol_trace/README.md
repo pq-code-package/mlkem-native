@@ -135,3 +135,35 @@ the commands select every function of both architectures (see
 `hol-trace list`). `hol-trace --help` lists all options. Every command
 first runs `selfcheck`, the unit tests of conform.py and check-bind
 (under a second).
+
+## CI
+
+[hol_trace.yml](../../../.github/workflows/hol_trace.yml) follows
+HOL-Light CI: a changed-file gate and explicit per-proof dependencies
+checked in Bash. It runs in the upstream repository and skips fork
+pull requests. Manual dispatch checks all proofs.
+
+The file check runs on a hosted runner and collects all affected proofs
+before starting an instance. Its dependency table includes transitive
+local imports. A proof or its assembly, definitions, theorem statements
+or bindings selects that proof; shared sources and accepted
+specifications select their users. Architecture build files and base
+layers select that architecture. Changes to Nix pins, HOLTrace tooling
+or its CI setup select every proof. An empty selection skips EC2
+provisioning.
+
+One temporary `r9g.24xlarge` runner with a 512 GB disk checks the entire
+selection; there is no EC2 proof matrix. The ARM64 runner
+cross-assembles x86_64 proofs in `nix develop .#hol_trace-cross`.
+It sets a 1 GiB stack and uses eight workers for each phase. It first
+records every selected proof, then replays and conforms every proof with
+HOL Light, then with HolLean, and finally checks all machine-code bindings
+against the assembled objects. Each phase finishes before the next starts.
+Conformance and binding checks use eight separate processes. Other proofs
+and later phases continue if one fails, and any failure fails the job.
+Traces and replay results are removed after all checks finish.
+CI never accepts new definitions or statements.
+Generation and replay logs and manifests are retained for seven days;
+the large trace files are not uploaded. The job has a 24-hour
+timeout. The existing EC2 workflow stops the runner after the job,
+including on failure or cancellation.

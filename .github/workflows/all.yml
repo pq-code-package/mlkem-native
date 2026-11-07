@@ -118,12 +118,20 @@ jobs:
     permissions:
       contents: 'read'
     uses: ./.github/workflows/hol_light.yml
+  hol-trace:
+    name: HOLTrace
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    uses: ./.github/workflows/hol_trace.yml
+    secrets:
+      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
   # Single required status check for branch protection and the merge queue; jobs added to this workflow must also be added to the needs list below to gate merges.
   # riscv excluded as the RISE runners tend to be flaky.
   ci-summary:
     name: CI Summary
     if: always()
-    needs: [ base, lint-markdown, nix, ci, cbmc, oqs_integration, awslc_integration, ct-test, slothy, baremetal, pavona_integration, zephyr, hol-light ]
+    needs: [ base, lint-markdown, nix, ci, cbmc, oqs_integration, awslc_integration, ct-test, slothy, baremetal, pavona_integration, zephyr, hol-light, hol-trace ]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled

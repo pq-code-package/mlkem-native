@@ -1,0 +1,171 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: HOLTrace
+permissions:
+  contents: read
+on:
+  workflow_call:
+    secrets:
+      AWS_GITHUB_TOKEN:
+        description: Token for registering EC2 runners
+        required: false
+  workflow_dispatch:
+
+concurrency:
+  group: hol-trace-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # As in HOL-Light, check explicit proof dependencies on a hosted runner.
+  check_modified_files:
+    name: Determine changed files
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    outputs:
+      proofs: ${{ steps.check_run.outputs.proofs }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: github.event_name != 'workflow_dispatch'
+        with:
+          persist-credentials: false
+          # Enough history for changed-files (rebase-merge pushes can be multi-commit)
+          fetch-depth: 100
+      - name: Get changed files
+        id: changed-files
+        if: github.event_name != 'workflow_dispatch'
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: |
+            .github/workflows/all.yml
+            .github/workflows/hol_trace.yml
+            .github/workflows/ci_ec2_reusable.yml
+            .github/actions/hol-trace/**
+            .github/actions/setup-shell/**
+            .github/actions/setup-nix/**
+            proofs/hol_light/**
+            dev/**/*.S
+            flake.nix
+            flake.lock
+            nix/**
+
+      - name: Check if dependencies changed
+        id: check_run
+        if: steps.changed-files.outputs.any_changed == 'true' || steps.changed-files.outputs.any_deleted == 'true' || github.event_name == 'workflow_dispatch'
+        shell: bash
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
+          ALL_PROOFS: ${{ github.event_name == 'workflow_dispatch' }}
+          # Dependencies on FUNC.{S,ml,defs,thms,bind} are implicit.
+          # Each line gives ARCH/FUNC and its transitive local imports,
+          # relative to proofs/hol_light, as in the HOL-Light proof matrix.
+          HOLTRACE_DEPENDENCIES: |
+            aarch64/keccak_f1600_x1_scalar_aarch64_asm aarch64/proofs/keccak_utils.ml aarch64/proofs/subroutine_signatures.ml common/keccak_constants.ml common/keccak_spec.ml
+            aarch64/keccak_f1600_x1_v84a_aarch64_asm aarch64/proofs/keccak_utils.ml aarch64/proofs/subroutine_signatures.ml common/keccak_constants.ml common/keccak_spec.ml
+            aarch64/keccak_f1600_x2_v84a_aarch64_asm aarch64/proofs/keccak_utils.ml aarch64/proofs/subroutine_signatures.ml common/keccak_constants.ml common/keccak_spec.ml
+            aarch64/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm aarch64/proofs/keccak_utils.ml aarch64/proofs/subroutine_signatures.ml common/keccak_constants.ml common/keccak_spec.ml
+            aarch64/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm aarch64/proofs/keccak_utils.ml aarch64/proofs/subroutine_signatures.ml common/keccak_constants.ml common/keccak_spec.ml
+            aarch64/mlkem_intt_aarch64_asm aarch64/proofs/mlkem_utils.ml aarch64/proofs/mlkem_zetas.ml aarch64/proofs/subroutine_signatures.ml common/mlkem_specs.ml
+            aarch64/mlkem_ntt_aarch64_asm aarch64/proofs/mlkem_utils.ml aarch64/proofs/mlkem_zetas.ml aarch64/proofs/subroutine_signatures.ml common/mlkem_specs.ml
+            aarch64/mlkem_poly_mulcache_compute_aarch64_asm aarch64/proofs/mlkem_utils.ml aarch64/proofs/mlkem_zetas.ml aarch64/proofs/subroutine_signatures.ml common/mlkem_specs.ml
+            aarch64/mlkem_poly_reduce_aarch64_asm aarch64/proofs/mlkem_utils.ml aarch64/proofs/subroutine_signatures.ml common/mlkem_specs.ml
+            aarch64/mlkem_poly_tobytes_aarch64_asm aarch64/proofs/mlkem_utils.ml aarch64/proofs/subroutine_signatures.ml common/mlkem_specs.ml
+            aarch64/mlkem_poly_tomont_aarch64_asm aarch64/proofs/mlkem_utils.ml aarch64/proofs/subroutine_signatures.ml common/mlkem_specs.ml
+            aarch64/mlkem_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm aarch64/proofs/mlkem_utils.ml aarch64/proofs/subroutine_signatures.ml common/mlkem_specs.ml
+            aarch64/mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm aarch64/proofs/mlkem_utils.ml aarch64/proofs/subroutine_signatures.ml common/mlkem_specs.ml
+            aarch64/mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm aarch64/proofs/mlkem_utils.ml aarch64/proofs/subroutine_signatures.ml common/mlkem_specs.ml
+            aarch64/mlkem_rej_uniform_aarch64_asm aarch64/proofs/mlkem_rej_uniform_table.ml aarch64/proofs/mlkem_utils.ml common/mlkem_specs.ml
+            x86_64/keccak_f1600_x4_avx2_asm common/keccak_constants.ml common/keccak_spec.ml x86_64/proofs/keccak_f1600_x4_avx2_constants.ml x86_64/proofs/keccak_utils.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_intt_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/mlkem_zetas.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_ntt_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/mlkem_zetas.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_nttfrombytes_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_ntttobytes_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_nttunpack_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_poly_compress_d10_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_compress_common.ml x86_64/proofs/mlkem_compress_consts.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_poly_compress_d11_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_compress_common.ml x86_64/proofs/mlkem_compress_consts.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_poly_compress_d4_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_compress_common.ml x86_64/proofs/mlkem_compress_consts.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_poly_compress_d5_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_compress_common.ml x86_64/proofs/mlkem_compress_consts.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_poly_decompress_d10_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_compress_common.ml x86_64/proofs/mlkem_compress_consts.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_poly_decompress_d11_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_compress_common.ml x86_64/proofs/mlkem_compress_consts.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_poly_decompress_d4_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_compress_common.ml x86_64/proofs/mlkem_compress_consts.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_poly_decompress_d5_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_compress_common.ml x86_64/proofs/mlkem_compress_consts.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_poly_mulcache_compute_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/mlkem_zetas.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_polyvec_basemul_acc_montgomery_cached_k4_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_reduce_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+            x86_64/mlkem_rej_uniform_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_rej_uniform_table.ml x86_64/proofs/mlkem_utils.ml
+            x86_64/mlkem_tomont_avx2_asm common/mlkem_specs.ml x86_64/proofs/mlkem_utils.ml x86_64/proofs/subroutine_signatures.ml
+        run: |
+          proofs=()
+          while read -r proof imports; do
+            [[ -n "$proof" ]] || continue
+            run_needed=0
+            arch=${proof%/*}
+            routine=${proof#*/}
+            s2n_arch=x86
+            [[ "$arch" == "aarch64" ]] && s2n_arch=arm
+            dependencies="$imports $routine.S $routine.ml $routine.defs $routine.thms $routine.bind"
+            dependencies+=" $arch/Makefile $arch/list_proofs.sh $arch/list_thms.sh"
+            dependencies+=" hol_trace/accepted/base/s2n_bignum_$s2n_arch.defs"
+            for needs in $imports; do
+              layer=${needs#common/}
+              layer=${layer/\/proofs/}
+              dependencies+=" hol_trace/accepted/spec/${layer%.ml}.defs"
+            done
+            for changed in $CHANGED_FILES; do
+              for needs in $dependencies; do
+                if [[ "$changed" == *"$needs" ]]; then
+                  run_needed=1
+                fi
+              done
+              # Always re-run upon changes to shared tooling or Nix files.
+              case "$changed" in
+                flake.nix|flake.lock|nix/*|\
+                .github/workflows/all.yml|\
+                .github/workflows/hol_trace.yml|\
+                .github/workflows/ci_ec2_reusable.yml|\
+                .github/actions/hol-trace/*|\
+                .github/actions/setup-shell/*|\
+                .github/actions/setup-nix/*|\
+                proofs/hol_light/aarch64/proofs/build-proof.sh|\
+                proofs/hol_light/hol_trace/accepted/base/hol_light.defs)
+                  run_needed=1
+                  ;;
+                proofs/hol_light/hol_trace/accepted/*)
+                  ;;
+                proofs/hol_light/hol_trace/*.py|\
+                proofs/hol_light/hol_trace/*.ml|\
+                proofs/hol_light/hol_trace/*.sh|\
+                proofs/hol_light/hol_trace/hol-trace|\
+                proofs/hol_light/hol_trace/check-bind)
+                  run_needed=1
+                  ;;
+              esac
+            done
+            if [[ "$ALL_PROOFS" == "true" || "$run_needed" == "1" ]]; then
+              proofs+=("$proof")
+            fi
+          done <<< "$HOLTRACE_DEPENDENCIES"
+          echo "Selected proofs: ${proofs[*]}"
+          echo "proofs=${proofs[*]}" >> "$GITHUB_OUTPUT"
+
+  hol_trace_proofs:
+    name: HOLTrace proofs
+    needs: [ check_modified_files ]
+    if: needs.check_modified_files.outputs.proofs != ''
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/ci_ec2_reusable.yml
+    with:
+      name: HOLTrace
+      # Cross-assemble x86_64 proofs on one ARM64 runner.
+      ec2_instance_type: r9g.24xlarge
+      ec2_volume_size: "512"
+      timeout_minutes: 1440
+      lint: false
+      test: false
+      hol_trace_proofs: ${{ needs.check_modified_files.outputs.proofs }}
+    secrets:
+      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
