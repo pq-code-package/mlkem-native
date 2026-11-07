@@ -1,0 +1,96 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# aarch64/mlkem_ntt_aarch64_asm
+#
+# The definitions that the main theorems use beyond the generated
+# layers. Written by `hol-trace conform --accept`; review changes like
+# source code. check-bind compares the byte lists named in
+# mlkem_ntt_aarch64_asm.bind with sections of object files.
+
+# mlkem_ntt_mc: 1872 bytes, sha256 9b6de7092c86d30b56dd72a2a9bd4e4e8b790bdb97eac17f852d84aa627dad6b
+definition mlkem_ntt_mc
+  |- (= mlkem_ntt_mc
+       #x[ff 03 01 d1 e8 27 00 6d ea 2f 01 6d ec 37 02 6d ee 3f 03 6d 25 a0 81 52 a7 1c 02 4e e5 d7 89
+          52 a7 1c 06 4e e3 03 00 aa 84 00 80 d2 20 04 c2 3c 21 00 df 3c 15 10 c0 3d 05 70 c0 3d 1e 44
+          c0 3d 18 50 c0 3d 0c 20 c0 3d a9 d0 50 4f b7 80 40 4f 11 d3 50 4f 0d 30 c0 3d 37 41 47 6f 08
+          83 40 4f 28 42 47 6f a9 85 77 4e aa 85 77 6e cb 83 40 4f 0d 60 c0 3d 3c d1 70 4f bd 86 68 6e
+          3a 81 60 4f a8 86 68 4e a2 81 40 4f 9a 43 47 6f 5c 89 40 4f 57 d9 50 4f 16 85 7a 4e aa d1 50
+          4f d5 da 70 4f 0d 40 c0 3d d0 8a 60 4f fc 42 47 6f 42 41 47 6f b7 d1 50 4f aa 87 7c 6e b1 87
+          7c 4e b0 42 47 6f 92 85 62 6e 1d 00 c0 3d 2e d2 71 4f 96 85 62 4e 49 da 50 4f b5 81 40 4f 0d
+          54 c0 3d 45 8a 40 4f 25 41 47 6f b2 81 40 4f f5 42 47 6f a2 d1 50 4f 2d 82 61 4f a4 87 75 6e
+          cd 41 47 6f b9 87 75 4e 86 84 65 4e cf d2 70 4f 95 84 65 6e 05 85 7a 6e d7 82 60 4f dc 84 6d
+          4e cd 84 6d 6e a4 80 41 4f 84 08 00 d1 f7 41 47 6f 06 64 c0 3d 0f 24 c0 3d 13 04 c0 3d 56 89
+          41 4f 18 14 c0 3d 0d 50 80 3d cd d0 50 4f 34 87 77 6e c3 d3 50 4f 1c 40 80 3d 1e 48 c0 3d c8
+          80 40 4f 5b d9 51 4f 6b 40 47 6f 52 40 47 6f 1f 58 c0 3d aa d0 51 4f a8 41 47 6f 0d 74 c0 3d
+          0e 87 72 6e 09 87 72 4e e2 d3 50 4f 44 41 47 6f 2a 87 77 4e 78 86 6b 6e 79 86 6b 4e bc d1 50
+          4f cb 83 40 4f b1 81 40 4f 4d 85 70 6e e6 85 68 6e 91 43 47 6f 0d 10 80 3d 76 43 47 6f 0d 34
+          c0 3d 9a 86 64 4e f2 83 40 4f 5b 85 70 4e 1a 20 80 3d df d8 50 4f a3 86 76 4e 1b 04 81 3c da
+          88 40 4f a6 85 71 4e a5 85 71 6e 03 5c 80 3d b1 86 76 6e ca d0 70 4f 8d 86 64 6e f4 85 68 4e
+          ac d8 50 4f 0d 2c 80 3d c8 80 60 4f 11 6c 80 3d 48 41 47 6f bd 88 40 4f 9d 41 47 6f 25 85 68
+          6e 23 85 68 4e 8f d2 70 4f a4 80 41 4f c6 85 7d 4e 69 d8 70 4f cc d0 71 4f ca 85 7d 6e d7 80
+          61 4f fa 43 47 6f 97 41 47 6f 70 88 60 4f 0d 87 7a 4e 15 87 7a 6e 30 41 47 6f bc 85 77 4e ad
+          85 77 6e 97 82 60 4f 84 04 00 d1 64 f6 ff b5 a3 d0 51 4f f7 41 47 6f 05 64 c0 3d 5d 89 41 4f
+          64 40 47 6f 33 87 77 6e bf d0 50 4f c6 d3 50 4f 63 86 64 6e a5 80 40 4f 03 30 80 3d 4c d9 51
+          4f 52 40 47 6f 03 74 c0 3d e5 43 47 6f 6a d0 50 4f cb 40 47 6f 1f 24 c0 3d 7e 80 40 4f 5e 41
+          47 6f ea 87 65 6e 9d 41 47 6f 06 34 c0 3d 4f d9 50 4f 51 89 40 4f ca 84 7e 4e c6 84 7e 6e 4c
+          d1 70 4f bb 86 7d 6e c3 d8 50 4f 4a 81 60 4f 14 14 c0 3d 8a 41 47 6f c2 88 40 4f 86 86 72 4e
+          e5 87 65 4e 62 40 47 6f df 84 6a 6e ac d0 70 4f 96 86 72 6e c6 84 6a 4e f4 83 41 4f de 86 62
+          4e c3 d8 70 4f ca d3 71 4f c9 83 61 4f 1e 04 c0 3d f1 41 47 6f 49 41 47 6f cf 88 60 4f d8 87
+          6b 4e ca 86 62 6e 6f 40 47 6f 66 86 64 4e 36 87 77 4e 43 d9 51 4f 0d 50 80 3d d3 87 6b 6e d9
+          86 70 4e a5 80 60 4f cd 86 70 6e 1c 40 80 3d 85 41 47 6f 0d 10 80 3d 06 20 80 3d b5 86 7d 4e
+          ed d3 51 4f 19 04 81 3c 6c 86 71 4e 7f 86 71 6e 5e 89 41 4f 15 5c 80 3d 15 87 65 4e 86 85 69
+          4e 7e 40 47 6f 1b 6c 80 3d aa 86 6f 6e 8c 85 69 6e b4 41 47 6f 06 40 80 3d 0a 10 80 3d 0d 87
+          65 6e a3 86 6f 4e 0c 50 80 3d ea 87 7e 6e f5 87 7e 4e 03 04 81 3c ac 85 74 4e ad 85 74 6e 15
+          5c 80 3d 0a 6c 80 3d 0c 1c 80 3d 0d 2c 80 3d e0 03 03 aa 04 01 80 d2 02 08 c0 3d 2d 04 c1 3c
+          1e 0c c0 3d 59 10 c0 3d 05 00 c0 3d 12 18 c0 3d 0c 1c c0 3d 51 d0 5d 4f 24 04 c1 3c 17 04 c0
+          3d d5 d3 5d 4f 58 08 c0 3d 49 04 c6 3c ca 83 4d 4f 4b 80 4d 4f aa 42 47 6f 9d d1 54 4f 81 81
+          44 4f f5 86 6a 4e ea 86 6a 6e 48 82 44 4f b7 d2 7d 4f a2 82 6d 4f a1 43 47 6f e2 42 47 6f 4f
+          00 db 3c 40 d9 5d 4f 2b 42 47 6f 1d 14 c0 3d 57 89 4d 4f 17 40 47 6f b0 87 61 6e a3 84 6b 4e
+          bf 84 6b 6e 16 da 54 4f 7e 84 62 4e 60 84 62 6e 5c d2 54 4f f5 87 77 4e f3 87 77 6e 1a 8a 44
+          4f c3 6b 80 4e 57 00 df 3c b2 6a 93 4e da 42 47 6f cd 2b 80 4e 88 43 47 6f 7f 68 d2 4e ab 2a
+          93 4e bb 87 61 4e e6 b7 6f 6e a2 29 cb 4e ad 69 cb 4e e1 9f 69 4e 0b 10 c0 3d bd b5 6f 6e c1
+          40 47 6f 66 28 d2 4e b1 9d 69 4e 6d 85 68 6e 6a d3 74 4f ac 85 7a 6e d2 84 61 6e b1 43 47 6f
+          de 84 61 4e a6 85 7a 4e 4d 00 dd 3c 50 b6 77 6e dc 28 8c 4e 57 9e 79 4e 59 04 c0 3d 54 84 71
+          4e c0 9f 78 4e dd b7 6d 6e 5e 84 71 6e 17 42 47 6f 84 08 00 d1 53 14 c0 3d df 87 77 6e a0 43
+          47 6f 70 85 68 4e 12 28 c0 3d ce 68 8c 4e 7a 83 64 4f 24 04 c1 3c 58 10 c0 3d 15 2c c0 3d 5a
+          41 47 6f d7 87 77 4e 8f 86 60 6e 09 24 c0 3d 8a 86 60 4e 48 82 44 4f 41 04 c6 3c fb 2a 9f 4e
+          4c d2 54 4f 45 29 8f 4e 1e 86 7a 6e ad 68 db 4e a2 d2 54 4f 1d 86 7a 4e a0 82 44 4f 0d 08 80
+          3d ab 2b 9e 4e 88 41 47 6f ba 6b 9e 4e 66 69 dc 4e 40 40 47 6f 50 6b ce 4e 5a 2b ce 4e b4 28
+          db 4e dd b4 79 6e 4f 69 8f 4e 0d b6 79 6e 14 04 84 3c 3e 85 60 6e 3b 85 60 4e d1 9c 61 4e d6
+          db 54 4f 12 9e 61 4e b2 41 47 6f c2 8b 44 4f c2 42 47 6f f6 6a 9f 4e 43 87 72 6e 59 00 dd 3c
+          b1 43 47 6f ff 69 d6 4e f4 29 d6 4e 50 87 72 4e 7a b4 73 6e 75 29 dc 4e 0b 10 c0 3d 1d b6 79
+          6e 14 00 9d 3c b4 86 71 4e 1f 00 9f 3c 77 9c 78 4e 59 04 c0 3d 6d 85 68 6e 57 43 47 6f 41 00
+          dc 3c ac 85 62 6e a6 85 62 4e 6a d3 74 4f be 86 71 6e 00 9e 61 4e dc 28 8c 4e 84 04 00 d1 04
+          f7 ff b5 76 85 68 4e 7b 83 64 4f d1 68 8c 4e 4f 04 c6 3c 5b 41 47 6f c4 87 77 4e d2 87 77 6e
+          46 00 dd 3c a0 43 47 6f 4c 00 dc 3c 58 00 de 3c 42 00 df 3c 89 28 92 4e ca 86 7b 4e cd 86 7b
+          6e 81 86 60 6e 55 69 8d 4e 9b 86 60 4e a3 6a d1 4e 4d 29 8d 4e 7f 2b 81 4e 6a b4 79 6e a5 69
+          dc 4e ad 29 dc 4e b5 2a d1 4e b1 b4 79 6e fe 6b c9 4e 79 9c 6f 4e 1e 08 80 3d 9e 68 92 4e 59
+          41 47 6f 63 6b 81 4e b4 9c 6f 4e 6a 68 de 4e 34 42 47 6f 0a 0c 80 3d b2 86 79 6e aa 86 79 4e
+          63 28 de 4e 5e b6 62 6e 4c 9d 6c 4e 46 b5 66 6e 03 04 80 3d b5 85 74 4e 4a 9e 78 4e ad 85 74
+          6e ca 43 47 6f cc 40 47 6f fe 2b c9 4e a3 85 6a 6e a6 85 6a 4e aa 86 6c 4e b5 86 6c 6e cd 68
+          83 4e 4c 29 95 4e 55 69 95 4e c3 28 83 4e 1e 04 84 3c aa 6a cd 4e ad 2a cd 4e 95 69 c3 4e 83
+          29 c3 4e 0a 0c 80 3d 0d 04 80 3d 03 04 84 3c 15 00 9e 3c e8 27 40 6d ea 2f 41 6d ec 37 42 6d
+          ee 3f 43 6d ff 03 01 91 c0 03 5f d6])
+
+definition ntt_constants
+  |- (= ntt_constants
+       (@
+         (\ntt_constants:((num # num # num # num # num # num # num # num # num # num # num # num # num) -> (word #64) -> (word #64) -> armstate -> bool).
+           (!_1:(num # num # num # num # num # num # num # num # num # num # num # num # num) z_12345:(word #64) z_67:(word #64) s:armstate.
+             (= (ntt_constants _1 z_12345 z_67 s)
+               (/\
+                 (!i:num.
+                   (==> (< i #80)
+                     (=
+                       (read
+                         (":>" memory (bytes16 (word_add z_12345 (word:(num -> (word #64)) (* #2 i)))))
+                         s)
+                       (iword:(int -> (word #16)) (EL i ntt_zetas_layer12345)))))
+                 (!i:num.
+                   (==> (< i #384)
+                     (=
+                       (read
+                         (":>" memory (bytes16 (word_add z_67 (word:(num -> (word #64)) (* #2 i))))) s)
+                       (iword:(int -> (word #16)) (EL i ntt_zetas_layer67)))))))))
+         (, #110 #116 #116 #95 #99 #111 #110 #115 #116 #97 #110 #116 #115)))

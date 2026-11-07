@@ -1,0 +1,59 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: HOLTrace
+description: Record, replay, conform, and bind selected HOL Light proofs
+inputs:
+  proofs:
+    description: Space-separated proofs to check, as ARCH/FUNC
+    required: true
+  gh_token:
+    description: Github access token
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Record and check proofs
+      uses: ./.github/actions/setup-shell
+      env:
+        HOLTRACE_PROOFS: ${{ inputs.proofs }}
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        nix-shell: hol_trace-cross
+        script: |
+          ulimit -s 1048576
+          read -r -a proofs <<<"$HOLTRACE_PROOFS"
+          [[ ${#proofs[@]} -gt 0 ]]
+          for proof in "${proofs[@]}"; do
+            [[ "$proof" =~ ^(aarch64|x86_64)/[a-zA-Z0-9_]+$ ]]
+          done
+          status=0
+          # Finish each phase for all proofs before starting the next.
+          hol-trace gen -j 8 -p "${proofs[@]}" || status=1
+          hol-trace replay -j 8 --backend hol-light -p "${proofs[@]}" || status=1
+          # Conformance is serial within hol-trace; use eight processes.
+          printf '%s\0' "${proofs[@]}" |
+            xargs -0 -P 8 -n 1 hol-trace conform --backend hol-light -p || status=1
+          hol-trace replay -j 8 --backend hol-lean -p "${proofs[@]}" || status=1
+          printf '%s\0' "${proofs[@]}" |
+            xargs -0 -P 8 -n 1 hol-trace conform --backend hol-lean -p || status=1
+          printf 'proofs/hol_light/hol_trace/accepted/proofs/%s.bind\0' "${proofs[@]}" |
+            xargs -0 -P 8 -n 1 check-bind || status=1
+          # Keep logs and manifests, but free traces after all checks finish.
+          for proof in "${proofs[@]}"; do
+            trace="proofs/hol_light/hol_trace/traces/$proof"
+            rm -f -- "$trace.50" "$trace.raw.50" "$trace."*.result
+          done
+          git diff --exit-code HEAD -- proofs/hol_light/hol_trace/accepted || status=1
+          exit "$status"
+    - name: Upload proof logs
+      if: always()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: holtrace-logs
+        path: |
+          proofs/hol_light/hol_trace/traces/**/*.gen.log
+          proofs/hol_light/hol_trace/traces/**/*.replay.log
+          proofs/hol_light/hol_trace/traces/**/*.manifest.json
+        if-no-files-found: warn
+        retention-days: 7

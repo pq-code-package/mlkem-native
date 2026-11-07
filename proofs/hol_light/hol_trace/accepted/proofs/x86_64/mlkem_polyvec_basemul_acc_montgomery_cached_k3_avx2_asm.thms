@@ -1,0 +1,618 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# x86_64/mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2_asm
+#
+# The main theorems. Written by `hol-trace conform --accept`; review
+# changes like source code: this is what the proof claims.
+
+theorem x86_64/mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2_asm MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K3_NOIBT_SUBROUTINE_CORRECT
+  |- (!src1:(word #64) src2:(word #64) src2t:(word #64) dst:(word #64) a0:(num -> num -> (word #16)) b0:(num -> num -> (word #16)) c0:(num -> num -> (word #16)) d0:(num -> num -> (word #16)) dz0:(num -> num -> (word #16)) a1:(num -> num -> (word #16)) b1:(num -> num -> (word #16)) c1:(num -> num -> (word #16)) d1:(num -> num -> (word #16)) dz1:(num -> num -> (word #16)) a2:(num -> num -> (word #16)) b2:(num -> num -> (word #16)) c2:(num -> num -> (word #16)) d2:(num -> num -> (word #16)) dz2:(num -> num -> (word #16)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (aligned #32 src1) (aligned #32 src2) (aligned #32 src2t) (aligned #32 dst)
+           (ALL (nonoverlapping (, dst #512)) [(, src1 #1536); (, src2 #1536); (, src2t #768)])
+           (nonoverlapping (, dst #512)
+             (, (word:(num -> (word #64)) pc) (LENGTH mlkem_basemul_k3_tmc)))
+           (nonoverlapping (, dst #512) (, stackpointer #8)))
+         (ensures x86
+           (\s:x86state.
+             (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_basemul_k3_tmc)
+               (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+               (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+               (C_ARGUMENTS [dst; src1; src2; src2t] s)
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src1 (word:(num -> (word #64)) (+ (* #64 j) (* #2 i))))))
+                           s)
+                         (a0 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src1
+                                 (word:(num -> (word #64)) (+ (* #64 j) (+ #32 (* #2 i)))))))
+                           s)
+                         (b0 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2 (word:(num -> (word #64)) (+ (* #64 j) (* #2 i))))))
+                           s)
+                         (c0 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2
+                                 (word:(num -> (word #64)) (+ (* #64 j) (+ #32 (* #2 i)))))))
+                           s)
+                         (d0 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2t (word:(num -> (word #64)) (+ (* #32 j) (* #2 i))))))
+                           s)
+                         (dz0 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src1
+                                 (word:(num -> (word #64)) (+ #512 (+ (* #64 j) (* #2 i)))))))
+                           s)
+                         (a1 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src1
+                                 (word:(num -> (word #64)) (+ #512 (+ (* #64 j) (+ #32 (* #2 i))))))))
+                           s)
+                         (b1 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2
+                                 (word:(num -> (word #64)) (+ #512 (+ (* #64 j) (* #2 i)))))))
+                           s)
+                         (c1 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2
+                                 (word:(num -> (word #64)) (+ #512 (+ (* #64 j) (+ #32 (* #2 i))))))))
+                           s)
+                         (d1 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2t
+                                 (word:(num -> (word #64)) (+ #256 (+ (* #32 j) (* #2 i)))))))
+                           s)
+                         (dz1 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src1
+                                 (word:(num -> (word #64)) (+ #1024 (+ (* #64 j) (* #2 i)))))))
+                           s)
+                         (a2 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src1
+                                 (word:(num -> (word #64)) (+ #1024 (+ (* #64 j) (+ #32 (* #2 i))))))))
+                           s)
+                         (b2 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2
+                                 (word:(num -> (word #64)) (+ #1024 (+ (* #64 j) (* #2 i)))))))
+                           s)
+                         (c2 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2
+                                 (word:(num -> (word #64)) (+ #1024 (+ (* #64 j) (+ #32 (* #2 i))))))))
+                           s)
+                         (d2 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2t
+                                 (word:(num -> (word #64)) (+ #512 (+ (* #32 j) (* #2 i)))))))
+                           s)
+                         (dz2 i j))))))))
+           (\s:x86state.
+             (/\ (= (read RIP s) returnaddress)
+               (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #4)
+                       (LET
+                         (\j':num.
+                           (LET_END
+                             (==>
+                               (/\ (int_le (int_abs (ival (a0 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (b0 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (a1 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (b1 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (a2 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (b2 i j'))) (int_pow &2 #12)))
+                               (==
+                                 (ival
+                                   (read
+                                     (":>" memory
+                                       (bytes16
+                                         (word_add dst
+                                           (word:(num -> (word #64)) (+ (* #64 j') (* #2 i))))))
+                                     s))
+                                 (pmulaccred0_k3 (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j'))
+                                   (ival (d0 i j')) (ival (dz0 i j')) (ival (a1 i j'))
+                                   (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j'))
+                                   (ival (dz1 i j')) (ival (a2 i j')) (ival (b2 i j'))
+                                   (ival (c2 i j')) (ival (d2 i j')) (ival (dz2 i j')))
+                                 (int_mod &3329)))))
+                         (* #2 j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #4)
+                       (LET
+                         (\j':num.
+                           (LET_END
+                             (==>
+                               (/\ (int_le (int_abs (ival (a0 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (b0 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (a1 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (b1 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (a2 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (b2 i j'))) (int_pow &2 #12)))
+                               (==
+                                 (ival
+                                   (read
+                                     (":>" memory
+                                       (bytes16
+                                         (word_add dst
+                                           (word:(num -> (word #64)) (+ (* #64 j') (* #2 i))))))
+                                     s))
+                                 (pmulaccred0_odd_k3 (ival (a0 i j')) (ival (b0 i j'))
+                                   (ival (c0 i j')) (ival (d0 i j')) (ival (dz0 i j'))
+                                   (ival (a1 i j')) (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j'))
+                                   (ival (dz1 i j')) (ival (a2 i j')) (ival (b2 i j'))
+                                   (ival (c2 i j')) (ival (d2 i j')) (ival (dz2 i j')))
+                                 (int_mod &3329)))))
+                         (+ (* #2 j) #1))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (/\ (int_le (int_abs (ival (a0 i j))) (int_pow &2 #12))
+                         (int_le (int_abs (ival (b0 i j))) (int_pow &2 #12))
+                         (int_le (int_abs (ival (a1 i j))) (int_pow &2 #12))
+                         (int_le (int_abs (ival (b1 i j))) (int_pow &2 #12))
+                         (int_le (int_abs (ival (a2 i j))) (int_pow &2 #12))
+                         (int_le (int_abs (ival (b2 i j))) (int_pow &2 #12)))
+                       (==
+                         (ival
+                           (read
+                             (":>" memory
+                               (bytes16
+                                 (word_add dst
+                                   (word:(num -> (word #64)) (+ (* #64 j) (+ #32 (* #2 i)))))))
+                             s))
+                         (pmulaccred1_k3 (ival (a0 i j)) (ival (b0 i j)) (ival (c0 i j))
+                           (ival (d0 i j)) (ival (dz0 i j)) (ival (a1 i j)) (ival (b1 i j))
+                           (ival (c1 i j)) (ival (d1 i j)) (ival (dz1 i j)) (ival (a2 i j))
+                           (ival (b2 i j)) (ival (c2 i j)) (ival (d2 i j)) (ival (dz2 i j)))
+                         (int_mod &3329))))))))
+           (,, (MAYCHANGE [RSP])
+             (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+               (MAYCHANGE [(":>" memory (bytes (, dst #512)))]))))))
+
+theorem x86_64/mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2_asm MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K3_NOIBT_SUBROUTINE_SAFE
+  |- (?f_events:((word #64) -> (word #64) -> (word #64) -> (word #64) -> num -> (word #64) -> (word #64) -> (list (address_uarch_event #64))).
+       (!e:(list (address_uarch_event #64)) src1:(word #64) src2:(word #64) src2t:(word #64) dst:(word #64) pc:num stackpointer:(word #64) returnaddress:(word #64).
+         (==>
+           (/\ (aligned #32 src1) (aligned #32 src2) (aligned #32 src2t) (aligned #32 dst)
+             (ALL (nonoverlapping (, dst #512)) [(, src1 #1536); (, src2 #1536); (, src2t #768)])
+             (nonoverlapping (, dst #512)
+               (, (word:(num -> (word #64)) pc) (LENGTH mlkem_basemul_k3_tmc)))
+             (nonoverlapping (, stackpointer #8) (, dst #512)))
+           (ensures x86
+             (\s:x86state.
+               (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_basemul_k3_tmc)
+                 (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+                 (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+                 (C_ARGUMENTS [dst; src1; src2; src2t] s) (= (read events s) e)))
+             (\s:x86state.
+               (/\ (= (read RIP s) returnaddress)
+                 (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+                 (?e2:(list (address_uarch_event #64)).
+                   (/\ (= (read events s) (APPEND e2 e))
+                     (= e2 (f_events src1 src2 src2t dst pc stackpointer returnaddress))
+                     (memaccess_inbounds e2
+                       [(, src1 #1536); (, src2 #1536); (, src2t #768); (, dst #512);
+                        (, stackpointer #8)]
+                       [(, dst #512); (, stackpointer #8)])))))
+             (\s:x86state s':x86state. T)))))
+
+theorem x86_64/mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2_asm MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K3_SUBROUTINE_CORRECT
+  |- (!src1:(word #64) src2:(word #64) src2t:(word #64) dst:(word #64) a0:(num -> num -> (word #16)) b0:(num -> num -> (word #16)) c0:(num -> num -> (word #16)) d0:(num -> num -> (word #16)) dz0:(num -> num -> (word #16)) a1:(num -> num -> (word #16)) b1:(num -> num -> (word #16)) c1:(num -> num -> (word #16)) d1:(num -> num -> (word #16)) dz1:(num -> num -> (word #16)) a2:(num -> num -> (word #16)) b2:(num -> num -> (word #16)) c2:(num -> num -> (word #16)) d2:(num -> num -> (word #16)) dz2:(num -> num -> (word #16)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (aligned #32 src1) (aligned #32 src2) (aligned #32 src2t) (aligned #32 dst)
+           (ALL (nonoverlapping (, dst #512)) [(, src1 #1536); (, src2 #1536); (, src2t #768)])
+           (nonoverlapping (, dst #512) (, (word:(num -> (word #64)) pc) (LENGTH mlkem_basemul_k3_mc)))
+           (nonoverlapping (, dst #512) (, stackpointer #8)))
+         (ensures x86
+           (\s:x86state.
+             (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_basemul_k3_mc)
+               (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+               (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+               (C_ARGUMENTS [dst; src1; src2; src2t] s)
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src1 (word:(num -> (word #64)) (+ (* #64 j) (* #2 i))))))
+                           s)
+                         (a0 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src1
+                                 (word:(num -> (word #64)) (+ (* #64 j) (+ #32 (* #2 i)))))))
+                           s)
+                         (b0 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2 (word:(num -> (word #64)) (+ (* #64 j) (* #2 i))))))
+                           s)
+                         (c0 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2
+                                 (word:(num -> (word #64)) (+ (* #64 j) (+ #32 (* #2 i)))))))
+                           s)
+                         (d0 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2t (word:(num -> (word #64)) (+ (* #32 j) (* #2 i))))))
+                           s)
+                         (dz0 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src1
+                                 (word:(num -> (word #64)) (+ #512 (+ (* #64 j) (* #2 i)))))))
+                           s)
+                         (a1 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src1
+                                 (word:(num -> (word #64)) (+ #512 (+ (* #64 j) (+ #32 (* #2 i))))))))
+                           s)
+                         (b1 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2
+                                 (word:(num -> (word #64)) (+ #512 (+ (* #64 j) (* #2 i)))))))
+                           s)
+                         (c1 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2
+                                 (word:(num -> (word #64)) (+ #512 (+ (* #64 j) (+ #32 (* #2 i))))))))
+                           s)
+                         (d1 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2t
+                                 (word:(num -> (word #64)) (+ #256 (+ (* #32 j) (* #2 i)))))))
+                           s)
+                         (dz1 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src1
+                                 (word:(num -> (word #64)) (+ #1024 (+ (* #64 j) (* #2 i)))))))
+                           s)
+                         (a2 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src1
+                                 (word:(num -> (word #64)) (+ #1024 (+ (* #64 j) (+ #32 (* #2 i))))))))
+                           s)
+                         (b2 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2
+                                 (word:(num -> (word #64)) (+ #1024 (+ (* #64 j) (* #2 i)))))))
+                           s)
+                         (c2 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2
+                                 (word:(num -> (word #64)) (+ #1024 (+ (* #64 j) (+ #32 (* #2 i))))))))
+                           s)
+                         (d2 i j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (=
+                         (read
+                           (":>" memory
+                             (bytes16
+                               (word_add src2t
+                                 (word:(num -> (word #64)) (+ #512 (+ (* #32 j) (* #2 i)))))))
+                           s)
+                         (dz2 i j))))))))
+           (\s:x86state.
+             (/\ (= (read RIP s) returnaddress)
+               (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #4)
+                       (LET
+                         (\j':num.
+                           (LET_END
+                             (==>
+                               (/\ (int_le (int_abs (ival (a0 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (b0 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (a1 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (b1 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (a2 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (b2 i j'))) (int_pow &2 #12)))
+                               (==
+                                 (ival
+                                   (read
+                                     (":>" memory
+                                       (bytes16
+                                         (word_add dst
+                                           (word:(num -> (word #64)) (+ (* #64 j') (* #2 i))))))
+                                     s))
+                                 (pmulaccred0_k3 (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j'))
+                                   (ival (d0 i j')) (ival (dz0 i j')) (ival (a1 i j'))
+                                   (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j'))
+                                   (ival (dz1 i j')) (ival (a2 i j')) (ival (b2 i j'))
+                                   (ival (c2 i j')) (ival (d2 i j')) (ival (dz2 i j')))
+                                 (int_mod &3329)))))
+                         (* #2 j))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #4)
+                       (LET
+                         (\j':num.
+                           (LET_END
+                             (==>
+                               (/\ (int_le (int_abs (ival (a0 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (b0 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (a1 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (b1 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (a2 i j'))) (int_pow &2 #12))
+                                 (int_le (int_abs (ival (b2 i j'))) (int_pow &2 #12)))
+                               (==
+                                 (ival
+                                   (read
+                                     (":>" memory
+                                       (bytes16
+                                         (word_add dst
+                                           (word:(num -> (word #64)) (+ (* #64 j') (* #2 i))))))
+                                     s))
+                                 (pmulaccred0_odd_k3 (ival (a0 i j')) (ival (b0 i j'))
+                                   (ival (c0 i j')) (ival (d0 i j')) (ival (dz0 i j'))
+                                   (ival (a1 i j')) (ival (b1 i j')) (ival (c1 i j')) (ival (d1 i j'))
+                                   (ival (dz1 i j')) (ival (a2 i j')) (ival (b2 i j'))
+                                   (ival (c2 i j')) (ival (d2 i j')) (ival (dz2 i j')))
+                                 (int_mod &3329)))))
+                         (+ (* #2 j) #1))))))
+               (!i:num.
+                 (==> (< i #16)
+                   (!j:num.
+                     (==> (< j #8)
+                       (/\ (int_le (int_abs (ival (a0 i j))) (int_pow &2 #12))
+                         (int_le (int_abs (ival (b0 i j))) (int_pow &2 #12))
+                         (int_le (int_abs (ival (a1 i j))) (int_pow &2 #12))
+                         (int_le (int_abs (ival (b1 i j))) (int_pow &2 #12))
+                         (int_le (int_abs (ival (a2 i j))) (int_pow &2 #12))
+                         (int_le (int_abs (ival (b2 i j))) (int_pow &2 #12)))
+                       (==
+                         (ival
+                           (read
+                             (":>" memory
+                               (bytes16
+                                 (word_add dst
+                                   (word:(num -> (word #64)) (+ (* #64 j) (+ #32 (* #2 i)))))))
+                             s))
+                         (pmulaccred1_k3 (ival (a0 i j)) (ival (b0 i j)) (ival (c0 i j))
+                           (ival (d0 i j)) (ival (dz0 i j)) (ival (a1 i j)) (ival (b1 i j))
+                           (ival (c1 i j)) (ival (d1 i j)) (ival (dz1 i j)) (ival (a2 i j))
+                           (ival (b2 i j)) (ival (c2 i j)) (ival (d2 i j)) (ival (dz2 i j)))
+                         (int_mod &3329))))))))
+           (,, (MAYCHANGE [RSP])
+             (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+               (MAYCHANGE [(":>" memory (bytes (, dst #512)))]))))))
+
+theorem x86_64/mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2_asm MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K3_SUBROUTINE_SAFE
+  |- (?f_events:((word #64) -> (word #64) -> (word #64) -> (word #64) -> num -> (word #64) -> (word #64) -> (list (address_uarch_event #64))).
+       (!e:(list (address_uarch_event #64)) src1:(word #64) src2:(word #64) src2t:(word #64) dst:(word #64) pc:num stackpointer:(word #64) returnaddress:(word #64).
+         (==>
+           (/\ (aligned #32 src1) (aligned #32 src2) (aligned #32 src2t) (aligned #32 dst)
+             (ALL (nonoverlapping (, dst #512)) [(, src1 #1536); (, src2 #1536); (, src2t #768)])
+             (nonoverlapping (, dst #512)
+               (, (word:(num -> (word #64)) pc) (LENGTH mlkem_basemul_k3_mc)))
+             (nonoverlapping (, stackpointer #8) (, dst #512)))
+           (ensures x86
+             (\s:x86state.
+               (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_basemul_k3_mc)
+                 (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+                 (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+                 (C_ARGUMENTS [dst; src1; src2; src2t] s) (= (read events s) e)))
+             (\s:x86state.
+               (/\ (= (read RIP s) returnaddress)
+                 (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+                 (?e2:(list (address_uarch_event #64)).
+                   (/\ (= (read events s) (APPEND e2 e))
+                     (= e2 (f_events src1 src2 src2t dst pc stackpointer returnaddress))
+                     (memaccess_inbounds e2
+                       [(, src1 #1536); (, src2 #1536); (, src2t #768); (, dst #512);
+                        (, stackpointer #8)]
+                       [(, dst #512); (, stackpointer #8)])))))
+             (\s:x86state s':x86state. T)))))

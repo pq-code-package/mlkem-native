@@ -1,0 +1,55 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# aarch64/mlkem_poly_tomont_aarch64_asm
+#
+# The main theorems. Written by `hol-trace conform --accept`; review
+# changes like source code: this is what the proof claims.
+
+theorem aarch64/mlkem_poly_tomont_aarch64_asm MLKEM_POLY_TOMONT_SUBROUTINE_CORRECT
+  |- (!ptr:(word #64) x:(num -> (word #16)) pc:num returnaddress:(word #64).
+       (==>
+         (nonoverlapping (, (word:(num -> (word #64)) pc) (LENGTH poly_tomont_asm_mc)) (, ptr #512))
+         (ensures arm
+           (\s:armstate.
+             (/\ (aligned_bytes_loaded s (word:(num -> (word #64)) pc) poly_tomont_asm_mc)
+               (= (read PC s) (word:(num -> (word #64)) pc)) (= (read X30 s) returnaddress)
+               (C_ARGUMENTS [ptr] s)
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (read (":>" memory (bytes16 (word_add ptr (word:(num -> (word #64)) (* #2 i)))))
+                       s)
+                     (x i))))))
+           (\s:armstate.
+             (/\ (= (read PC s) returnaddress)
+               (!i:num.
+                 (==> (< i #256)
+                   (LET
+                     (\z_i:(word #16).
+                       (LET_END
+                         (/\
+                           (== (ival z_i) (tomont_3329 (o ival:((word #16) -> int) x) i)
+                             (int_mod &3329))
+                           (int_le (int_abs (ival z_i)) &3328))))
+                     (read (":>" memory (bytes16 (word_add ptr (word:(num -> (word #64)) (* #2 i)))))
+                       s))))))
+           (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             (MAYCHANGE [(":>" memory (bytes (, ptr #512)))])))))
+
+theorem aarch64/mlkem_poly_tomont_aarch64_asm MLKEM_POLY_TOMONT_SUBROUTINE_SAFE
+  |- (?f_events:((word #64) -> num -> (word #64) -> (list (address_uarch_event #64))).
+       (!e:(list (address_uarch_event #64)) ptr:(word #64) pc:num returnaddress:(word #64).
+         (==>
+           (nonoverlapping (, (word:(num -> (word #64)) pc) (LENGTH poly_tomont_asm_mc)) (, ptr #512))
+           (ensures arm
+             (\s:armstate.
+               (/\ (aligned_bytes_loaded s (word:(num -> (word #64)) pc) poly_tomont_asm_mc)
+                 (= (read PC s) (word:(num -> (word #64)) pc)) (= (read X30 s) returnaddress)
+                 (C_ARGUMENTS [ptr] s) (= (read events s) e)))
+             (\s:armstate.
+               (/\ (= (read PC s) returnaddress)
+                 (?e2:(list (address_uarch_event #64)).
+                   (/\ (= (read events s) (APPEND e2 e)) (= e2 (f_events ptr pc returnaddress))
+                     (memaccess_inbounds e2 [(, ptr #512)] [(, ptr #512)])))))
+             (\s:armstate s':armstate. T)))))

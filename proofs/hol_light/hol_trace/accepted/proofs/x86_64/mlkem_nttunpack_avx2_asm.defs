@@ -1,0 +1,57 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# x86_64/mlkem_nttunpack_avx2_asm
+#
+# The definitions that the main theorems use beyond the generated
+# layers. Written by `hol-trace conform --accept`; review changes like
+# source code. check-bind compares the byte lists named in
+# mlkem_nttunpack_avx2_asm.bind with sections of object files.
+
+definition avx_unorder
+  |- (= avx_unorder
+       (\_1:num.
+         (LET
+           (\half:num.
+             (LET_END
+               (LET
+                 (\offset:num.
+                   (LET_END (+ (* half #128) (+ (* #8 (MOD offset #16)) (DIV offset #16)))))
+                 (MOD _1 #128))))
+           (DIV _1 #128))))
+
+# mlkem_unpack_mc: 762 bytes, sha256 5cf7f561b2dafcaa3b67cae5f4c87e36bcf6aef69bd89fd19dab1f256382fe55
+definition mlkem_unpack_mc
+  |- (= mlkem_unpack_mc
+       #x[f3 0f 1e fa c5 fd 6f 27 c5 fd 6f 6f 20 c5 fd 6f 77 40 c5 fd 6f 7f 60 c5 7d 6f 87 80 00 00 00
+          c5 7d 6f 8f a0 00 00 00 c5 7d 6f 97 c0 00 00 00 c5 7d 6f 9f e0 00 00 00 c4 c3 5d 46 d8 20 c4
+          43 5d 46 c0 31 c4 c3 55 46 e1 20 c4 43 55 46 c9 31 c4 c3 4d 46 ea 20 c4 43 4d 46 d2 31 c4 c3
+          45 46 f3 20 c4 43 45 46 db 31 c5 e5 6c fd c5 e5 6d ed c4 c1 3d 6c da c4 41 3d 6d d2 c5 5d 6c
+          c6 c5 dd 6d f6 c4 c1 35 6c e3 c4 41 35 6d db c4 41 7e 12 c8 c4 43 45 02 c9 aa c5 c5 73 d7 20
+          c4 43 45 02 c0 aa c5 fe 12 fe c4 e3 55 02 ff aa c5 d5 73 d5 20 c4 e3 55 02 f6 aa c5 fe 12 ec
+          c4 e3 65 02 ed aa c5 e5 73 d3 20 c4 e3 65 02 e4 aa c4 c1 7e 12 db c4 e3 2d 02 db aa c4 c1 2d
+          73 d2 20 c4 43 2d 02 db aa c5 ad 72 f5 10 c4 43 35 0e d2 aa c4 c1 35 72 d1 10 c4 e3 35 0e ed
+          aa c5 b5 72 f4 10 c4 43 3d 0e c9 aa c4 c1 3d 72 d0 10 c4 e3 3d 0e e4 aa c5 bd 72 f3 10 c4 43
+          45 0e c0 aa c5 c5 72 d7 10 c4 e3 45 0e db aa c4 c1 45 72 f3 10 c4 e3 4d 0e ff aa c5 cd 72 d6
+          10 c4 43 4d 0e db aa c5 7d 7f 17 c5 fd 7f 6f 20 c5 7d 7f 4f 40 c5 fd 7f 67 60 c5 7d 7f 87 80
+          00 00 00 c5 fd 7f 9f a0 00 00 00 c5 fd 7f bf c0 00 00 00 c5 7d 7f 9f e0 00 00 00 c5 fd 6f a7
+          00 01 00 00 c5 fd 6f af 20 01 00 00 c5 fd 6f b7 40 01 00 00 c5 fd 6f bf 60 01 00 00 c5 7d 6f
+          87 80 01 00 00 c5 7d 6f 8f a0 01 00 00 c5 7d 6f 97 c0 01 00 00 c5 7d 6f 9f e0 01 00 00 c4 c3
+          5d 46 d8 20 c4 43 5d 46 c0 31 c4 c3 55 46 e1 20 c4 43 55 46 c9 31 c4 c3 4d 46 ea 20 c4 43 4d
+          46 d2 31 c4 c3 45 46 f3 20 c4 43 45 46 db 31 c5 e5 6c fd c5 e5 6d ed c4 c1 3d 6c da c4 41 3d
+          6d d2 c5 5d 6c c6 c5 dd 6d f6 c4 c1 35 6c e3 c4 41 35 6d db c4 41 7e 12 c8 c4 43 45 02 c9 aa
+          c5 c5 73 d7 20 c4 43 45 02 c0 aa c5 fe 12 fe c4 e3 55 02 ff aa c5 d5 73 d5 20 c4 e3 55 02 f6
+          aa c5 fe 12 ec c4 e3 65 02 ed aa c5 e5 73 d3 20 c4 e3 65 02 e4 aa c4 c1 7e 12 db c4 e3 2d 02
+          db aa c4 c1 2d 73 d2 20 c4 43 2d 02 db aa c5 ad 72 f5 10 c4 43 35 0e d2 aa c4 c1 35 72 d1 10
+          c4 e3 35 0e ed aa c5 b5 72 f4 10 c4 43 3d 0e c9 aa c4 c1 3d 72 d0 10 c4 e3 3d 0e e4 aa c5 bd
+          72 f3 10 c4 43 45 0e c0 aa c5 c5 72 d7 10 c4 e3 45 0e db aa c4 c1 45 72 f3 10 c4 e3 4d 0e ff
+          aa c5 cd 72 d6 10 c4 43 4d 0e db aa c5 7d 7f 97 00 01 00 00 c5 fd 7f af 20 01 00 00 c5 7d 7f
+          8f 40 01 00 00 c5 fd 7f a7 60 01 00 00 c5 7d 7f 87 80 01 00 00 c5 fd 7f 9f a0 01 00 00 c5 fd
+          7f bf c0 01 00 00 c5 7d 7f 9f e0 01 00 00 c5 f8 77 c3])
+
+definition mlkem_unpack_tmc
+  |- (= mlkem_unpack_tmc (TRIM_LIST (, #4 #0) mlkem_unpack_mc))
+
+definition unpermute_list
+  |- (= unpermute_list:((list '?1) -> (list '?1))
+       (\_1:(list '?1). (list_of_seq (\i:num. (EL (avx_unorder i) _1)) #256)))

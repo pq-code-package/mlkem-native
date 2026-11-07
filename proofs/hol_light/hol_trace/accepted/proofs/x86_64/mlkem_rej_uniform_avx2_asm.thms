@@ -1,0 +1,191 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# x86_64/mlkem_rej_uniform_avx2_asm
+#
+# The main theorems. Written by `hol-trace conform --accept`; review
+# changes like source code: this is what the proof claims.
+
+theorem x86_64/mlkem_rej_uniform_avx2_asm MLKEM_REJ_UNIFORM_NOIBT_SUBROUTINE_CORRECT
+  |- (!res:(word #64) buf:(word #64) buflen:(word #64) table:(word #64) inlist:(list (word #12)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (num_divides #12 (val buflen)) (= (* #8 (val buflen)) (* #12 (LENGTH inlist)))
+           (ALL (nonoverlapping (, (word_sub stackpointer (word:(num -> (word #64)) #528)) #528))
+             [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_rej_uniform_tmc)); (, buf (val buflen));
+              (, table #4096)])
+           (ALL (nonoverlapping (, res #512))
+             [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_rej_uniform_tmc));
+              (, (word_sub stackpointer (word:(num -> (word #64)) #528)) #536)]))
+         (ensures x86
+           (\s:x86state.
+             (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_rej_uniform_tmc)
+               (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+               (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+               (C_ARGUMENTS [res; buf; buflen; table] s) (= (read DF s) F)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> x86state -> (list (word #8)))
+                   (, table #4096) s)
+                 mlkem_rej_uniform_table)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> x86state -> (list (word #12)))
+                   (, buf (LENGTH inlist)) s)
+                 inlist)))
+           (\s:x86state.
+             (/\ (= (read RIP s) returnaddress)
+               (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+               (LET
+                 (\inlist':(list (word #16)).
+                   (LET_END
+                     (LET
+                       (\outlist:(list (word #16)).
+                         (LET_END
+                           (LET
+                             (\outlen:num.
+                               (LET_END
+                                 (/\ (= (C_RETURN s) (word:(num -> (word #64)) outlen))
+                                   (=
+                                     (wordlist_from_memory:(((word #64) # num) -> x86state -> (list (word #16)))
+                                       (, res outlen) s)
+                                     outlist))))
+                             (LENGTH outlist))))
+                       (SUB_LIST (, #0 #256) (FILTER (\x:(word #16). (< (val x) #3329)) inlist')))))
+                 (MAP word_zx:((word #12) -> (word #16)) inlist))))
+           (,, (MAYCHANGE [RSP])
+             (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+               (MAYCHANGE
+                 [(":>" memory (bytes (, res #512)));
+                  (":>" memory
+                    (bytes (, (word_sub stackpointer (word:(num -> (word #64)) #528)) #528)))]))))))
+
+theorem x86_64/mlkem_rej_uniform_avx2_asm MLKEM_REJ_UNIFORM_NOIBT_SUBROUTINE_MEMSAFE
+  |- (!res:(word #64) buf:(word #64) buflen:(word #64) table:(word #64) inlist:(list (word #12)) e:(list (address_uarch_event #64)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (num_divides #12 (val buflen)) (= (* #8 (val buflen)) (* #12 (LENGTH inlist)))
+           (ALL (nonoverlapping (, (word_sub stackpointer (word:(num -> (word #64)) #528)) #528))
+             [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_rej_uniform_tmc)); (, buf (val buflen));
+              (, table #4096)])
+           (ALL (nonoverlapping (, res #512))
+             [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_rej_uniform_tmc));
+              (, (word_sub stackpointer (word:(num -> (word #64)) #528)) #536)]))
+         (ensures x86
+           (\s:x86state.
+             (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_rej_uniform_tmc)
+               (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+               (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+               (C_ARGUMENTS [res; buf; buflen; table] s) (= (read DF s) F)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> x86state -> (list (word #8)))
+                   (, table #4096) s)
+                 mlkem_rej_uniform_table)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> x86state -> (list (word #12)))
+                   (, buf (LENGTH inlist)) s)
+                 inlist)
+               (= (read events s) e)))
+           (\s:x86state.
+             (/\ (= (read RIP s) returnaddress)
+               (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+               (?e2:(list (address_uarch_event #64)).
+                 (/\ (= (read events s) (APPEND e2 e))
+                   (memaccess_inbounds e2
+                     [(, buf (val buflen)); (, table #4096);
+                      (, (word_sub stackpointer (word:(num -> (word #64)) #528)) #536)]
+                     [(, (word_sub stackpointer (word:(num -> (word #64)) #528)) #528); (, res #512)])))))
+           (,, (MAYCHANGE [RSP])
+             (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+               (MAYCHANGE
+                 [(":>" memory (bytes (, res #512)));
+                  (":>" memory
+                    (bytes (, (word_sub stackpointer (word:(num -> (word #64)) #528)) #528)))]))))))
+
+theorem x86_64/mlkem_rej_uniform_avx2_asm MLKEM_REJ_UNIFORM_SUBROUTINE_CORRECT
+  |- (!res:(word #64) buf:(word #64) buflen:(word #64) table:(word #64) inlist:(list (word #12)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (num_divides #12 (val buflen)) (= (* #8 (val buflen)) (* #12 (LENGTH inlist)))
+           (ALL (nonoverlapping (, (word_sub stackpointer (word:(num -> (word #64)) #528)) #528))
+             [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_rej_uniform_mc)); (, buf (val buflen));
+              (, table #4096)])
+           (ALL (nonoverlapping (, res #512))
+             [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_rej_uniform_mc));
+              (, (word_sub stackpointer (word:(num -> (word #64)) #528)) #536)]))
+         (ensures x86
+           (\s:x86state.
+             (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_rej_uniform_mc)
+               (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+               (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+               (C_ARGUMENTS [res; buf; buflen; table] s) (= (read DF s) F)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> x86state -> (list (word #8)))
+                   (, table #4096) s)
+                 mlkem_rej_uniform_table)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> x86state -> (list (word #12)))
+                   (, buf (LENGTH inlist)) s)
+                 inlist)))
+           (\s:x86state.
+             (/\ (= (read RIP s) returnaddress)
+               (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+               (LET
+                 (\inlist':(list (word #16)).
+                   (LET_END
+                     (LET
+                       (\outlist:(list (word #16)).
+                         (LET_END
+                           (LET
+                             (\outlen:num.
+                               (LET_END
+                                 (/\ (= (C_RETURN s) (word:(num -> (word #64)) outlen))
+                                   (=
+                                     (wordlist_from_memory:(((word #64) # num) -> x86state -> (list (word #16)))
+                                       (, res outlen) s)
+                                     outlist))))
+                             (LENGTH outlist))))
+                       (SUB_LIST (, #0 #256) (FILTER (\x:(word #16). (< (val x) #3329)) inlist')))))
+                 (MAP word_zx:((word #12) -> (word #16)) inlist))))
+           (,, (MAYCHANGE [RSP])
+             (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+               (MAYCHANGE
+                 [(":>" memory (bytes (, res #512)));
+                  (":>" memory
+                    (bytes (, (word_sub stackpointer (word:(num -> (word #64)) #528)) #528)))]))))))
+
+theorem x86_64/mlkem_rej_uniform_avx2_asm MLKEM_REJ_UNIFORM_SUBROUTINE_MEMSAFE
+  |- (!res:(word #64) buf:(word #64) buflen:(word #64) table:(word #64) inlist:(list (word #12)) e:(list (address_uarch_event #64)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (num_divides #12 (val buflen)) (= (* #8 (val buflen)) (* #12 (LENGTH inlist)))
+           (ALL (nonoverlapping (, (word_sub stackpointer (word:(num -> (word #64)) #528)) #528))
+             [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_rej_uniform_mc)); (, buf (val buflen));
+              (, table #4096)])
+           (ALL (nonoverlapping (, res #512))
+             [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_rej_uniform_mc));
+              (, (word_sub stackpointer (word:(num -> (word #64)) #528)) #536)]))
+         (ensures x86
+           (\s:x86state.
+             (/\ (bytes_loaded s (word:(num -> (word #64)) pc) mlkem_rej_uniform_mc)
+               (= (read RIP s) (word:(num -> (word #64)) pc)) (= (read RSP s) stackpointer)
+               (= (read (":>" memory (bytes64 stackpointer)) s) returnaddress)
+               (C_ARGUMENTS [res; buf; buflen; table] s) (= (read DF s) F)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> x86state -> (list (word #8)))
+                   (, table #4096) s)
+                 mlkem_rej_uniform_table)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> x86state -> (list (word #12)))
+                   (, buf (LENGTH inlist)) s)
+                 inlist)
+               (= (read events s) e)))
+           (\s:x86state.
+             (/\ (= (read RIP s) returnaddress)
+               (= (read RSP s) (word_add stackpointer (word:(num -> (word #64)) #8)))
+               (?e2:(list (address_uarch_event #64)).
+                 (/\ (= (read events s) (APPEND e2 e))
+                   (memaccess_inbounds e2
+                     [(, buf (val buflen)); (, table #4096);
+                      (, (word_sub stackpointer (word:(num -> (word #64)) #528)) #536)]
+                     [(, (word_sub stackpointer (word:(num -> (word #64)) #528)) #528); (, res #512)])))))
+           (,, (MAYCHANGE [RSP])
+             (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+               (MAYCHANGE
+                 [(":>" memory (bytes (, res #512)));
+                  (":>" memory
+                    (bytes (, (word_sub stackpointer (word:(num -> (word #64)) #528)) #528)))]))))))

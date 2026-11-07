@@ -1,0 +1,186 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# aarch64/mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm
+#
+# The main theorems. Written by `hol-trace conform --accept`; review
+# changes like source code: this is what the proof claims.
+
+theorem aarch64/mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K4_SUBROUTINE_CORRECT
+  |- (!srcA:(word #64) srcB:(word #64) srcBt:(word #64) dst:(word #64) x0:(num -> (word #16)) y0:(num -> (word #16)) y0t:(num -> (word #16)) x1:(num -> (word #16)) y1:(num -> (word #16)) y1t:(num -> (word #16)) x2:(num -> (word #16)) y2:(num -> (word #16)) y2t:(num -> (word #16)) x3:(num -> (word #16)) y3:(num -> (word #16)) y3t:(num -> (word #16)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (aligned #16 stackpointer)
+           (ALLPAIRS nonoverlapping:(((word #64) # num) -> ((word #64) # num) -> bool)
+             [(, dst #512); (, (word_sub stackpointer (word:(num -> (word #64)) #64)) #64)]
+             [(, (word:(num -> (word #64)) pc) (LENGTH poly_basemul_acc_montgomery_cached_k4_mc));
+              (, srcA #2048); (, srcB #2048); (, srcBt #1024)])
+           (nonoverlapping (, dst #512) (, (word_sub stackpointer (word:(num -> (word #64)) #64)) #64)))
+         (ensures arm
+           (\s:armstate.
+             (/\
+               (aligned_bytes_loaded s (word:(num -> (word #64)) pc)
+                 poly_basemul_acc_montgomery_cached_k4_mc)
+               (= (read PC s) (word:(num -> (word #64)) pc)) (= (read SP s) stackpointer)
+               (= (read X30 s) returnaddress) (C_ARGUMENTS [dst; srcA; srcB; srcBt] s)
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (read (":>" memory (bytes16 (word_add srcA (word:(num -> (word #64)) (* #2 i)))))
+                       s)
+                     (x0 i))))
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (read (":>" memory (bytes16 (word_add srcB (word:(num -> (word #64)) (* #2 i)))))
+                       s)
+                     (y0 i))))
+               (!i:num.
+                 (==> (< i #128)
+                   (=
+                     (read
+                       (":>" memory (bytes16 (word_add srcBt (word:(num -> (word #64)) (* #2 i))))) s)
+                     (y0t i))))
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (read
+                       (":>" memory
+                         (bytes16 (word_add srcA (word:(num -> (word #64)) (+ #512 (* #2 i))))))
+                       s)
+                     (x1 i))))
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (read
+                       (":>" memory
+                         (bytes16 (word_add srcB (word:(num -> (word #64)) (+ #512 (* #2 i))))))
+                       s)
+                     (y1 i))))
+               (!i:num.
+                 (==> (< i #128)
+                   (=
+                     (read
+                       (":>" memory
+                         (bytes16 (word_add srcBt (word:(num -> (word #64)) (+ #256 (* #2 i))))))
+                       s)
+                     (y1t i))))
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (read
+                       (":>" memory
+                         (bytes16 (word_add srcA (word:(num -> (word #64)) (+ #1024 (* #2 i))))))
+                       s)
+                     (x2 i))))
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (read
+                       (":>" memory
+                         (bytes16 (word_add srcB (word:(num -> (word #64)) (+ #1024 (* #2 i))))))
+                       s)
+                     (y2 i))))
+               (!i:num.
+                 (==> (< i #128)
+                   (=
+                     (read
+                       (":>" memory
+                         (bytes16 (word_add srcBt (word:(num -> (word #64)) (+ #512 (* #2 i))))))
+                       s)
+                     (y2t i))))
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (read
+                       (":>" memory
+                         (bytes16 (word_add srcA (word:(num -> (word #64)) (+ #1536 (* #2 i))))))
+                       s)
+                     (x3 i))))
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (read
+                       (":>" memory
+                         (bytes16 (word_add srcB (word:(num -> (word #64)) (+ #1536 (* #2 i))))))
+                       s)
+                     (y3 i))))
+               (!i:num.
+                 (==> (< i #128)
+                   (=
+                     (read
+                       (":>" memory
+                         (bytes16 (word_add srcBt (word:(num -> (word #64)) (+ #768 (* #2 i))))))
+                       s)
+                     (y3t i))))))
+           (\s:armstate.
+             (/\ (= (read PC s) returnaddress)
+               (==>
+                 (!i:num.
+                   (==> (< i #256)
+                     (/\ (int_le (int_abs (ival (x0 i))) (int_pow &2 #12))
+                       (int_le (int_abs (ival (x1 i))) (int_pow &2 #12))
+                       (int_le (int_abs (ival (x2 i))) (int_pow &2 #12))
+                       (int_le (int_abs (ival (x3 i))) (int_pow &2 #12)))))
+                 (!i:num.
+                   (==> (< i #128)
+                     (/\
+                       (==
+                         (ival
+                           (read
+                             (":>" memory (bytes16 (word_add dst (word:(num -> (word #64)) (* #4 i)))))
+                             s))
+                         (basemul4_even (o ival:((word #16) -> int) x0)
+                           (o ival:((word #16) -> int) y0) (o ival:((word #16) -> int) y0t)
+                           (o ival:((word #16) -> int) x1) (o ival:((word #16) -> int) y1)
+                           (o ival:((word #16) -> int) y1t) (o ival:((word #16) -> int) x2)
+                           (o ival:((word #16) -> int) y2) (o ival:((word #16) -> int) y2t)
+                           (o ival:((word #16) -> int) x3) (o ival:((word #16) -> int) y3)
+                           (o ival:((word #16) -> int) y3t) i)
+                         (int_mod &3329))
+                       (==
+                         (ival
+                           (read
+                             (":>" memory
+                               (bytes16 (word_add dst (word:(num -> (word #64)) (+ (* #4 i) #2)))))
+                             s))
+                         (basemul4_odd (o ival:((word #16) -> int) x0) (o ival:((word #16) -> int) y0)
+                           (o ival:((word #16) -> int) x1) (o ival:((word #16) -> int) y1)
+                           (o ival:((word #16) -> int) x2) (o ival:((word #16) -> int) y2)
+                           (o ival:((word #16) -> int) x3) (o ival:((word #16) -> int) y3) i)
+                         (int_mod &3329))))))))
+           (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             (MAYCHANGE
+               [(":>" memory (bytes (, dst #512)));
+                (":>" memory (bytes (, (word_sub stackpointer (word:(num -> (word #64)) #64)) #64)))])))))
+
+theorem aarch64/mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K4_SUBROUTINE_SAFE
+  |- (?f_events:((word #64) -> (word #64) -> (word #64) -> (word #64) -> num -> (word #64) -> (word #64) -> (list (address_uarch_event #64))).
+       (!e:(list (address_uarch_event #64)) srcA:(word #64) srcB:(word #64) srcBt:(word #64) dst:(word #64) pc:num stackpointer:(word #64) returnaddress:(word #64).
+         (==>
+           (/\ (aligned #16 stackpointer)
+             (ALLPAIRS nonoverlapping:(((word #64) # num) -> ((word #64) # num) -> bool)
+               [(, dst #512); (, (word_sub stackpointer (word:(num -> (word #64)) #64)) #64)]
+               [(, (word:(num -> (word #64)) pc) (LENGTH poly_basemul_acc_montgomery_cached_k4_mc));
+                (, srcA #2048); (, srcB #2048); (, srcBt #1024)])
+             (nonoverlapping (, dst #512)
+               (, (word_sub stackpointer (word:(num -> (word #64)) #64)) #64)))
+           (ensures arm
+             (\s:armstate.
+               (/\
+                 (aligned_bytes_loaded s (word:(num -> (word #64)) pc)
+                   poly_basemul_acc_montgomery_cached_k4_mc)
+                 (= (read PC s) (word:(num -> (word #64)) pc)) (= (read SP s) stackpointer)
+                 (= (read X30 s) returnaddress) (C_ARGUMENTS [dst; srcA; srcB; srcBt] s)
+                 (= (read events s) e)))
+             (\s:armstate.
+               (/\ (= (read PC s) returnaddress)
+                 (?e2:(list (address_uarch_event #64)).
+                   (/\ (= (read events s) (APPEND e2 e))
+                     (= e2
+                       (f_events srcA srcB srcBt dst pc
+                         (word_sub stackpointer (word:(num -> (word #64)) #64)) returnaddress))
+                     (memaccess_inbounds e2
+                       [(, srcA #2048); (, srcB #2048); (, srcBt #1024); (, dst #512);
+                        (, (word_sub stackpointer (word:(num -> (word #64)) #64)) #64)]
+                       [(, dst #512); (, (word_sub stackpointer (word:(num -> (word #64)) #64)) #64)])))))
+             (\s:armstate s':armstate. T)))))

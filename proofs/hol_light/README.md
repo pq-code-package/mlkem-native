@@ -16,6 +16,9 @@ functionally correct and memory-safe, but not constant-time. Rejection sampling 
 safely variable-time, so no constant-time proof is needed.
 
 See [SOUNDNESS.md](../../SOUNDNESS.md) for a detailed analysis of the scope, assumptions and risks of the formal verification efforts.
+Since proof scripts are OCaml code that could bypass HOL Light's kernel, the proofs can also be re-checked by replaying
+their kernel traces in a separate kernel and comparing definitions and statements with accepted copies; see
+[hol_trace/README.md](hol_trace/README.md).
 
 Each function is proved in a separate `.ml` file in [aarch64/proofs/](aarch64/proofs) and [x86_64/proofs/](x86_64/proofs). Each file
 contains the byte code being verified, as well as the specification that is being proved.
@@ -100,6 +103,10 @@ make -C proofs/hol_light/x86_64
 will build and run the proofs. Note that this make take hours even on powerful machines.
 
 For convenience, you can also use `tests hol_light` which wraps the `make` invocation above; see `tests hol_light --help`.
+
+To re-check the proofs in a separate HOL Light process that loads none of s2n-bignum or the proof scripts, use
+`hol-trace gen`, `hol-trace check` and `check-bind` in the `hol_trace-cross` nix shell; see
+[hol_trace/README.md](hol_trace/README.md).
 
 ## Interactive proof development
 

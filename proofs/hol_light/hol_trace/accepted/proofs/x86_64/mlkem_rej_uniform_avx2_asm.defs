@@ -1,0 +1,25 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# x86_64/mlkem_rej_uniform_avx2_asm
+#
+# The definitions that the main theorems use beyond the generated
+# layers. Written by `hol-trace conform --accept`; review changes like
+# source code. check-bind compares the byte lists named in
+# mlkem_rej_uniform_avx2_asm.bind with sections of object files.
+
+# mlkem_rej_uniform_mc: 260 bytes, sha256 47edd11bdb5f5fd28753d2dc41da4d911115d40a606673496ffdd5ce31c18006
+definition mlkem_rej_uniform_mc
+  |- (= mlkem_rej_uniform_mc
+       #x[f3 0f 1e fa 48 81 ec 10 02 00 00 31 c0 48 85 d2 0f 84 e6 00 00 00 48 b8 01 0d 01 0d 01 0d 01
+          0d 66 48 0f 6e c0 66 48 0f 3a 22 c0 01 48 b8 ff 0f ff 0f ff 0f ff 0f 66 48 0f 6e e8 66 48 0f
+          3a 22 e8 01 48 b8 00 01 01 02 03 04 04 05 66 48 0f 6e e0 48 b8 06 07 07 08 09 0a 0a 0b 66 48
+          0f 3a 22 e0 01 48 c7 c0 00 00 00 00 49 c7 c0 00 00 00 00 49 c7 c1 55 55 00 00 f3 42 0f 7e 14
+          06 66 42 0f 3a 22 54 06 08 02 66 0f 38 00 d4 66 0f 6f da 66 0f 71 d3 04 66 0f 3a 0e d3 aa 66
+          0f db d5 66 0f 6f c8 66 0f 65 ca 66 44 0f d7 d9 c4 42 a2 f5 d9 4d 89 da 49 c1 e2 04 f3 42 0f
+          6f 1c 11 66 0f 38 00 d3 f3 0f 7f 14 44 f3 4d 0f b8 db 4c 01 d8 48 3d 00 01 00 00 73 09 49 83
+          c0 0c 4c 39 c2 77 97 48 c7 c1 00 01 00 00 48 3d 00 01 00 00 48 0f 47 c1 48 89 e6 48 89 c1 48
+          d1 e1 f3 a4 48 81 c4 10 02 00 00 c3])
+
+definition mlkem_rej_uniform_tmc
+  |- (= mlkem_rej_uniform_tmc (TRIM_LIST (, #4 #0) mlkem_rej_uniform_mc))

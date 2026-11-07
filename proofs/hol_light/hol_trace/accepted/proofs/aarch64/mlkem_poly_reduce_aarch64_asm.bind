@@ -1,0 +1,10 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# aarch64/mlkem_poly_reduce_aarch64_asm
+#
+# Byte lists in the .defs file next to this one, and the object-file
+# sections that `check-bind` compares them with. Written by hand.
+#
+# CONSTANT OBJECT SECTION
+mlkem_poly_reduce_mc proofs/hol_light/aarch64/mlkem/mlkem_poly_reduce_aarch64_asm.o .text

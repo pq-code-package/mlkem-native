@@ -1,0 +1,50 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# aarch64/mlkem_poly_reduce_aarch64_asm
+#
+# The main theorems. Written by `hol-trace conform --accept`; review
+# changes like source code: this is what the proof claims.
+
+theorem aarch64/mlkem_poly_reduce_aarch64_asm MLKEM_POLY_REDUCE_SUBROUTINE_CORRECT
+  |- (!a:(word #64) x:(num -> (word #16)) pc:num returnaddress:(word #64).
+       (==>
+         (nonoverlapping (, (word:(num -> (word #64)) pc) (LENGTH mlkem_poly_reduce_mc)) (, a #512))
+         (ensures arm
+           (\s:armstate.
+             (/\ (aligned_bytes_loaded s (word:(num -> (word #64)) pc) mlkem_poly_reduce_mc)
+               (= (read PC s) (word:(num -> (word #64)) pc)) (= (read X30 s) returnaddress)
+               (C_ARGUMENTS [a] s)
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (read (":>" memory (bytes16 (word_add a (word:(num -> (word #64)) (* #2 i))))) s)
+                     (x i))))))
+           (\s:armstate.
+             (/\ (= (read PC s) returnaddress)
+               (!i:num.
+                 (==> (< i #256)
+                   (=
+                     (ival
+                       (read (":>" memory (bytes16 (word_add a (word:(num -> (word #64)) (* #2 i)))))
+                         s))
+                     (rem (ival (x i)) &3329))))))
+           (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             (MAYCHANGE [(":>" memory (bytes (, a #512)))])))))
+
+theorem aarch64/mlkem_poly_reduce_aarch64_asm MLKEM_POLY_REDUCE_SUBROUTINE_SAFE
+  |- (?f_events:((word #64) -> num -> (word #64) -> (list (address_uarch_event #64))).
+       (!e:(list (address_uarch_event #64)) a:(word #64) pc:num returnaddress:(word #64).
+         (==>
+           (nonoverlapping (, (word:(num -> (word #64)) pc) (LENGTH mlkem_poly_reduce_mc)) (, a #512))
+           (ensures arm
+             (\s:armstate.
+               (/\ (aligned_bytes_loaded s (word:(num -> (word #64)) pc) mlkem_poly_reduce_mc)
+                 (= (read PC s) (word:(num -> (word #64)) pc)) (= (read X30 s) returnaddress)
+                 (C_ARGUMENTS [a] s) (= (read events s) e)))
+             (\s:armstate.
+               (/\ (= (read PC s) returnaddress)
+                 (?e2:(list (address_uarch_event #64)).
+                   (/\ (= (read events s) (APPEND e2 e)) (= e2 (f_events a pc returnaddress))
+                     (memaccess_inbounds e2 [(, a #512)] [(, a #512)])))))
+             (\s:armstate s':armstate. T)))))

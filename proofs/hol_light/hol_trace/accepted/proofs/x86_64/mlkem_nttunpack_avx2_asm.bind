@@ -1,0 +1,10 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# x86_64/mlkem_nttunpack_avx2_asm
+#
+# Byte lists in the .defs file next to this one, and the object-file
+# sections that `check-bind` compares them with. Written by hand.
+#
+# CONSTANT OBJECT SECTION
+mlkem_unpack_mc proofs/hol_light/x86_64/mlkem/mlkem_nttunpack_avx2_asm.o .text

@@ -1,0 +1,81 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# aarch64/mlkem_rej_uniform_aarch64_asm
+#
+# The main theorems. Written by `hol-trace conform --accept`; review
+# changes like source code: this is what the proof claims.
+
+theorem aarch64/mlkem_rej_uniform_aarch64_asm MLKEM_REJ_UNIFORM_SUBROUTINE_CORRECT
+  |- (!res:(word #64) buf:(word #64) buflen:(word #64) table:(word #64) inlist:(list (word #12)) pc:num stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (num_divides #24 (val buflen)) (= (* #8 (val buflen)) (* #12 (LENGTH inlist)))
+           (ALL (nonoverlapping (, (word_sub stackpointer (word:(num -> (word #64)) #576)) #576))
+             [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_rej_uniform_mc)); (, buf (val buflen));
+              (, table #4096)])
+           (ALL (nonoverlapping (, res #512))
+             [(, (word:(num -> (word #64)) pc) (LENGTH mlkem_rej_uniform_mc));
+              (, (word_sub stackpointer (word:(num -> (word #64)) #576)) #576)]))
+         (ensures arm
+           (\s:armstate.
+             (/\ (aligned_bytes_loaded s (word:(num -> (word #64)) pc) mlkem_rej_uniform_mc)
+               (= (read PC s) (word:(num -> (word #64)) pc)) (= (read SP s) stackpointer)
+               (= (read X30 s) returnaddress) (C_ARGUMENTS [res; buf; buflen; table] s)
+               (= (read (":>" memory (bytes (, table #4096))) s)
+                 (num_of_wordlist mlkem_rej_uniform_table))
+               (= (read (":>" memory (bytes (, buf (val buflen)))) s) (num_of_wordlist inlist))))
+           (\s:armstate.
+             (/\ (= (read PC s) returnaddress)
+               (LET
+                 (\outlist:(list (word #16)).
+                   (LET_END
+                     (LET
+                       (\outlen:num.
+                         (LET_END
+                           (/\ (= (C_RETURN s) (word:(num -> (word #64)) outlen))
+                             (= (read (":>" memory (bytes (, res (* #2 outlen)))) s)
+                               (num_of_wordlist outlist)))))
+                       (LENGTH outlist))))
+                 (SUB_LIST (, #0 #256) (REJ_SAMPLE inlist)))))
+           (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             (MAYCHANGE
+               [(":>" memory (bytes (, res #512)));
+                (":>" memory (bytes (, (word_sub stackpointer (word:(num -> (word #64)) #576)) #576)))])))))
+
+theorem aarch64/mlkem_rej_uniform_aarch64_asm MLKEM_REJ_UNIFORM_SUBROUTINE_MEMSAFE
+  |- (!res:(word #64) buf:(word #64) buflen:(word #64) table:(word #64) inlist:(list (word #12)) pc:num e:(list (address_uarch_event #64)) stackpointer:(word #64) returnaddress:(word #64).
+       (==>
+         (/\ (num_divides #24 (val buflen)) (= (* #8 (val buflen)) (* #12 (LENGTH inlist)))
+           (ALL (nonoverlapping (, (word_sub stackpointer (word:(num -> (word #64)) #576)) #576))
+             [(, (word:(num -> (word #64)) pc) #588); (, buf (val buflen)); (, table #4096)])
+           (ALL (nonoverlapping (, res #512))
+             [(, (word:(num -> (word #64)) pc) #588);
+              (, (word_sub stackpointer (word:(num -> (word #64)) #576)) #576)]))
+         (ensures arm
+           (\s:armstate.
+             (/\ (aligned_bytes_loaded s (word:(num -> (word #64)) pc) mlkem_rej_uniform_mc)
+               (= (read PC s) (word:(num -> (word #64)) pc)) (= (read SP s) stackpointer)
+               (= (read X30 s) returnaddress) (C_ARGUMENTS [res; buf; buflen; table] s)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> armstate -> (list (word #8)))
+                   (, table #4096) s)
+                 mlkem_rej_uniform_table)
+               (=
+                 (wordlist_from_memory:(((word #64) # num) -> armstate -> (list (word #12)))
+                   (, buf (LENGTH inlist)) s)
+                 inlist)
+               (= (read events s) e)))
+           (\s:armstate.
+             (/\ (= (read PC s) returnaddress)
+               (?e2:(list (address_uarch_event #64)).
+                 (/\ (= (read events s) (APPEND e2 e))
+                   (memaccess_inbounds e2
+                     [(, buf (val buflen)); (, table #4096);
+                      (, (word_sub stackpointer (word:(num -> (word #64)) #576)) #576)]
+                     [(, (word_sub stackpointer (word:(num -> (word #64)) #576)) #576); (, res #512)])))))
+           (,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             (,, (MAYCHANGE [events])
+               (MAYCHANGE
+                 [(":>" memory (bytes (, res #512)));
+                  (":>" memory
+                    (bytes (, (word_sub stackpointer (word:(num -> (word #64)) #576)) #576)))]))))))

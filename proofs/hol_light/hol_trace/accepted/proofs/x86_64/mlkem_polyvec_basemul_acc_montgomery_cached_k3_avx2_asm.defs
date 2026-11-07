@@ -1,0 +1,229 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# x86_64/mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2_asm
+#
+# The definitions that the main theorems use beyond the generated
+# layers. Written by `hol-trace conform --accept`; review changes like
+# source code. check-bind compares the byte lists named in
+# mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2_asm.bind with sections of object files.
+
+# mlkem_basemul_k3_mc: 3860 bytes, sha256 1f204e28235c82c3c75088bcdcfa6712ee6b726a9e2fe4aacfd3afc3b0689c2a
+definition mlkem_basemul_k3_mc
+  |- (= mlkem_basemul_k3_mc
+       #x[f3 0f 1e fa b8 01 0d 01 0d c5 f9 6e c0 c4 e2 7d 58 c0 b8 01 f3 01 f3 c5 f9 6e c8 c4 e2 7d 58
+          c9 c5 fd 6f 16 c5 fd 6f 5e 20 c5 fd 6f 22 c5 fd 6f 6a 20 c5 fd 6f 31 c5 75 d5 ea c5 75 d5 f3
+          c4 c1 5d d5 fd c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4 41 7d e5 c9 c4 41
+          7d e5 c0 c4 41 7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff c4 41 1d
+          f9 c9 c4 41 15 f9 c0 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5 fd 7f 3f c5 7d 7f 4f 20 c5
+          fd 6f 56 40 c5 fd 6f 5e 60 c5 fd 6f 62 40 c5 fd 6f 6a 60 c5 fd 6f 71 20 c5 75 d5 ea c5 75 d5
+          f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4 41 7d e5 c9 c4
+          41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff c4 41
+          1d f9 c9 c4 41 3d f9 c5 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5 fd 7f 7f 40 c5 7d 7f 4f
+          60 c5 fd 6f 96 80 00 00 00 c5 fd 6f 9e a0 00 00 00 c5 fd 6f a2 80 00 00 00 c5 fd 6f aa a0 00
+          00 00 c5 fd 6f 71 40 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4 41 4d d5 c6 c4
+          41 5d d5 d6 c5 fd e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5 da c5 55 e5 e2
+          c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41 15 f9 c0 c4 41 0d f9 d2 c5 bd fd ff
+          c4 41 2d fd c9 c5 fd 7f bf 80 00 00 00 c5 7d 7f 8f a0 00 00 00 c5 fd 6f 96 c0 00 00 00 c5 fd
+          6f 9e e0 00 00 00 c5 fd 6f a2 c0 00 00 00 c5 fd 6f aa e0 00 00 00 c5 fd 6f 71 60 c5 75 d5 ea
+          c5 75 d5 f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4 41 7d
+          e5 c9 c4 41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5 a5 f9
+          ff c4 41 1d f9 c9 c4 41 3d f9 c5 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5 fd 7f bf c0 00
+          00 00 c5 7d 7f 8f e0 00 00 00 c5 fd 6f 96 00 01 00 00 c5 fd 6f 9e 20 01 00 00 c5 fd 6f a2 00
+          01 00 00 c5 fd 6f aa 20 01 00 00 c5 fd 6f b1 80 00 00 00 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5
+          fd c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4
+          41 7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41
+          15 f9 c0 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5 fd 7f bf 00 01 00 00 c5 7d 7f 8f 20 01
+          00 00 c5 fd 6f 96 40 01 00 00 c5 fd 6f 9e 60 01 00 00 c5 fd 6f a2 40 01 00 00 c5 fd 6f aa 60
+          01 00 00 c5 fd 6f b1 a0 00 00 00 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4 41
+          4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5 da
+          c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41 3d f9 c5 c4 41 0d f9 d2
+          c5 bd fd ff c4 41 2d fd c9 c5 fd 7f bf 40 01 00 00 c5 7d 7f 8f 60 01 00 00 c5 fd 6f 96 80 01
+          00 00 c5 fd 6f 9e a0 01 00 00 c5 fd 6f a2 80 01 00 00 c5 fd 6f aa a0 01 00 00 c5 fd 6f b1 c0
+          00 00 00 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6
+          c5 fd e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb
+          c5 5d e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41 15 f9 c0 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d fd
+          c9 c5 fd 7f bf 80 01 00 00 c5 7d 7f 8f a0 01 00 00 c5 fd 6f 96 c0 01 00 00 c5 fd 6f 9e e0 01
+          00 00 c5 fd 6f a2 c0 01 00 00 c5 fd 6f aa e0 01 00 00 c5 fd 6f b1 e0 00 00 00 c5 75 d5 ea c5
+          75 d5 f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4 41 7d e5
+          c9 c4 41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff
+          c4 41 1d f9 c9 c4 41 3d f9 c5 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5 fd 7f bf c0 01 00
+          00 c5 7d 7f 8f e0 01 00 00 c5 fd 6f 96 00 02 00 00 c5 fd 6f 9e 20 02 00 00 c5 fd 6f a2 00 02
+          00 00 c5 fd 6f aa 20 02 00 00 c5 fd 6f b1 00 01 00 00 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5 fd
+          c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4 41
+          7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41 15
+          f9 c0 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5 7d 6f 07 c5 7d 6f 57 20 c5 bd fd ff c4 41
+          2d fd c9 c5 fd 7f 3f c5 7d 7f 4f 20 c5 fd 6f 96 40 02 00 00 c5 fd 6f 9e 60 02 00 00 c5 fd 6f
+          a2 40 02 00 00 c5 fd 6f aa 60 02 00 00 c5 fd 6f b1 20 01 00 00 c5 75 d5 ea c5 75 d5 f3 c4 c1
+          5d d5 fd c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4 41 7d e5 c9 c4 41 7d e5
+          c0 c4 41 7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff c4 41 1d f9 c9
+          c4 41 3d f9 c5 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5 7d 6f 47 40 c5 7d 6f 57 60 c5 bd
+          fd ff c4 41 2d fd c9 c5 fd 7f 7f 40 c5 7d 7f 4f 60 c5 fd 6f 96 80 02 00 00 c5 fd 6f 9e a0 02
+          00 00 c5 fd 6f a2 80 02 00 00 c5 fd 6f aa a0 02 00 00 c5 fd 6f b1 40 01 00 00 c5 75 d5 ea c5
+          75 d5 f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4 41 7d e5
+          c9 c4 41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff
+          c4 41 1d f9 c9 c4 41 15 f9 c0 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5 7d 6f 87 80 00 00
+          00 c5 7d 6f 97 a0 00 00 00 c5 bd fd ff c4 41 2d fd c9 c5 fd 7f bf 80 00 00 00 c5 7d 7f 8f a0
+          00 00 00 c5 fd 6f 96 c0 02 00 00 c5 fd 6f 9e e0 02 00 00 c5 fd 6f a2 c0 02 00 00 c5 fd 6f aa
+          e0 02 00 00 c5 fd 6f b1 60 01 00 00 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4
+          41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5
+          da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41 3d f9 c5 c4 41 0d f9
+          d2 c5 bd fd ff c4 41 2d fd c9 c5 7d 6f 87 c0 00 00 00 c5 7d 6f 97 e0 00 00 00 c5 bd fd ff c4
+          41 2d fd c9 c5 fd 7f bf c0 00 00 00 c5 7d 7f 8f e0 00 00 00 c5 fd 6f 96 00 03 00 00 c5 fd 6f
+          9e 20 03 00 00 c5 fd 6f a2 00 03 00 00 c5 fd 6f aa 20 03 00 00 c5 fd 6f b1 80 01 00 00 c5 75
+          d5 ea c5 75 d5 f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4
+          41 7d e5 c9 c4 41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5
+          a5 f9 ff c4 41 1d f9 c9 c4 41 15 f9 c0 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5 7d 6f 87
+          00 01 00 00 c5 7d 6f 97 20 01 00 00 c5 bd fd ff c4 41 2d fd c9 c5 fd 7f bf 00 01 00 00 c5 7d
+          7f 8f 20 01 00 00 c5 fd 6f 96 40 03 00 00 c5 fd 6f 9e 60 03 00 00 c5 fd 6f a2 40 03 00 00 c5
+          fd 6f aa 60 03 00 00 c5 fd 6f b1 a0 01 00 00 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5 fd c4 41 55
+          d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4 41 7d e5 d2
+          c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41 3d f9 c5 c4
+          41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5 7d 6f 87 40 01 00 00 c5 7d 6f 97 60 01 00 00 c5 bd
+          fd ff c4 41 2d fd c9 c5 fd 7f bf 40 01 00 00 c5 7d 7f 8f 60 01 00 00 c5 fd 6f 96 80 03 00 00
+          c5 fd 6f 9e a0 03 00 00 c5 fd 6f a2 80 03 00 00 c5 fd 6f aa a0 03 00 00 c5 fd 6f b1 c0 01 00
+          00 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd
+          e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d
+          e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41 15 f9 c0 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5
+          7d 6f 87 80 01 00 00 c5 7d 6f 97 a0 01 00 00 c5 bd fd ff c4 41 2d fd c9 c5 fd 7f bf 80 01 00
+          00 c5 7d 7f 8f a0 01 00 00 c5 fd 6f 96 c0 03 00 00 c5 fd 6f 9e e0 03 00 00 c5 fd 6f a2 c0 03
+          00 00 c5 fd 6f aa e0 03 00 00 c5 fd 6f b1 e0 01 00 00 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5 fd
+          c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4 41
+          7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41 3d
+          f9 c5 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5 7d 6f 87 c0 01 00 00 c5 7d 6f 97 e0 01 00
+          00 c5 bd fd ff c4 41 2d fd c9 c5 fd 7f bf c0 01 00 00 c5 7d 7f 8f e0 01 00 00 c5 fd 6f 96 00
+          04 00 00 c5 fd 6f 9e 20 04 00 00 c5 fd 6f a2 00 04 00 00 c5 fd 6f aa 20 04 00 00 c5 fd 6f b1
+          00 02 00 00 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5
+          d6 c5 fd e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5
+          eb c5 5d e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41 15 f9 c0 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d
+          fd c9 c5 7d 6f 07 c5 7d 6f 57 20 c5 bd fd ff c4 41 2d fd c9 c5 fd 7f 3f c5 7d 7f 4f 20 c5 fd
+          6f 96 40 04 00 00 c5 fd 6f 9e 60 04 00 00 c5 fd 6f a2 40 04 00 00 c5 fd 6f aa 60 04 00 00 c5
+          fd 6f b1 20 02 00 00 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4 41 4d d5 c6 c4
+          41 5d d5 d6 c5 fd e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5 da c5 55 e5 e2
+          c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41 3d f9 c5 c4 41 0d f9 d2 c5 bd fd ff
+          c4 41 2d fd c9 c5 7d 6f 47 40 c5 7d 6f 57 60 c5 bd fd ff c4 41 2d fd c9 c5 fd 7f 7f 40 c5 7d
+          7f 4f 60 c5 fd 6f 96 80 04 00 00 c5 fd 6f 9e a0 04 00 00 c5 fd 6f a2 80 04 00 00 c5 fd 6f aa
+          a0 04 00 00 c5 fd 6f b1 40 02 00 00 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4
+          41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5
+          da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41 15 f9 c0 c4 41 0d f9
+          d2 c5 bd fd ff c4 41 2d fd c9 c5 7d 6f 87 80 00 00 00 c5 7d 6f 97 a0 00 00 00 c5 bd fd ff c4
+          41 2d fd c9 c5 fd 7f bf 80 00 00 00 c5 7d 7f 8f a0 00 00 00 c5 fd 6f 96 c0 04 00 00 c5 fd 6f
+          9e e0 04 00 00 c5 fd 6f a2 c0 04 00 00 c5 fd 6f aa e0 04 00 00 c5 fd 6f b1 60 02 00 00 c5 75
+          d5 ea c5 75 d5 f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4
+          41 7d e5 c9 c4 41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5
+          a5 f9 ff c4 41 1d f9 c9 c4 41 3d f9 c5 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5 7d 6f 87
+          c0 00 00 00 c5 7d 6f 97 e0 00 00 00 c5 bd fd ff c4 41 2d fd c9 c5 fd 7f bf c0 00 00 00 c5 7d
+          7f 8f e0 00 00 00 c5 fd 6f 96 00 05 00 00 c5 fd 6f 9e 20 05 00 00 c5 fd 6f a2 00 05 00 00 c5
+          fd 6f aa 20 05 00 00 c5 fd 6f b1 80 02 00 00 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5 fd c4 41 55
+          d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4 41 7d e5 d2
+          c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41 15 f9 c0 c4
+          41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5 7d 6f 87 00 01 00 00 c5 7d 6f 97 20 01 00 00 c5 bd
+          fd ff c4 41 2d fd c9 c5 fd 7f bf 00 01 00 00 c5 7d 7f 8f 20 01 00 00 c5 fd 6f 96 40 05 00 00
+          c5 fd 6f 9e 60 05 00 00 c5 fd 6f a2 40 05 00 00 c5 fd 6f aa 60 05 00 00 c5 fd 6f b1 a0 02 00
+          00 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd
+          e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d
+          e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41 3d f9 c5 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5
+          7d 6f 87 40 01 00 00 c5 7d 6f 97 60 01 00 00 c5 bd fd ff c4 41 2d fd c9 c5 fd 7f bf 40 01 00
+          00 c5 7d 7f 8f 60 01 00 00 c5 fd 6f 96 80 05 00 00 c5 fd 6f 9e a0 05 00 00 c5 fd 6f a2 80 05
+          00 00 c5 fd 6f aa a0 05 00 00 c5 fd 6f b1 c0 02 00 00 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5 fd
+          c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5 d6 c5 fd e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4 41
+          7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5 eb c5 5d e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41 15
+          f9 c0 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d fd c9 c5 7d 6f 87 80 01 00 00 c5 7d 6f 97 a0 01 00
+          00 c5 bd fd ff c4 41 2d fd c9 c5 fd 7f bf 80 01 00 00 c5 7d 7f 8f a0 01 00 00 c5 fd 6f 96 c0
+          05 00 00 c5 fd 6f 9e e0 05 00 00 c5 fd 6f a2 c0 05 00 00 c5 fd 6f aa e0 05 00 00 c5 fd 6f b1
+          e0 02 00 00 c5 75 d5 ea c5 75 d5 f3 c4 c1 5d d5 fd c4 41 55 d5 cd c4 41 4d d5 c6 c4 41 5d d5
+          d6 c5 fd e5 ff c4 41 7d e5 c9 c4 41 7d e5 c0 c4 41 7d e5 d2 c5 5d e5 da c5 55 e5 e2 c5 4d e5
+          eb c5 5d e5 f3 c5 a5 f9 ff c4 41 1d f9 c9 c4 41 3d f9 c5 c4 41 0d f9 d2 c5 bd fd ff c4 41 2d
+          fd c9 c5 7d 6f 87 c0 01 00 00 c5 7d 6f 97 e0 01 00 00 c5 bd fd ff c4 41 2d fd c9 c5 fd 7f bf
+          c0 01 00 00 c5 7d 7f 8f e0 01 00 00 c5 f8 77 c3])
+
+definition mlkem_basemul_k3_tmc
+  |- (= mlkem_basemul_k3_tmc (TRIM_LIST (, #4 #0) mlkem_basemul_k3_mc))
+
+definition pmul0
+  |- (= pmul0
+       (@
+         (\pmul0:((num # num # num # num # num) -> int -> int -> int -> int -> int).
+           (!_1:(num # num # num # num # num) a:int b:int c:int dz:int.
+             (= (pmul0 _1 a b c dz) (int_add (int_mul b dz) (int_mul a c)))))
+         (, #112 #109 #117 #108 #48)))
+
+definition pmul0_odd
+  |- (= pmul0_odd
+       (@
+         (\pmul0_odd:((num # num # num # num # num # num # num # num # num) -> int -> int -> int -> int -> int).
+           (!_1:(num # num # num # num # num # num # num # num # num) a:int b:int c:int dz:int.
+             (= (pmul0_odd _1 a b c dz) (int_sub (int_mul a c) (int_mul b dz)))))
+         (, #112 #109 #117 #108 #48 #95 #111 #100 #100)))
+
+definition pmul1
+  |- (= pmul1
+       (@
+         (\pmul1:((num # num # num # num # num) -> int -> int -> int -> int -> int).
+           (!_1:(num # num # num # num # num) a:int b:int c:int d:int.
+             (= (pmul1 _1 a b c d) (int_add (int_mul b c) (int_mul a d)))))
+         (, #112 #109 #117 #108 #49)))
+
+definition pmulacc0_k3
+  |- (= pmulacc0_k3
+       (@
+         (\pmulacc0_k3:((num # num # num # num # num # num # num # num # num # num # num) -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int).
+           (!_1:(num # num # num # num # num # num # num # num # num # num # num) a0:int b0:int c0:int d0:int dz0:int a1:int b1:int c1:int d1:int dz1:int a2:int b2:int c2:int d2:int dz2:int.
+             (= (pmulacc0_k3 _1 a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1 a2 b2 c2 d2 dz2)
+               (int_add (pmul0 a0 b0 c0 dz0) (int_add (pmul0 a1 b1 c1 dz1) (pmul0 a2 b2 c2 dz2))))))
+         (, #112 #109 #117 #108 #97 #99 #99 #48 #95 #107 #51)))
+
+definition pmulacc0_odd_k3
+  |- (= pmulacc0_odd_k3
+       (@
+         (\pmulacc0_odd_k3:((num # num # num # num # num # num # num # num # num # num # num # num # num # num # num) -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int).
+           (!_1:(num # num # num # num # num # num # num # num # num # num # num # num # num # num # num) a0:int b0:int c0:int d0:int dz0:int a1:int b1:int c1:int d1:int dz1:int a2:int b2:int c2:int d2:int dz2:int.
+             (= (pmulacc0_odd_k3 _1 a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1 a2 b2 c2 d2 dz2)
+               (int_add (pmul0_odd a0 b0 c0 dz0)
+                 (int_add (pmul0_odd a1 b1 c1 dz1) (pmul0_odd a2 b2 c2 dz2))))))
+         (, #112 #109 #117 #108 #97 #99 #99 #48 #95 #111 #100 #100 #95 #107 #51)))
+
+definition pmulacc1_k3
+  |- (= pmulacc1_k3
+       (@
+         (\pmulacc1_k3:((num # num # num # num # num # num # num # num # num # num # num) -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int).
+           (!_1:(num # num # num # num # num # num # num # num # num # num # num) a0:int b0:int c0:int d0:int dz0:int a1:int b1:int c1:int d1:int dz1:int a2:int b2:int c2:int d2:int dz2:int.
+             (= (pmulacc1_k3 _1 a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1 a2 b2 c2 d2 dz2)
+               (int_add (pmul1 a0 b0 c0 d0) (int_add (pmul1 a1 b1 c1 d1) (pmul1 a2 b2 c2 d2))))))
+         (, #112 #109 #117 #108 #97 #99 #99 #49 #95 #107 #51)))
+
+definition pmulaccred0_k3
+  |- (= pmulaccred0_k3
+       (@
+         (\pmulaccred0_k3:((num # num # num # num # num # num # num # num # num # num # num # num # num # num) -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int).
+           (!_1:(num # num # num # num # num # num # num # num # num # num # num # num # num # num) a0:int b0:int c0:int d0:int dz0:int a1:int b1:int c1:int d1:int dz1:int a2:int b2:int c2:int d2:int dz2:int.
+             (= (pmulaccred0_k3 _1 a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1 a2 b2 c2 d2 dz2)
+               (rem
+                 (int_mul (int_of_num (inverse_mod #3329 #65536))
+                   (pmulacc0_k3 a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1 a2 b2 c2 d2 dz2))
+                 &3329))))
+         (, #112 #109 #117 #108 #97 #99 #99 #114 #101 #100 #48 #95 #107 #51)))
+
+definition pmulaccred0_odd_k3
+  |- (= pmulaccred0_odd_k3
+       (@
+         (\pmulaccred0_odd_k3:((num # num # num # num # num # num # num # num # num # num # num # num # num # num # num # num # num # num) -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int).
+           (!_1:(num # num # num # num # num # num # num # num # num # num # num # num # num # num # num # num # num # num) a0:int b0:int c0:int d0:int dz0:int a1:int b1:int c1:int d1:int dz1:int a2:int b2:int c2:int d2:int dz2:int.
+             (= (pmulaccred0_odd_k3 _1 a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1 a2 b2 c2 d2 dz2)
+               (rem
+                 (int_mul (int_of_num (inverse_mod #3329 #65536))
+                   (pmulacc0_odd_k3 a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1 a2 b2 c2 d2 dz2))
+                 &3329))))
+         (, #112 #109 #117 #108 #97 #99 #99 #114 #101 #100 #48 #95 #111 #100 #100 #95 #107 #51)))
+
+definition pmulaccred1_k3
+  |- (= pmulaccred1_k3
+       (@
+         (\pmulaccred1_k3:((num # num # num # num # num # num # num # num # num # num # num # num # num # num) -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int).
+           (!_1:(num # num # num # num # num # num # num # num # num # num # num # num # num # num) a0:int b0:int c0:int d0:int dz0:int a1:int b1:int c1:int d1:int dz1:int a2:int b2:int c2:int d2:int dz2:int.
+             (= (pmulaccred1_k3 _1 a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1 a2 b2 c2 d2 dz2)
+               (rem
+                 (int_mul (int_of_num (inverse_mod #3329 #65536))
+                   (pmulacc1_k3 a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1 a2 b2 c2 d2 dz2))
+                 &3329))))
+         (, #112 #109 #117 #108 #97 #99 #99 #114 #101 #100 #49 #95 #107 #51)))

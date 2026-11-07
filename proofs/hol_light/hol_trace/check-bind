@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+"""Check byte-list definitions in accepted files against object files.
+
+`hol-trace conform` checks that the main theorems follow from the
+accepted definitions, some of which are byte lists, but knows nothing
+about object files. This script ties chosen byte lists to binaries.
+
+A binding file accepted/proofs/ARCH/FUNC.bind has one line per binding,
+
+    CONSTANT OBJECT SECTION
+
+with OBJECT relative to the repository root; `#` starts a comment. The
+bytes of CONSTANT are read from the hex rendering of its entry in
+FUNC.defs and must equal the contents of SECTION in OBJECT, an ELF64
+file in which SECTION has no relocations. The comment before the entry
+must state the same length and SHA-256. To reproduce the hash of a
+section by hand:
+
+    readelf -x .text FUNC.o | grep '^  0x' | cut -c14-48 | xxd -r -p | sha256sum
+
+Build the object files first, e.g. `make -B -C proofs/hol_light/ARCH
+mlkem/FUNC.o`; this script reads them as they are.
+
+Usage: check-bind [FILE.bind ...]   (default: accepted/proofs/*/*.bind)
+"""
+
+import glob
+import os
+import struct
+import sys
+import tempfile
+
+HERE = os.path.dirname(os.path.realpath(__file__))
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
+sys.path.insert(0, HERE)
+# As in hol-trace: never read bytecode from the checkout.
+sys.pycache_prefix = tempfile.mkdtemp(prefix="check-bind-pycache-")
+import conform  # noqa: E402
+
+SHT_RELA, SHT_REL = 4, 9
+
+
+class Failed(Exception):
+    pass
+
+
+def elf_section(path, name):
+    """The contents of the one section called name in an ELF64 file."""
+    with open(path, "rb") as f:
+        data = f.read()
+    if data[:4] != b"\x7fELF" or data[4] != 2 or data[5] != 1:
+        raise Failed(f"{path}: not a little-endian ELF64 file")
+    (shoff,) = struct.unpack_from("<Q", data, 40)
+    shentsize, shnum, shstrndx = struct.unpack_from("<HHH", data, 58)
+    sections = [
+        struct.unpack_from("<IIQQQQII", data, shoff + i * shentsize)
+        for i in range(shnum)
+    ]
+    strtab_offset = sections[shstrndx][4]
+
+    def section_name(s):
+        start = strtab_offset + s[0]
+        return data[start : data.index(b"\0", start)].decode()
+
+    found = [i for i, s in enumerate(sections) if section_name(s) == name]
+    if len(found) != 1:
+        raise Failed(f"{path}: expected one {name} section, found {len(found)}")
+    for s in sections:
+        # sh_type, sh_size, sh_info: a relocation section and its target
+        if s[1] in (SHT_RELA, SHT_REL) and s[7] == found[0] and s[5]:
+            raise Failed(f"{path}: {name} has relocations")
+    _, _, _, _, offset, size, _, _ = sections[found[0]]
+    return data[offset : offset + size]
+
+
+def defs_bytes(defs_path, constant):
+    """The bytes of constant's entry in defs_path, checked against the
+    comment before it."""
+    entries = conform.read_entries(defs_path)
+    header = f"definition {conform.qname(constant)}"
+    if header not in entries:
+        raise Failed(f"{conform.short(defs_path)} has no {header}")
+    found = conform.rendered_bytes(entries[header])
+    if found is None or found[0] != conform.qname(constant):
+        raise Failed(f"{header} is not a byte list shown in full")
+    data = found[1]
+    with open(defs_path, encoding="utf-8") as f:
+        lines = f.read().split("\n")
+    note = conform.byte_note(found[0], data)
+    if lines[lines.index(header) - 1] != note:
+        raise Failed(f"the comment before {header} is not `{note}`")
+    return data
+
+
+def check(bind_path):
+    """Check one binding file. Return report lines."""
+    defs_path = os.path.splitext(bind_path)[0] + ".defs"
+    report = []
+    with open(bind_path, encoding="utf-8") as f:
+        lines = [line.split("#")[0].split() for line in f]
+    bindings = [line for line in lines if line]
+    if not bindings:
+        raise Failed(f"{conform.short(bind_path)} binds nothing")
+    for line in bindings:
+        if len(line) != 3:
+            raise Failed(f"{conform.short(bind_path)}: bad line {' '.join(line)}")
+        constant, obj, section = line
+        data = defs_bytes(defs_path, constant)
+        actual = elf_section(os.path.join(ROOT, obj), section)
+        if actual != data:
+            raise Failed(f"{constant} differs from {section} of {obj}")
+        report.append(f"{conform.byte_note(constant, data)[2:]} = {obj} {section}")
+    return report
+
+
+def main(paths):
+    paths = paths or sorted(glob.glob(os.path.join(HERE, "accepted/proofs/*/*.bind")))
+    failed = 0
+    for path in paths:
+        try:
+            for line in check(path):
+                print(f"OK {line}")
+        except (Failed, conform.Failed, OSError) as e:
+            print(f"FAILED {conform.short(path)}: {e}")
+            failed += 1
+    print(f"check-bind: {len(paths) - failed} of {len(paths)} binding files OK")
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
