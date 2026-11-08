@@ -4476,9 +4476,17 @@ def update_hol_light_bytecode_for_arch(arch, force_cross=()):
     bytecode_dict = extract_bytecode_from_output(output_text)
 
     # Update each .ml file
-    for obj_name, bytecode in bytecode_dict.items():
-        ml_file = "proofs/hol_light/" + arch + "/proofs/" + obj_name + ".ml"
-        update_bytecode_in_proof_script(ml_file, bytecode)
+    proof_dir = "proofs/hol_light/" + arch + "/proofs"
+    asm_dir = "proofs/hol_light/" + arch + "/mlkem"
+    for asm_file in sorted(pathlib.Path(asm_dir).glob("*.S")):
+        ml_file = f"{proof_dir}/{asm_file.stem}.ml"
+        if not os.path.isfile(ml_file):
+            raise Exception(f"{asm_file} has no proof {ml_file}")
+        if asm_file.stem not in bytecode_dict:
+            raise Exception(
+                f"{proof_dir}/dump_bytecode.ml does not dump {asm_file.stem}.o"
+            )
+        update_bytecode_in_proof_script(ml_file, bytecode_dict[asm_file.stem])
 
 
 def update_hol_light_bytecode(force_cross=()):
