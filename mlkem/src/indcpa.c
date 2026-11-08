@@ -18,7 +18,6 @@
  */
 
 #include "indcpa.h"
-
 #include "debug.h"
 #include "randombytes.h"
 #include "sampling.h"

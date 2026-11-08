@@ -23,7 +23,6 @@
  */
 
 #include "poly_k.h"
-
 #include "debug.h"
 #include "sampling.h"
 #include "symmetric.h"

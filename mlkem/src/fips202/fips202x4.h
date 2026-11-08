@@ -8,7 +8,6 @@
 
 #include "../cbmc.h"
 #include "../common.h"
-
 #include "fips202.h"
 #include "keccakf1600.h"
 
