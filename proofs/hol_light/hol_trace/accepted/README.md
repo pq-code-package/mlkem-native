@@ -62,6 +62,8 @@ Objects are printed as fully parenthesized prefix expressions:
 | `(a # b # c)` | the product type `prod a (prod b c)` |
 | `#64` | the numeral type `tybit0 (... 1)` |
 | `_1`, `'?1` | generated variables and parser-invented type variables, renumbered in order of first occurrence |
+| `"GEN%PVAR%1"` | a variable that the parser invents for a set comprehension, renumbered likewise |
+| `_<C>` | the temporary constant that `define_type` creates for the constructor `C`, defined by `C = _<C>`; HOL Light calls it `_<n>` |
 
 Names are printed as written if they are alphanumeric, or symbolic and
 not the name of a variable or type variable, and as JSON strings
@@ -70,7 +72,10 @@ Type-definition entries always show the types of their abs and rep
 constants, which give the order of the new type's arguments. Different
 objects never print the same, except for the renumbering, which is a
 bijection that keeps the structure of the term; HOL Light numbers these
-names by global counters, so they depend on load order.
+names by global counters, so they depend on load order and on how many
+fresh names earlier proofs used. A temporary constant is shown as
+`_<C>` only if exactly one definition has the form `C = _<n>`;
+otherwise it keeps its name `_<n>`.
 
 Renderings longer than 64 KiB are stored as their SHA-256 hash. Today
 only s2n-bignum's instruction decoders and execution functions, its x86
