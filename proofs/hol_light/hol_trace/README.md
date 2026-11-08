@@ -97,6 +97,51 @@ the definitions and main theorems that result. An outline checks
 nothing; review its changes, then confirm them with `gen` and `check`,
 as CI does. See [accepted/README.md](accepted/README.md).
 
+## Changing or adding a proof
+
+Run these from the repository root in a HOL Light nix shell:
+`nix develop .#hol_light` for the host's architecture, or
+`nix develop .#hol_light-cross` for both. For a proof of the other
+architecture, add `--arch ARCH` to the `hol-trace` commands, as with
+`tests hol_light`. Only `gen` needs
+`nix develop .#hol_trace-cross`.
+
+**After editing a proof**, `ARCH/proofs/FUNC.ml` or its `.S` file:
+
+1. Check the proof as usual, e.g. `tests hol_light -p FUNC`.
+2. Rewrite its accepted files with `scripts/autogen --hol-trace-defs
+   FUNC`, which also updates `proofs/hol_light/bind.yml`. If only
+   tactics changed, nothing changes.
+3. Review `git diff proofs/hol_light`. A change to `FUNC.thms` changes
+   what the proof claims; a change to the byte list in `FUNC.defs`
+   changes the code that it is about.
+4. If the code changed, check the object file:
+   `make -B -C proofs/hol_light/ARCH mlkem/FUNC.o`, then
+   `check-binary proofs/hol_light/ARCH/mlkem/FUNC.o`.
+5. Commit the accepted files with the proof. CI records and replays the
+   proof, and fails if the accepted files do not match.
+
+**After editing a specification file**, that is a file in `common/` or a
+file in `ARCH/proofs/` that is not a proof, **or after updating HOL Light
+or s2n-bignum**: run `scripts/autogen --hol-trace-defs`, which rewrites
+the shared files and every proof's files. Review `accepted/spec`
+carefully, since it holds the specifications; changes to `accepted/base`
+should be explained by the update.
+
+**When adding a proof**, in addition to the usual HOL Light steps, name
+its main theorems as `ARCH/list_thms.sh` derives them from the routine
+name (lint checks this), and run
+`scripts/autogen --hol-trace-defs FUNC`. It writes the proof's accepted
+files and adds the proof to [proofs/hol_light/deps.yml](../deps.yml),
+from which CI selects the proofs to check, and to
+[proofs/hol_light/bind.yml](../bind.yml). If it reports entries that
+would be stored as hashes, find out where they come from before running
+`hol-trace outline --accept-hashed`.
+
+An outline only writes files; it proves nothing. To run CI's check
+yourself, use `hol-trace gen -p FUNC` and then
+`hol-trace check -p FUNC`.
+
 ## What is trusted
 
 - **Trusted:** the replay backend's kernel; `hol-trace` and
@@ -112,7 +157,7 @@ as CI does. See [accepted/README.md](accepted/README.md).
 ## Usage
 
 ```bash
-nix develop .#hol_trace-cross   # layers and HOL Light replay: any HOL Light shell
+nix develop .#hol_trace-cross   # outline and HOL Light replay: any HOL Light shell
 hol-trace list
 hol-trace outline [-p FUNC ...] [--base] [--specs] [-j N]   # used by scripts/autogen --hol-trace-defs
 hol-trace gen [-p FUNC ...] [--no-prune] [-j N]
