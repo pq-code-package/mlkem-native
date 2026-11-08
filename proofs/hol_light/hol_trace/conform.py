@@ -919,11 +919,13 @@ def conform(
 
     layers = read_layers(layer_paths)
     defs, thms = read_entries(defs_path), read_entries(thms_path)
-    for header in defs:
-        if header in layers:
-            raise Failed(
-                f"{short(defs_path)}: {header} is also in {short(layers[header][1])}"
-            )
+    # A definition that a shared file now makes, for example after it moved
+    # there from the proof, must leave the proof's file. --accept drops it;
+    # its text is then checked against the shared file like any other.
+    moved = [f"{h} is also in {short(layers[h][1])}" for h in defs if h in layers]
+    if moved and not accept:
+        raise Failed(f"{short(defs_path)}: " + "; ".join(moved))
+    defs = {h: t for h, t in defs.items() if h not in layers}
     # The proof's files are rebuilt from what this result reaches.
     new_defs, new_thms = {}, {}
     layer_problems, problems, residue, hashed = [], [], [], []
@@ -994,6 +996,7 @@ def conform(
         comment = DEFS_COMMENT.format(proof=proof)
         write_entries(defs_path, comment, new_defs)
         write_entries(thms_path, THMS_COMMENT.format(proof=proof), new_thms)
+        report.extend(f"removed: {m}" for m in moved)
         report.extend(f"accepted: {p}" for p in problems + residue)
         return report
     if problems or residue:
