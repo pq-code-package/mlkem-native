@@ -176,7 +176,7 @@ static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   /* Deliberately break PCT for testing purposes */
   if (mlk_break_pct())
   {
-    ss_enc[0] = ~ss_enc[0];
+    ss_enc[0] ^= 0xFF;
   }
 #endif /* MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST */
 
