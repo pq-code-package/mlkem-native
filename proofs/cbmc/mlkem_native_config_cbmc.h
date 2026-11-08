@@ -34,6 +34,7 @@
  *   - MLK_CONFIG_KEYGEN_PCT
  *   - MLK_CONFIG_CUSTOM_ALLOC_FREE
  *   - MLK_CONFIG_CUSTOM_ZEROIZE
+ *   - MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
  */
 
 
@@ -644,15 +645,20 @@ __contract__(
  *
  * This option only has an effect if MLK_CONFIG_KEYGEN_PCT is set.
  */
-/* #define MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
-   #if !defined(__ASSEMBLER__)
-   #include "src/sys.h"
-   static MLK_INLINE int mlk_break_pct(void)
-   {
-       ... return 0/1 depending on whether PCT should be broken ...
-   }
-   #endif
-*/
+#define MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
+#if !defined(__ASSEMBLER__)
+#include "../../mlkem/src/cbmc.h"
+#include "../../mlkem/src/sys.h"
+static MLK_INLINE int mlk_break_pct(void)
+__contract__(
+  ensures(return_value == 0 || return_value == 1))
+{
+  /* Fail if we forget to invoke mlk_break_pct by contract. */
+  cassert(0);
+  return 0;
+}
+#endif /* !__ASSEMBLER__ */
+
 
 /**
  * MLK_CONFIG_SERIAL_FIPS202_ONLY

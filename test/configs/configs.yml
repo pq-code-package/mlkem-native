@@ -496,6 +496,21 @@ configs:
             cassert(0);
           }
           #endif /* !__ASSEMBLER__ */
+      MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST:
+        content: |
+          #define MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
+          #if !defined(__ASSEMBLER__)
+          #include "../../mlkem/src/cbmc.h"
+          #include "../../mlkem/src/sys.h"
+          static MLK_INLINE int mlk_break_pct(void)
+          __contract__(
+            ensures(return_value == 0 || return_value == 1))
+          {
+            /* Fail if we forget to invoke mlk_break_pct by contract. */
+            cassert(0);
+            return 0;
+          }
+          #endif /* !__ASSEMBLER__ */
       MLK_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
