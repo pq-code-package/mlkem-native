@@ -143,20 +143,18 @@ def detect_supported_functions():
     acvp_call = exec_prefix + [acvp_bin, "--info"]
     try:
         result = subprocess.run(acvp_call, encoding="utf-8", capture_output=True)
-        if result.returncode != 0:
-            err(
-                f"Warning: {acvp_call} failed (rc={result.returncode}), assuming all functions supported"
-            )
-            return set(ALL_ACVP_FUNCTIONS)
-        functions = set()
-        for line in result.stdout.splitlines():
-            line = line.strip()
-            if line in ALL_ACVP_FUNCTIONS:
-                functions.add(line)
-        return functions
     except FileNotFoundError:
-        err(f"Warning: {acvp_bin} not found, assuming all functions supported")
-        return set(ALL_ACVP_FUNCTIONS)
+        err(f"Error: {acvp_call[0]} not found")
+        sys.exit(1)
+    if result.returncode != 0:
+        err(f"Error: {acvp_call} failed (rc={result.returncode})")
+        sys.exit(1)
+    functions = set()
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if line in ALL_ACVP_FUNCTIONS:
+            functions.add(line)
+    return functions
 
 
 ENCAP_DECAP_FUNCTIONS = {
@@ -167,10 +165,7 @@ ENCAP_DECAP_FUNCTIONS = {
 }
 
 
-def loadDefaultAcvpData(version, supported_functions=None):
-    if supported_functions is None:
-        supported_functions = set(ALL_ACVP_FUNCTIONS)
-
+def loadDefaultAcvpData(version, supported_functions):
     # Load a prompt whenever any of its sub-functions is compiled in.
     # Unsupported sub-functions are filtered out per test case (see
     # filter_test_cases) so result comparison stays byte-identical.
@@ -543,7 +538,7 @@ def runTest(data, output):
     info(f"ALL GOOD! ({cases} cases in {time.time() - start:.1f}s)")
 
 
-def test(prompt, expected, output, version, supported_functions=None):
+def test(prompt, expected, output, version, supported_functions):
     assert prompt is not None or output is None, (
         "cannot produce output if there is no input"
     )
@@ -566,18 +561,17 @@ def test(prompt, expected, output, version, supported_functions=None):
         return
 
     # Filter out test cases whose ACVP function isn't compiled in.
-    if supported_functions is not None:
-        reasons = filter_test_cases(data, unsupported_function(supported_functions))
-        if reasons:
-            fns = ", ".join(sorted(set(reasons)))
-            warn(
-                f"WARNING: Dropped {len(reasons)} ACVP test case(s). "
-                f"Unsupported functions: {fns}."
-            )
+    reasons = filter_test_cases(data, unsupported_function(supported_functions))
+    if reasons:
+        fns = ", ".join(sorted(set(reasons)))
+        warn(
+            f"WARNING: Dropped {len(reasons)} ACVP test case(s). "
+            f"Unsupported functions: {fns}."
+        )
 
     # Seed key-format cases require keyGen to expand the key; drop them when the
     # build does not provide it.
-    if supported_functions is not None and "keyGen" not in supported_functions:
+    if "keyGen" not in supported_functions:
         seed_reasons = filter_test_cases(data, seed_key_format)
         if seed_reasons:
             summary = ", ".join(sorted(set(seed_reasons)))
