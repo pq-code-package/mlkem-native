@@ -85,13 +85,16 @@ module Hol_trace_term = struct
     | [_] -> failwith "odd number of type-definition theorems"
 
   (* The records of a replay result (see the top of this file) for the
-     current kernel state and the given named theorems, ending in S. *)
-  let theory named =
+     current kernel state and the given named theorems, ending in S. The
+     X records are the kernel's axioms unless ~axioms gives others:
+     `hol-trace outline` asserts theorems with new_axiom and writes only
+     the axioms from before it did. *)
+  let theory ?axioms:(ax = axioms()) named =
     let b = Buffer.create (1 lsl 20) in
     let record tag th =
       Buffer.add_char b tag;
       Buffer.add_string b (theorem th) in
-    List.iter (record 'X') (axioms());
+    List.iter (record 'X') ax;
     List.iter (record 'D') (definitions());
     List.iter (record 'Y') (typedef_reps (holtrace_typedef_thms()));
     List.iter (fun (name,th) ->
@@ -110,7 +113,8 @@ module Hol_trace_term = struct
     output_string oc records;
     close_out oc
 
-  let write_theory file named = write_result file (theory named)
+  let write_theory ?axioms file named =
+    write_result file (theory ?axioms named)
 
   (* A result that holds only an F record with the given message. *)
   let write_failure file msg =

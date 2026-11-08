@@ -3998,7 +3998,31 @@ def run_quietly(cmd):
 
 
 def gen_hol_trace_defs():
-    run_quietly(["proofs/hol_light/hol_trace/hol-trace", "layers"])
+    hol_trace = "proofs/hol_light/hol_trace/hol-trace"
+    # The shared files, for both architectures, then each architecture's
+    # proofs. Each outline is one HOL Light process that loads
+    # definitions only.
+    run_quietly([hol_trace, "outline", "--base", "--specs"])
+    machine = platform.machine().lower()
+    native = "aarch64" if machine in ["arm64", "aarch64"] else machine
+    for arch in ["aarch64", "x86_64"]:
+        # The proofs read their object files; as the proof Makefiles do,
+        # assemble other architectures with the cross assembler.
+        if arch != native and shutil.which(f"{arch}-unknown-linux-gnu-as") is None:
+            print(
+                f"Skipping the HOLTrace outlines of the {arch} proofs: no "
+                f"{arch} assembler. Use `nix develop .#hol_light-cross` to "
+                "write those of both architectures.",
+                flush=True,
+            )
+            continue
+        funcs = subprocess.run(
+            [hol_trace, "list", "--arch", arch],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.split()
+        run_quietly([hol_trace, "outline", "--arch", arch, "-p"] + funcs)
 
 
 def gen_slothy(funcs):
@@ -5520,9 +5544,10 @@ def _main():
         "--hol-trace-defs",
         default=False,
         action="store_true",
-        help="Regenerate proofs/hol_light/hol_trace/accepted/{base,spec} "
-        "from the pinned HOL Light and s2n-bignum and the specification "
-        "files. Run in `nix develop .#hol_light`.",
+        help="Regenerate the trusted HOL definitions of the HOL Light and "
+        "s2n-bignum proof infrastructure, and of our own specifications and "
+        "proofs, in proofs/hol_light/hol_trace/accepted/. "
+        "See proofs/hol_light/hol_trace/accepted/README.md.",
     )
     parser.add_argument(
         "--test-vectors",
@@ -5573,7 +5598,7 @@ def _main():
             args.slothy is not None and not args.dry_run,
         ),
         (
-            "Generate HOLTrace definition layers",
+            "Generate HOLTrace accepted files (outlines)",
             gen_hol_trace_defs,
             args.hol_trace_defs and not args.dry_run,
         ),

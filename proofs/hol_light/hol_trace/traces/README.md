@@ -11,7 +11,7 @@
 | `FUNC.gen.log` | log of `gen` |
 | `FUNC.BACKEND.result` | theory replayed by `BACKEND`, read by `compare` |
 | `FUNC.BACKEND.replay.log` | log of `replay` |
+| `FUNC.outline.result`, `FUNC.outline.log` | theory and log of `outline`, read by its own `compare --accept` only |
 
-Only the README files are checked in: pruned traces take 0.08 to 13 GB
-per function, 57 GB for all of them. How to store and share them is
-still open, and no CI job currently downloads or checks them.
+Only the README files are checked in: traces take up to many gigabytes
+per function. CI records them afresh and does not keep them.

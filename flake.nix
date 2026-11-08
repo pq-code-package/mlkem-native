@@ -57,12 +57,12 @@
             ln -sfn "$PROOF_DIR"      "$IMPORTS_DIR/mlkem_native"
             export HOLLIGHT_LOAD_PATH="$IMPORTS_DIR:$S2N_BIGNUM_DIR''${HOLLIGHT_LOAD_PATH:+:$HOLLIGHT_LOAD_PATH}"
             export HOLDIR="$HOLLIGHT_DIR"
-            # HOL Light with HOLTrace's library hook, for `hol-trace`
-            # only. It is not a package of any shell, so it never becomes
-            # HOLLIGHT_DIR or the `hol.sh` on PATH.
+            # HOL Light with HOLTrace's library hook, for `hol-trace
+            # outline` and replay only. It is not a package of any shell,
+            # so it never becomes HOLLIGHT_DIR or the `hol.sh` on PATH.
             export HOLTRACE_REPLAY_HOL=${config.packages.hol_trace.hol_light_replay}/lib/hol_light
             # The upstream sources of HOL Light and s2n-bignum; `hol-trace
-            # layers` records their commits in the accepted files.
+            # outline` records their commits in the accepted files.
             export HOL_LIGHT_SRC=${config.packages.hol_light.src.url}
             export S2N_BIGNUM_SRC=${config.packages.s2n_bignum.src.url}
             # hol-trace, appended to PATH.
