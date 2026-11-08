@@ -5,9 +5,9 @@
 #ifndef MLK_NATIVE_RISCV64_SRC_RV64V_DEBUG_H
 #define MLK_NATIVE_RISCV64_SRC_RV64V_DEBUG_H
 
-#include "../../../debug.h"
-
 #include <riscv_vector.h>
+
+#include "../../../debug.h"
 
 /*************************************************
  * RISC-V Vector Bounds Assertion Macros

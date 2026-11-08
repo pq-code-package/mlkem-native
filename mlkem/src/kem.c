@@ -24,7 +24,6 @@
  */
 
 #include "kem.h"
-
 #include "indcpa.h"
 #include "randombytes.h"
 #include "symmetric.h"

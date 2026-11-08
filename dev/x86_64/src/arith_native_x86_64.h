@@ -5,9 +5,9 @@
 #ifndef MLK_DEV_X86_64_SRC_ARITH_NATIVE_X86_64_H
 #define MLK_DEV_X86_64_SRC_ARITH_NATIVE_X86_64_H
 
-#include "../../../common.h"
-
 #include <stdint.h>
+
+#include "../../../common.h"
 #include "compress_consts.h"
 #include "consts.h"
 
