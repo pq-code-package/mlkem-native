@@ -490,7 +490,7 @@ static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
 
 
 /**
- * MLK_CONFIG_CUSTOM_ALLOC_FREE [EXPERIMENTAL]
+ * MLK_CONFIG_CUSTOM_ALLOC_FREE
  *
  * Set this option and define `MLK_CUSTOM_ALLOC` and `MLK_CUSTOM_FREE` if
  * you want to use custom allocation for large local structures or buffers.
@@ -507,10 +507,6 @@ static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
  *  - T* v: Target pointer to free. May be NULL.
  *  - T: Type of structure to be freed.
  *  - N: Number of elements to be freed.
- *
- * @warning This option is experimental. Its scope, configuration and
- *          function/macro signatures may change at any time. We expect a
- *          stable API in a future version.
  *
  * @note Even if this option is set, some allocations further down the call
  *       stack will still be made from the stack, consuming up to 3KB of
