@@ -12,9 +12,9 @@
 #   (fusion.ml) to cache hashes, so this build is used for recording only.
 # - hol_light_replay: our HOL Light with the plain `install`. Replays
 #   (checks) traces; its kernel and HOLTrace's replay code are unchanged
-#   apart from the comparison fix in 0001. `hol-trace` writes the
-#   accepted shared files with it too, because it records every type
-#   definition; every HOL Light shell exports it as HOLTRACE_REPLAY_HOL.
+#   apart from the comparison fix in 0001. `hol-trace outline` uses it
+#   too, because it records every type definition; every HOL Light shell
+#   exports it as HOLTRACE_REPLAY_HOL.
 # - s2n_bignum_hashtt: s2n-bignum rewritten for hashtt's constructors,
 #   with a fix (0005) for code that breaks while HOLTrace records.
 # - bin/holtrace-hashtt-rewrite: the same rewrite, for our proofs.

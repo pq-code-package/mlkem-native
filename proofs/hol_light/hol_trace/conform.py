@@ -895,10 +895,10 @@ DEFS_COMMENT = (
     + """\
 # {proof}
 #
-# The definitions that the main theorems use beyond the generated
-# layers. Written by `hol-trace compare --accept`. check-binary
-# compares the byte list with functions in binaries, through
-# proofs/hol_light/bind.yml.
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
 """
     + NOTATION_COMMENT
 )
@@ -908,8 +908,8 @@ THMS_COMMENT = (
     + """\
 # {proof}
 #
-# The main theorems. Written by `hol-trace compare --accept`. This
-# is what the proof claims.
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
 """
 )
 
@@ -1030,7 +1030,7 @@ def conform(
         f"{len(named)} theorems"
     ]
     if layer_problems:
-        # Never accept: the layers are only written by `hol-trace layers`.
+        # Never accept: the layers are only written by `hol-trace outline`.
         raise Failed(
             "; ".join(layer_problems) + ". If the pinned libraries or the "
             "specifications changed, regenerate the layers with "
