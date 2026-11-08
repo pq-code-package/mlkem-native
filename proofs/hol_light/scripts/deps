@@ -156,6 +156,8 @@ EVERY_PROOF = (
     ".github/actions/setup-shell/",
     HL + "aarch64/proofs/build-proof.sh",  # used for both architectures
     "scripts/check-binary",  # checks the proofs' object files
+    ".github/workflows/hol_trace.yml",
+    ".github/actions/hol-trace/",
 )
 HT = HL + "hol_trace/"
 ACC = HT + "accepted/"

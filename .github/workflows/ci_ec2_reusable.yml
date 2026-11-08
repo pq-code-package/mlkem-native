@@ -26,6 +26,10 @@ on:
       ec2_volume_size:
         type: string
         default: ""
+      timeout_minutes:
+        type: number
+        description: Maximum time for the test job, in minutes
+        default: 360
       cflags:
         type: string
         description: Custom CFLAGS for compilation
@@ -70,6 +74,10 @@ on:
       cbmc_mlkem_k:
         type: string
         default: 2
+      hol_trace_proofs:
+        type: string
+        description: Space-separated HOLTrace proofs as ARCH/FUNC, or empty to skip
+        default: ''
     secrets:
       AWS_GITHUB_TOKEN:
         description: Token for registering EC2 runners and reading the nix cache
@@ -176,6 +184,7 @@ jobs:
     name: Run tests
     needs: start-ec2-runner
     runs-on: ${{ needs.start-ec2-runner.outputs.label }}
+    timeout-minutes: ${{ inputs.timeout_minutes }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -233,6 +242,12 @@ jobs:
             tests all --no-examples --opt opt --cflags="-DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x4_v8a_scalar.h\\\""
             make clean
             tests all --no-examples --opt opt --cflags="-march=armv8.4-a+sha3 -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x4_v8a_v84a_scalar.h\\\""
+      - name: HOLTrace
+        if: ${{ inputs.hol_trace_proofs != '' }}
+        uses: ./.github/actions/hol-trace
+        with:
+          proofs: ${{ inputs.hol_trace_proofs }}
+          gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
   stop-ec2-runner:
     name: Stop instance (${{ inputs.ec2_instance_type }})
     permissions:

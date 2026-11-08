@@ -526,6 +526,14 @@ reviewed definitions and theorem statements expected from the proof at hand.
 See
 [`proofs/hol_light/hol_trace/README.md`](proofs/hol_light/hol_trace/README.md).
 
+**Residual risk:** CI records and replays every proof that a change affects,
+but runs the trace capture and the trace analysis in the same workflow. To
+keep the trace capture, which runs the untrusted proof scripts, from
+tampering with the replay environment, it should run in a sandbox that
+exports only the captured trace. Until then, a reviewer must check that a
+proof script only drives HOL Light; see "What is trusted" in the HOLTrace
+README.
+
 Independent reassurance can be provided by Candle[^Candle] and HOLTrace [^HOLTrace]. See the s2n-bignum soundness doc[^s2n-bignum-soundness] for full details.
 
 ### C2. CBMC & SMT/SAT solver trusted computing base

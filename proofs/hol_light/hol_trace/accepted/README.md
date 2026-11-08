@@ -47,7 +47,7 @@ writes the outlines of every proof of both architectures. With
 and at most 0.4 GiB; `gen` takes up to hours and over 100 GB per proof.
 
 An outline checks nothing: it asserts every statement, true or not. The
-files it writes are for review, and `hol-trace check`
+files it writes are for review, and `hol-trace check`, in CI or by hand,
 confirms them against a replayed trace. If a definition did depend on a
 proof, for example on whether it succeeds, an outline could have a
 different entry; that replay would then fail, not pass.

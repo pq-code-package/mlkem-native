@@ -888,7 +888,7 @@ def cmd_outline(arch, proofs, args):
         "\nWARNING: `hol-trace outline` writes the definitions and theorem "
         "statements\nthat the proofs claim, but checks none of the proofs. "
         "Review the changes\nto accepted/, then confirm them with "
-        "`hol-trace gen` and `hol-trace check`."
+        "`hol-trace gen` and `hol-trace check`,\nas CI does."
     )
     return rc
 

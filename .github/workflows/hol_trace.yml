@@ -1,0 +1,76 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: HOLTrace
+permissions:
+  contents: read
+on:
+  workflow_call:
+    secrets:
+      AWS_GITHUB_TOKEN:
+        description: Token for registering EC2 runners
+        required: false
+  workflow_dispatch:
+
+concurrency:
+  group: hol-trace-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Select the proofs that the change can affect, with
+  # proofs/hol_light/scripts/deps rev, from proofs/hol_light/deps.yml,
+  # as HOL-Light CI does.
+  check_modified_files:
+    name: Determine changed files
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    outputs:
+      proofs: ${{ steps.select.outputs.proofs }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Enough history for changed-files (rebase-merge pushes can be multi-commit)
+          fetch-depth: 100
+      - name: Get changed files
+        id: changed-files
+        if: github.event_name != 'workflow_dispatch'
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+      - uses: ./.github/actions/setup-apt
+        with:
+          packages: python3-yaml
+      - name: Select proofs
+        id: select
+        shell: bash
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
+          ALL_PROOFS: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          all=()
+          if [[ "$ALL_PROOFS" == "true" ]]; then
+            all=(--all)
+          fi
+          # shellcheck disable=SC2086 # one argument per changed file
+          proofs=$(/usr/bin/python3 proofs/hol_light/scripts/deps rev "${all[@]}" $CHANGED_FILES | xargs)
+          echo "Selected proofs: $proofs"
+          echo "proofs=$proofs" >> "$GITHUB_OUTPUT"
+
+  hol_trace_proofs:
+    name: HOLTrace proofs
+    needs: [ check_modified_files ]
+    if: needs.check_modified_files.outputs.proofs != ''
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/ci_ec2_reusable.yml
+    with:
+      name: HOLTrace
+      # Cross-assemble x86_64 proofs on one ARM64 runner.
+      ec2_instance_type: r9g.24xlarge
+      ec2_volume_size: "512"
+      timeout_minutes: 1440
+      lint: false
+      test: false
+      hol_trace_proofs: ${{ needs.check_modified_files.outputs.proofs }}
+    secrets:
+      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
