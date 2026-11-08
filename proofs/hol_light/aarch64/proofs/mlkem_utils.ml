@@ -29,19 +29,6 @@ let READ_MEMORY_SPLIT_CONV =
     (baseconv THENC BINOP_CONV (conv(n - 1))) tm in
   conv;;
 
-let SIMD_SIMPLIFY_CONV unfold_defs =
-  TOP_DEPTH_CONV
-   (REWR_CONV WORD_SUBWORD_AND ORELSEC WORD_SIMPLE_SUBWORD_CONV) THENC
-  DEPTH_CONV WORD_NUM_RED_CONV THENC
-  REWRITE_CONV (map GSYM unfold_defs);;
-
-let SIMD_SIMPLIFY_TAC unfold_defs =
-  let simdable = can (term_match [] `read X (s:armstate):int128 = whatever`) in
-  TRY(FIRST_X_ASSUM
-   (ASSUME_TAC o
-    CONV_RULE(RAND_CONV (SIMD_SIMPLIFY_CONV unfold_defs)) o
-    check (simdable o concl)));;
-
 let MEMORY_128_FROM_16_TAC =
   let a_tm = `a:int64` and n_tm = `n:num` and i64_ty = `:int64`
   and pat = `read (memory :> bytes128(word_add a (word n))) s0` in
