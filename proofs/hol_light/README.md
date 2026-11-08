@@ -105,9 +105,11 @@ will build and run the proofs. Note that this make take hours even on powerful m
 
 For convenience, you can also use `tests hol_light` which wraps the `make` invocation above; see `tests hol_light --help`.
 
-To re-check the proofs in a separate HOL Light process that loads none of s2n-bignum or the proof scripts, use
-`hol-trace gen`, `hol-trace check` and `check-binary` in the `hol_trace-cross` nix shell; see
-[hol_trace/README.md](hol_trace/README.md).
+Each proof's definitions and main theorems are also recorded in accepted files under
+[hol_trace/accepted/](hol_trace/accepted), which CI checks by replaying the proof in a separate HOL Light process
+that loads none of s2n-bignum or the proof scripts. **When you change or add a proof, update its accepted files**
+with `scripts/autogen --hol-trace-defs FUNC` in the `hol_light` nix shell, review the diff and commit it with the proof;
+see [Changing or adding a proof](hol_trace/README.md#changing-or-adding-a-proof).
 
 ## Interactive proof development
 
