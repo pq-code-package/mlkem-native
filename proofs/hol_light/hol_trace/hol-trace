@@ -676,7 +676,9 @@ def new_entries(dumps):
             entries.append((conform.axiom_header(text), text))
         for th in reversed(definitions):  # the kernel lists newest first
             name = conform.dest_eq(th[1])[0][1]
-            entries.append((f"definition {conform.qname(name)}", render.theorem(th)))
+            entries.append(
+                (f"definition {theory.const_name(name)}", render.theorem(th))
+            )
         for th in reversed(typedefs):  # newest first, too
             name = conform.dest_typedef(th)[0]
             text = render.theorem(th, theory.typedef_consts[name])

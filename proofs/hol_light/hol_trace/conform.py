@@ -286,6 +286,7 @@ class Theory:
                 raise Failed(f"constant {name} is defined twice")
             self.const_def[name] = th
             self.generic[name] = eq[0][2]
+        self.display = self.temporaries()
         for th in typedefs:
             tyname, abs_, rep = dest_typedef(th)
             if tyname in self.type_def or tyname in PRIMITIVE_TYPES:
@@ -297,6 +298,36 @@ class Theory:
                     raise Failed(f"constant {c[1]} is defined twice")
                 self.typedef_of_const[c[1]] = tyname
                 self.generic[c[1]] = c[2]
+
+    def temporaries(self):
+        """Display names for define_type's temporary constants.
+
+        define_type first defines each constructor under a fresh name
+        _<n> from genvar, HOL Light's global counter, and then the
+        constructor C itself by |- C = _<n>. The counter depends on how
+        many fresh names earlier proofs used, so _<n> is shown as _<C>
+        instead. This applies only where exactly one definition has the
+        form |- C = _<n>, with C alphanumeric; other constants keep their
+        names. The renaming is injective: each C is defined once, and so
+        names at most one constant. A constant whose own name is _<C>
+        prints in quotes, so the two cannot be confused. _0, the numeral
+        zero, is not a temporary."""
+        aliases = {}
+        for name, th in self.const_def.items():
+            rhs = dest_eq(th[1])[1]
+            if (
+                rhs[0] == "c"
+                and GENVAR.match(rhs[1])
+                and rhs[1] != "_0"
+                and rhs[1] in self.const_def
+                and RAW_ALNUM.match(name)
+            ):
+                aliases.setdefault(rhs[1], []).append(name)
+        return {t: f"_<{cs[0]}>" for t, cs in aliases.items() if len(cs) == 1}
+
+    def const_name(self, name):
+        """How a constant's name is printed; see temporaries."""
+        return self.display.get(name) or qname(name)
 
     def closure(self, roots):
         """Definitions and type definitions that the roots depend on."""
@@ -362,6 +393,10 @@ class Theory:
 #                    renumbered in order of first occurrence
 #   '?1, '?2, ...    type variables named ?<digits> (invented by the
 #                    parser), renumbered likewise
+#   "GEN%PVAR%1"     variables of set comprehensions (invented by the
+#                    parser), renumbered likewise
+#   _<C>             define_type's temporary constant _<n> for the
+#                    constructor C; see Theory.temporaries
 #   #12              a numeral NUMERAL (BIT0 (BIT0 (BIT1 (BIT1 _0))))
 #   &12              an integer literal int_of_num #12
 #   [a; b]           CONS a (CONS b NIL)
@@ -384,6 +419,8 @@ RAW_SYMBOL = re.compile(r"[!#%&*+,\-/<=>?@\\^|~]+\Z")
 RESERVED = {"\\", "->", "#", "|-"}
 GENVAR = re.compile(r"_[0-9]+\Z")
 GENTYVAR = re.compile(r"\?[0-9]+\Z")
+# Variables that the parser invents for set comprehensions {x | P x}.
+GENPVAR = re.compile(r"GEN%PVAR%[0-9]+\Z")
 WIDTH = 100
 # Binder constants, applied to an abstraction, are printed (!x:ty. body).
 BINDERS = {"!", "?", "?!", "@"}
@@ -540,6 +577,7 @@ def atom(text):
 class Renderer:
     def __init__(self, theory):
         self.generic = theory.generic
+        self.display = theory.display
         self.type_of = TypeOf()
         self.annotate = ()
         self.genvars, self.tyvars = {}, {}
@@ -560,7 +598,11 @@ class Renderer:
         return not wanted <= have
 
     def const(self, tm, args, env):
-        name = ("$" if tm[1] in env else "") + qname(tm[1])
+        if tm[1] in self.display:
+            # _<C> is never the printed name of a variable.
+            name = self.display[tm[1]]
+        else:
+            name = ("$" if tm[1] in env else "") + qname(tm[1])
         if tm[1] in self.annotate or self.const_annotation_needed(tm[1], args):
             name += ":" + render_type(tm[2], self.tyvars)
         return atom(name)
@@ -678,20 +720,26 @@ class Renderer:
 
     def number_generated(self, tm):
         """Renumber generated names in order of first occurrence: variables
-        called _<digits> (from genvar) become _1, _2, ..., and type
-        variables called ?<digits> (invented by the parser) become ?1,
-        ?2, .... HOL Light numbers both by global counters, so the same
-        definition gets different names in different load orders. Each
+        called _<digits> (from genvar) become _1, _2, ..., variables called
+        GEN%PVAR%<digits> (invented by the parser for set comprehensions)
+        become GEN%PVAR%1, ..., and type variables called ?<digits>
+        (invented by the parser) become ?1, ?2, .... HOL Light numbers
+        them by global counters, so the same definition gets different
+        names in different load orders, or when proofs are skipped. Each
         renaming is a bijection on its names and leaves all other names
         alone, so it preserves the structure of the term."""
         self.genvars, self.tyvars, stack = {}, {}, [tm]
+        counts = {"_": 0, "GEN%PVAR%": 0}
         while stack:
             t = stack.pop()
             if t[0] in "al":
                 stack.extend((t[2], t[1]))
                 continue
-            if GENVAR.match(t[1]) and t[0] == "v" and t[1] not in self.genvars:
-                self.genvars[t[1]] = f"_{len(self.genvars) + 1}"
+            if t[0] == "v" and t[1] not in self.genvars:
+                for prefix, pattern in (("_", GENVAR), ("GEN%PVAR%", GENPVAR)):
+                    if pattern.match(t[1]):
+                        counts[prefix] += 1
+                        self.genvars[t[1]] = f"{prefix}{counts[prefix]}"
             types = [t[2]]
             while types:
                 ty = types.pop()
@@ -956,7 +1004,9 @@ def conform(
 
     const_defs, type_defs = theory.closure([th for _, th in named] + axioms)
     for name, th in sorted(const_defs.items()):
-        check_entry(f"definition {qname(name)}", render.theorem(th), defs, new_defs)
+        check_entry(
+            f"definition {theory.const_name(name)}", render.theorem(th), defs, new_defs
+        )
     for name, th in sorted(type_defs.items()):
         check_entry(
             f"typedef {qname(name)}",
