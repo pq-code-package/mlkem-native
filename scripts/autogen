@@ -113,9 +113,12 @@ def finalize_format_batch(batch):
             # Skip files scheduled for deletion
             if content is None:
                 continue
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".c", delete=False) as f:
+            # Keep the file name: clang-format uses it to identify the main
+            # include, which it sorts first.
+            temp_path = os.path.join(tempfile.mkdtemp(), os.path.basename(filename))
+            with open(temp_path, "w") as f:
                 f.write(content)
-                temp_files.append((f.name, filename))
+            temp_files.append((temp_path, filename))
 
         # Call clang-format with -i to update files in-place
         clang_format_file = os.path.join(
@@ -141,6 +144,7 @@ def finalize_format_batch(batch):
     finally:
         for temp_path, _ in temp_files:
             os.unlink(temp_path)
+            os.rmdir(os.path.dirname(temp_path))
 
 
 def finalize_file(item, dry_run):
