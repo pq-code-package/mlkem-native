@@ -55,6 +55,16 @@ def positive_int(value):
     return number
 
 
+def hms(start):
+    secs = round(time.time() - start)
+    return f"{secs // 3600}:{secs // 60 % 60:02}:{secs % 60:02}"
+
+
+def progress(what):
+    """Report a step that may take a while."""
+    print(what, flush=True)
+
+
 def die(msg):
     print(f"hol-trace: {msg}", file=sys.stderr)
     sys.exit(1)
@@ -238,6 +248,7 @@ def build_objects(selected):
         funcs = [f for a, f in selected if a == arch]
         if not funcs:
             continue
+        progress(f"assembling {len(funcs)} {arch} object files")
         p = subprocess.run(
             ["make", "-C", os.path.join(PROOF_DIR, arch)]
             + [f"mlkem/{f}.o" for f in funcs],
@@ -279,6 +290,12 @@ def remove_results(arch, func):
 
 
 def gen_one(arch, func, work, src, imports, prune, source_snapshot):
+    start = time.time()
+
+    def phase(what):
+        """Print the step that starts now; recording can take hours."""
+        print(f"  {func}: {what} ({hms(start)} elapsed)", flush=True)
+
     p = paths(arch, func)
     os.makedirs(os.path.dirname(p["trace"]), exist_ok=True)
     for k in ["trace", "raw", "manifest"]:
@@ -303,6 +320,7 @@ def gen_one(arch, func, work, src, imports, prune, source_snapshot):
     with open(p["gen_log"], "w") as log:
         e = dict(os.environ, S2N_BIGNUM_DIR=env("HOLTRACE_S2N_BIGNUM"))
         e["IMPORTS_DIR"] = imports
+        phase("compiling the proof")
         rc, _, _ = run(
             [BUILD_PROOF, wrapper, os.path.join(record_hol, "hol.sh"), native],
             log,
@@ -312,6 +330,7 @@ def gen_one(arch, func, work, src, imports, prune, source_snapshot):
         if rc != 0:
             raise Failed(f"building the proof failed, see {rel(p['gen_log'])}")
         e = dict(os.environ, HOLTRACE_SAVE=raw)
+        phase("recording the trace")
         rc, secs, rss = run([native], log, cwd=src, env=e)
         # Again: the proof code that just ran could have written them.
         remove_results(arch, func)
@@ -325,6 +344,7 @@ def gen_one(arch, func, work, src, imports, prune, source_snapshot):
     ):
         raise Failed(f"proof failed, see {rel(p['gen_log'])}")
     if prune:
+        phase(f"pruning the {os.path.getsize(raw) / 2**30:.1f} GiB trace")
         with open(p["gen_log"], "a") as log:
             log.write("\n# holtrace-prune\n")
             with open(raw, "rb") as fin, open(p["trace"], "wb") as fout:
@@ -343,6 +363,7 @@ def gen_one(arch, func, work, src, imports, prune, source_snapshot):
         shutil.move(raw, p["trace"])
     if sources(arch, func) != source_snapshot:
         raise Failed("proof sources changed while the trace was being recorded")
+    phase(f"hashing the {os.path.getsize(p['trace']) / 2**30:.1f} GiB trace")
     manifest = {
         "function": f"{arch}/{func}",
         "sources": source_snapshot,
@@ -368,6 +389,7 @@ def cmd_gen(selected, args):
     build_objects(selected)
     work = tempfile.mkdtemp(prefix="hol-trace-gen-")
     try:
+        progress("copying the proofs and rewriting them for hashtt")
         src, imports = prepare_tree(work)
         return run_all(
             "gen",
@@ -427,6 +449,7 @@ def fresh_imports(work):
 def hol_light_replay(work):
     restore = os.path.join(work, "restore.native")
     hol = os.path.join(holtrace_hol("HOLTRACE_REPLAY_HOL"), "hol.sh")
+    progress("compiling restore.ml against the replay HOL Light")
     p = subprocess.run(
         [BUILD_PROOF, os.path.join(HERE, "restore.ml"), hol, restore],
         capture_output=True,
@@ -656,6 +679,35 @@ let prove (tm, (_ : tactic)) = mk_thm ([], tm);;
 OUTLINE_END = "exit 0;;\n"
 
 
+def describe_steps(steps_of):
+    """Print what the shared-file programs load, one per architecture,
+    grouped by the accepted files that their definitions go to."""
+    shared = "Specifications for both architectures -> accepted/spec/"
+    groups = {}  # heading -> files, in load order within each group
+    for arch, steps in steps_of.items():
+        own = f"Specifications for {arch} -> accepted/spec/{arch}/"
+        for k, (path, _, lines, source) in enumerate(steps):
+            if k == 0:
+                groups[f"HOL Light -> {conform.short(path)}"] = []
+            elif k == 1:
+                loaded = re.findall(r'"s2n_bignum/([^"]+)"', " ".join(lines))
+                groups[f"s2n-bignum for {arch} -> {conform.short(path)}"] = loaded
+            else:
+                sub = os.path.relpath(source, PROOF_DIR)
+                heading = shared if sub.startswith("common/") else own
+                if sub not in groups.setdefault(heading, []):
+                    groups[heading].append(sub)
+    # HOL Light and s2n-bignum first, then the shared specifications.
+    order = sorted(
+        groups, key=lambda h: (not h.startswith(("HOL", "s2n")), h != shared)
+    )
+    print("extracting the outline of these files:", flush=True)
+    for heading in order:
+        print(f"  {heading}", flush=True)
+        for f in groups[heading]:
+            print(f"    + {f}", flush=True)
+
+
 def dump_steps(arch, steps, work):
     """Run the load steps in one HOL Light process, as an outline; dump the
     kernel's theory after each step. Return the dump files."""
@@ -679,6 +731,7 @@ def dump_steps(arch, steps, work):
             env=fresh_imports(work),
         )
         if rc == 0:
+            progress(f"loading the {arch} files, with proofs asserted")
             rc, _, _ = run([native], log, cwd=ROOT)
     if rc != 0:
         raise Failed(f"loading the {arch} layers failed; see {work}/{arch}.log")
@@ -717,11 +770,12 @@ def outline_shared(base, specs):
     pins = layer_pins()
     layers = {}  # file -> (comment, entries, source)
     work = tempfile.mkdtemp(prefix="hol-trace-layers-")
-    for arch in ARCHS:
-        steps = layer_steps(arch)
-        if not specs:
-            steps = steps[:2]  # HOL Light and s2n-bignum
+    # HOL Light and s2n-bignum, then, with specs, the specification files.
+    steps_of = {a: layer_steps(a)[: None if specs else 2] for a in ARCHS}
+    describe_steps(steps_of)
+    for arch, steps in steps_of.items():
         dumps = dump_steps(arch, steps, work)
+        progress(f"rendering the {arch} definitions")
         added = with_deep_stack(lambda: new_entries(dumps))
         for k, ((path, comment, _, source), entries) in enumerate(zip(steps, added)):
             # conform accepts axioms only from the HOL Light layer.
@@ -737,6 +791,7 @@ def outline_shared(base, specs):
     shutil.rmtree(work, ignore_errors=True)
 
     dirs = [d for d, wanted in (("base", base), ("spec", specs)) if wanted]
+    progress("writing " + " and ".join(f"accepted/{d}" for d in dirs))
     for d in dirs:
         shutil.rmtree(os.path.join(ACCEPTED, d), ignore_errors=True)
     for path, (comment, entries, source) in sorted(layers.items()):
@@ -749,7 +804,7 @@ def outline_shared(base, specs):
         if source:
             header += f"# source: {rel(source)} {sha256(source)}\n"
         conform.write_entries(path, header, dict(entries), [h for h, _ in entries])
-        print(f"{rel(path)}: {len(entries)} entries", flush=True)
+        print(f"  {conform.short(path)}: {len(entries)} entries", flush=True)
     return 0
 
 
@@ -798,6 +853,11 @@ def cmd_outline(arch, proofs, args):
         outline_shared(True, True)
     selected = select(arch, proofs)
     build_objects(selected)
+    jobs = min(args.jobs, len(selected))
+    progress(
+        f"writing outlines of {len(selected)} {arch} proofs, {jobs} at a "
+        f"time; logs in traces/{arch}/FUNC.outline.log"
+    )
     work = tempfile.mkdtemp(prefix="hol-trace-outline-")
     loaded = []
 
