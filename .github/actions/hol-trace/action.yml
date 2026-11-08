@@ -1,0 +1,88 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: HOLTrace
+description: Record, replay, compare, and bind selected HOL Light proofs
+inputs:
+  proofs:
+    description: Space-separated proofs to check, as ARCH/FUNC
+    required: true
+  gh_token:
+    description: Github access token
+    required: true
+runs:
+  using: composite
+  steps:
+    # Each phase finishes for all proofs before the next starts. A later
+    # phase runs even if an earlier one failed for some proofs, and any
+    # failure fails the job.
+    - name: Set up the HOLTrace shell
+      uses: ./.github/actions/setup-shell
+      env:
+        HOLTRACE_PROOFS: ${{ inputs.proofs }}
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        nix-shell: hol_trace-cross
+        script: |
+          source .github/actions/hol-trace/lib.sh
+          [[ ${#proofs[@]} -gt 0 ]]
+          # Validated by lib.sh: only ARCH/FUNC names and spaces.
+          echo "HOLTRACE_PROOFS=${proofs[*]}" >> "$GITHUB_ENV"
+    # This runs the proof scripts, which are not trusted, in the checkout
+    # that the later steps use; see "Not yet isolated" in
+    # proofs/hol_light/hol_trace/README.md.
+    - name: Capture traces
+      shell: ${{ env.SHELL }}
+      run: |
+        source .github/actions/hol-trace/lib.sh
+        hol-trace gen -j "$HOLTRACE_JOBS" -p "${proofs[@]}"
+    - name: Replay with HOL Light
+      if: ${{ !cancelled() }}
+      shell: ${{ env.SHELL }}
+      run: |
+        source .github/actions/hol-trace/lib.sh
+        hol-trace replay -j "$HOLTRACE_JOBS" --backend hol-light -p "${proofs[@]}"
+    - name: Compare with the accepted files
+      if: ${{ !cancelled() }}
+      shell: ${{ env.SHELL }}
+      run: |
+        source .github/actions/hol-trace/lib.sh
+        status=0
+        hol-trace compare -j "$HOLTRACE_JOBS" --backend hol-light -p "${proofs[@]}" || status=1
+        # CI never accepts: the accepted files must be unchanged.
+        git diff --exit-code HEAD -- proofs/hol_light/hol_trace/accepted || status=1
+        exit "$status"
+    - name: Check machine-code bindings
+      if: ${{ !cancelled() }}
+      shell: ${{ env.SHELL }}
+      run: |
+        source .github/actions/hol-trace/lib.sh
+        # The selected proofs' objects, which `gen` built: each must hold
+        # only functions with a proof, of the bytes that the proof is about.
+        objects=()
+        for proof in "${proofs[@]}"; do
+          objects+=("proofs/hol_light/${proof%%/*}/mlkem/${proof#*/}.o")
+        done
+        check-binary --force-all "${objects[@]}"
+    - name: Remove traces and replay results
+      if: always()
+      shell: bash
+      run: |
+        # Keep logs and manifests for upload.
+        read -r -a proofs <<<"${HOLTRACE_PROOFS:-}"
+        for proof in "${proofs[@]}"; do
+          [[ "$proof" =~ ^(aarch64|x86_64)/[a-zA-Z0-9_]+$ ]] || continue
+          trace="proofs/hol_light/hol_trace/traces/$proof"
+          rm -f -- "$trace.50" "$trace.raw.50" "$trace."*.result
+        done
+    - name: Upload proof logs
+      if: always()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: holtrace-logs
+        path: |
+          proofs/hol_light/hol_trace/traces/**/*.gen.log
+          proofs/hol_light/hol_trace/traces/**/*.replay.log
+          proofs/hol_light/hol_trace/traces/**/*.manifest.json
+        if-no-files-found: warn
+        retention-days: 7

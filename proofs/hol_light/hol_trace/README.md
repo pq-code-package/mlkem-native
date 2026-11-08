@@ -36,7 +36,8 @@ The trace checker confirms that the trace uses no axioms beyond HOL
 Light's own, and that the theorems it proves are the expected statements
 recorded in [accepted/](accepted). A proof script is thereby reduced to
 the kernel trace it emits, and any other potential kernel bypass is
-irrelevant at the trace level.
+irrelevant at the trace level. In CI, this assumes that recording cannot
+change what runs after it; see the caveat "Not yet isolated" below.
 
 HOLTrace's recommended check, `holtrace_restore`, runs in a HOL Light
 session that has the trusted libraries loaded, and refuses any
@@ -93,7 +94,8 @@ The accepted files themselves are written by `hol-trace outline` (or
 `scripts/autogen --hol-trace-defs`), which needs no trace: it loads each
 proof with `prove` asserting each goal instead of proving it, and writes
 the definitions and main theorems that result. An outline checks
-nothing; review its changes, then confirm them with `gen` and `check`. See [accepted/README.md](accepted/README.md).
+nothing; review its changes, then confirm them with `gen` and `check`,
+as CI does. See [accepted/README.md](accepted/README.md).
 
 ## What is trusted
 
@@ -103,6 +105,9 @@ nothing; review its changes, then confirm them with `gen` and `check`. See [acce
   [accepted/README.md](accepted/README.md)); and `check-binary`.
 - **Not trusted:** the proof scripts and everything else that produces
   the trace. A fault there can make a check fail, not pass.
+- **Not yet isolated:** `gen` runs the proof scripts on the same CI
+  runner as the checks after it, so a reviewer must check that a proof
+  script only drives HOL Light.
 
 ## Usage
 
@@ -124,3 +129,35 @@ commands select all of them (see `hol-trace list`). The shared files,
 which `hol-trace outline` writes without `-p` and with `--base` or
 `--specs`, always cover both architectures. `hol-trace --help` lists all
 options.
+
+## CI
+
+[hol_trace.yml](../../../.github/workflows/hol_trace.yml) runs in the
+upstream repository and skips fork pull requests. Manual dispatch checks
+all proofs.
+
+A hosted runner selects the affected proofs before starting an
+instance, with `proofs/hol_light/scripts/deps rev` from
+[proofs/hol_light/deps.yml](../deps.yml), exactly as HOL-Light CI
+does. An empty selection skips EC2 provisioning.
+
+One temporary `r9g.24xlarge` runner with a 512 GB disk checks the entire
+selection; there is no EC2 proof matrix. The ARM64 runner
+cross-assembles x86_64 proofs in `nix develop .#hol_trace-cross`.
+It sets a 1 GiB stack and uses eight workers for each phase. Each phase
+is a step of its own, so the job's log shows them separately:
+1. capture traces of every selected proof (`gen`);
+2. replay them with HOL Light;
+3. compare every replay result with the accepted files;
+4. check the proofs' object files with `check-binary --force-all`: each
+   must contain only proved functions, with the proved bytes.
+
+Each phase finishes for all proofs before the next starts, and runs
+`hol-trace` once per architecture. Comparisons use eight separate
+processes. Other proofs and later phases continue if one fails, and any
+failure fails the job. Traces and replay results are removed after all
+checks finish. CI never accepts new definitions or statements.
+Generation and replay logs and manifests are retained for seven days;
+the large trace files are not uploaded. The job has a 24-hour timeout.
+The existing EC2 workflow stops the runner after the job, including on
+failure or cancellation.
