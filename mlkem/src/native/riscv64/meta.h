@@ -22,36 +22,66 @@
 #include "../../common.h"
 
 #if !defined(__ASSEMBLER__)
+#if !defined(CBMC)
 #include <riscv_vector.h>
+#endif
 
 #include "../api.h"
 #include "src/arith_native_riscv64.h"
 
+/* Returns the vector register length VLEN in bits.
+ * CBMC proofs use the contract instead of the body. */
+static MLK_INLINE int mlk_rv64v_vlen(void)
+__contract__(
+  ensures(return_value >= 0)
+)
+{
+#if !defined(CBMC)
+  return (int)(16 * __riscv_vsetvlmax_e16m1());
+#else
+  return 0;
+#endif
+}
+
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_ntt_native(int16_t data[MLKEM_N])
 {
-  /* VLEN = 256 only for now */
-  if (__riscv_vsetvlmax_e16m1() != 16)
+  /* VLEN = 128 and VLEN = 256 only for now */
+  const int vlen = mlk_rv64v_vlen();
+  if (vlen == 256)
   {
-    return MLK_NATIVE_FUNC_FALLBACK;
+    mlk_ntt_vlen256_riscv64_asm(data, mlk_rv64v_ntt256_zetas,
+                                mlk_rv64v_ntt256_perms);
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
-
-  mlk_rv64v_poly_ntt(data);
-  return MLK_NATIVE_FUNC_SUCCESS;
+  if (vlen == 128)
+  {
+    mlk_ntt_vlen128_riscv64_asm(data, mlk_rv64v_ntt128_zetas,
+                                mlk_rv64v_ntt128_perms);
+    return MLK_NATIVE_FUNC_SUCCESS;
+  }
+  return MLK_NATIVE_FUNC_FALLBACK;
 }
 
 #if !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
 {
-  /* VLEN = 256 only for now */
-  if (__riscv_vsetvlmax_e16m1() != 16)
+  /* VLEN = 128 and VLEN = 256 only for now */
+  const int vlen = mlk_rv64v_vlen();
+  if (vlen == 256)
   {
-    return MLK_NATIVE_FUNC_FALLBACK;
+    mlk_intt_vlen256_riscv64_asm(data, mlk_rv64v_intt256_zetas,
+                                 mlk_rv64v_ntt256_perms);
+    return MLK_NATIVE_FUNC_SUCCESS;
   }
-
-  mlk_rv64v_poly_invntt_tomont(data);
-  return MLK_NATIVE_FUNC_SUCCESS;
+  if (vlen == 128)
+  {
+    mlk_intt_vlen128_riscv64_asm(data, mlk_rv64v_intt128_zetas,
+                                 mlk_rv64v_ntt128_perms);
+    return MLK_NATIVE_FUNC_SUCCESS;
+  }
+  return MLK_NATIVE_FUNC_FALLBACK;
 }
 #endif /* !MLK_CONFIG_NO_ENCAPS_API || !MLK_CONFIG_NO_DECAPS_API */
 
@@ -59,7 +89,7 @@ static MLK_INLINE int mlk_intt_native(int16_t data[MLKEM_N])
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_tomont_native(int16_t data[MLKEM_N])
 {
-  mlk_rv64v_poly_tomont(data);
+  mlk_poly_tomont_riscv64_asm(data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* !MLK_CONFIG_NO_KEYPAIR_API */
@@ -69,7 +99,7 @@ static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,
                                              const uint8_t *buf,
                                              unsigned buflen)
 {
-  /* mlk_rv64v_rej_uniform requires buflen to be a multiple of 12 */
+  /* mlk_rej_uniform_riscv64_asm requires buflen to be a multiple of 12 */
   if (buflen % 12 != 0)
   {
     return MLK_NATIVE_FUNC_FALLBACK;
@@ -77,13 +107,13 @@ static MLK_INLINE int mlk_rej_uniform_native(int16_t *r, unsigned len,
   /* The cast from unsigned to signed integer is safe
    * because the return value is <= len, which we asssume
    * to be bound by 4096 and hence <= INT_MAX. */
-  return (int)mlk_rv64v_rej_uniform(r, len, buf, buflen);
+  return (int)mlk_rej_uniform_riscv64_asm(r, len, buf, buflen);
 }
 
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_reduce_native(int16_t data[MLKEM_N])
 {
-  mlk_rv64v_poly_reduce(data);
+  mlk_poly_reduce_riscv64_asm(data);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
@@ -91,8 +121,7 @@ MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_poly_mulcache_compute_native(int16_t x[MLKEM_N / 2],
                                                        const int16_t y[MLKEM_N])
 {
-  (void)x; /* not using the cache at the moment */
-  (void)y;
+  mlk_poly_mulcache_compute_riscv64_asm(x, y, mlk_rv64v_mulcache_zetas);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 
@@ -102,8 +131,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k2_native(
     int16_t r[MLKEM_N], const int16_t a[2 * MLKEM_N],
     const int16_t b[2 * MLKEM_N], const int16_t b_cache[2 * (MLKEM_N / 2)])
 {
-  (void)b_cache;
-  mlk_rv64v_poly_basemul_mont_add_k2(r, a, b);
+  mlk_polyvec_basemul_acc_montgomery_cached_k2_riscv64_asm(r, a, b, b_cache);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 */
@@ -114,8 +142,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k3_native(
     int16_t r[MLKEM_N], const int16_t a[3 * MLKEM_N],
     const int16_t b[3 * MLKEM_N], const int16_t b_cache[3 * (MLKEM_N / 2)])
 {
-  (void)b_cache;
-  mlk_rv64v_poly_basemul_mont_add_k3(r, a, b);
+  mlk_polyvec_basemul_acc_montgomery_cached_k3_riscv64_asm(r, a, b, b_cache);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 3 */
@@ -126,8 +153,7 @@ static MLK_INLINE int mlk_polyvec_basemul_acc_montgomery_cached_k4_native(
     int16_t r[MLKEM_N], const int16_t a[4 * MLKEM_N],
     const int16_t b[4 * MLKEM_N], const int16_t b_cache[4 * (MLKEM_N / 2)])
 {
-  (void)b_cache;
-  mlk_rv64v_poly_basemul_mont_add_k4(r, a, b);
+  mlk_polyvec_basemul_acc_montgomery_cached_k4_riscv64_asm(r, a, b, b_cache);
   return MLK_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 4 */

@@ -77,7 +77,9 @@ def is_exception(funcname):
         # External functions
         return True
 
-    if funcname in ["zeroize"]:
+    # The VLEN query in the RISC-V backend uses an intrinsic that CBMC
+    # cannot model; callers use its contract.
+    if funcname in ["zeroize", "rv64v_vlen"]:
         # Implemented using inline ASM or external functions
         return True
 

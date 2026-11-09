@@ -7,7 +7,8 @@ ifeq ($(OPT),1)
                         $(wildcard mlkem/src/fips202/native/aarch64/src/*.c) \
                         $(wildcard mlkem/src/fips202/native/x86_64/src/*.c)  \
                         $(wildcard mlkem/src/fips202/native/x86_64/src/*.S)  \
-                        $(wildcard mlkem/src/fips202/native/armv81m/src/*.[csS])
+                        $(wildcard mlkem/src/fips202/native/armv81m/src/*.[csS]) \
+                        $(wildcard mlkem/src/fips202/native/riscv64/src/*.[csS])
 endif
 
 SOURCES += $(wildcard mlkem/src/*.c)
@@ -194,6 +195,9 @@ else ifeq ($(ABICHECK_ARCH),ppc64le)
 ABICHECK_ASM_SOURCES := $(wildcard mlkem/src/native/ppc64le/src/*.S)
 else ifeq ($(ABICHECK_ARCH),armv81m)
 ABICHECK_ASM_SOURCES := $(wildcard mlkem/src/fips202/native/armv81m/src/*.S)
+else ifeq ($(ABICHECK_ARCH),riscv64)
+ABICHECK_ASM_SOURCES := $(wildcard mlkem/src/native/riscv64/src/*.S) \
+                        $(wildcard mlkem/src/fips202/native/riscv64/src/*.S)
 else
 ABICHECK_ASM_SOURCES :=
 endif
@@ -215,6 +219,7 @@ ABICHECK_ASM_CFLAGS := \
   -DMLK_CONFIG_NAMESPACE_PREFIX=mlk \
   -DMLK_ARITH_BACKEND_AARCH64 \
   -DMLK_ARITH_BACKEND_PPC64LE_DEFAULT \
+  -DMLK_ARITH_BACKEND_RISCV64 \
   -DMLK_ARITH_BACKEND_X86_64_DEFAULT \
   -DMLK_FIPS202_AARCH64_NEED_X1_SCALAR \
   -DMLK_FIPS202_AARCH64_NEED_X1_V84A \
@@ -222,6 +227,7 @@ ABICHECK_ASM_CFLAGS := \
   -DMLK_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID \
   -DMLK_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID \
   -DMLK_FIPS202_ARMV81M_NEED_X4 \
+  -DMLK_FIPS202_RISCV64_NEED_X1_ZBB \
   -DMLK_FIPS202_X86_64_NEED_X4_AVX2
 
 ABICHECK_ASM_OBJS = $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_ASM_SOURCES))

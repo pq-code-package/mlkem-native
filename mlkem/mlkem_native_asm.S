@@ -94,7 +94,18 @@
 #include "src/native/x86_64/src/mlkem_tomont_avx2_asm.S"
 #endif /* MLK_SYS_X86_64 */
 #if defined(MLK_SYS_RISCV64)
-#endif
+#include "src/native/riscv64/src/mlkem_intt_vlen128_riscv64_asm.S"
+#include "src/native/riscv64/src/mlkem_intt_vlen256_riscv64_asm.S"
+#include "src/native/riscv64/src/mlkem_ntt_vlen128_riscv64_asm.S"
+#include "src/native/riscv64/src/mlkem_ntt_vlen256_riscv64_asm.S"
+#include "src/native/riscv64/src/mlkem_poly_mulcache_compute_riscv64_asm.S"
+#include "src/native/riscv64/src/mlkem_poly_reduce_riscv64_asm.S"
+#include "src/native/riscv64/src/mlkem_poly_tomont_riscv64_asm.S"
+#include "src/native/riscv64/src/mlkem_polyvec_basemul_acc_montgomery_cached_k2_riscv64_asm.S"
+#include "src/native/riscv64/src/mlkem_polyvec_basemul_acc_montgomery_cached_k3_riscv64_asm.S"
+#include "src/native/riscv64/src/mlkem_polyvec_basemul_acc_montgomery_cached_k4_riscv64_asm.S"
+#include "src/native/riscv64/src/mlkem_rej_uniform_riscv64_asm.S"
+#endif /* MLK_SYS_RISCV64 */
 #if defined(MLK_SYS_PPC64LE)
 #include "src/native/ppc64le/src/mlkem_intt_ppc_asm.S"
 #include "src/native/ppc64le/src/mlkem_ntt_ppc_asm.S"
@@ -118,6 +129,9 @@
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_mve.S"
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_state_extract_bytes_mve.S"
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_state_xor_bytes_mve.S"
+#endif
+#if defined(MLK_SYS_RISCV64)
+#include "src/fips202/native/riscv64/src/keccak_f1600_x1_zbb_riscv64_asm.S"
 #endif
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
@@ -511,6 +525,21 @@
 #undef mlk_keccak_f1600_x4_state_xor_bytes_asm
 #undef mlk_keccakf1600_round_constants
 #endif /* MLK_SYS_ARMV81M_MVE */
+#if defined(MLK_SYS_RISCV64)
+/*
+ * Undefine macros from native code (FIPS202, RISC-V 64)
+ */
+/* mlkem/src/fips202/native/riscv64/auto.h */
+#undef MLK_FIPS202_NATIVE_RISCV64_AUTO_H
+/* mlkem/src/fips202/native/riscv64/src/fips202_native_riscv64.h */
+#undef MLK_FIPS202_NATIVE_RISCV64_SRC_FIPS202_NATIVE_RISCV64_H
+#undef mlk_keccak_f1600_x1_zbb_riscv64_asm
+#undef mlk_keccakf1600_round_constants
+/* mlkem/src/fips202/native/riscv64/x1_zbb.h */
+#undef MLK_FIPS202_NATIVE_RISCV64_X1_ZBB_H
+#undef MLK_FIPS202_RISCV64_NEED_X1_ZBB
+#undef MLK_USE_NATIVE_FIPS202_X1
+#endif /* MLK_SYS_RISCV64 */
 #endif /* MLK_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
 /* mlkem/src/native/api.h */
@@ -639,24 +668,26 @@
 #undef MLK_USE_NATIVE_REJ_UNIFORM
 /* mlkem/src/native/riscv64/src/arith_native_riscv64.h */
 #undef MLK_NATIVE_RISCV64_SRC_ARITH_NATIVE_RISCV64_H
+#undef mlk_intt_vlen128_riscv64_asm
+#undef mlk_intt_vlen256_riscv64_asm
+#undef mlk_ntt_vlen128_riscv64_asm
+#undef mlk_ntt_vlen256_riscv64_asm
+#undef mlk_poly_mulcache_compute_riscv64_asm
+#undef mlk_poly_reduce_riscv64_asm
+#undef mlk_poly_tomont_riscv64_asm
+#undef mlk_polyvec_basemul_acc_montgomery_cached_k2_riscv64_asm
+#undef mlk_polyvec_basemul_acc_montgomery_cached_k3_riscv64_asm
+#undef mlk_polyvec_basemul_acc_montgomery_cached_k4_riscv64_asm
+#undef mlk_rej_uniform_riscv64_asm
+#undef mlk_rv64v_intt128_zetas
+#undef mlk_rv64v_intt256_zetas
+#undef mlk_rv64v_mulcache_zetas
+#undef mlk_rv64v_ntt128_perms
+#undef mlk_rv64v_ntt128_zetas
+#undef mlk_rv64v_ntt256_perms
+#undef mlk_rv64v_ntt256_zetas
 #undef mlk_rv64v_poly_add
-#undef mlk_rv64v_poly_basemul_mont_add_k2
-#undef mlk_rv64v_poly_basemul_mont_add_k3
-#undef mlk_rv64v_poly_basemul_mont_add_k4
-#undef mlk_rv64v_poly_invntt_tomont
-#undef mlk_rv64v_poly_ntt
-#undef mlk_rv64v_poly_reduce
 #undef mlk_rv64v_poly_sub
-#undef mlk_rv64v_poly_tomont
-#undef mlk_rv64v_rej_uniform
-/* mlkem/src/native/riscv64/src/rv64v_debug.h */
-#undef MLK_NATIVE_RISCV64_SRC_RV64V_DEBUG_H
-#undef mlk_assert_abs_bound_int16m1
-#undef mlk_assert_abs_bound_int16m2
-#undef mlk_assert_bound_int16m1
-#undef mlk_assert_bound_int16m2
-#undef mlk_debug_check_bounds_int16m1
-#undef mlk_debug_check_bounds_int16m2
 #endif /* MLK_SYS_RISCV64 */
 #if defined(MLK_SYS_PPC64LE)
 /*

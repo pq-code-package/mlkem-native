@@ -289,7 +289,16 @@ def simplify(logger, args, asm_input, asm_output=None):
         if args.arch == "armv81m":
             autogen_header += [".thumb", ".syntax unified", ""]
 
-        autogen_header += [".text", ".balign 4"]
+        autogen_header += [".text"]
+
+        # RISC-V: Pin the byte code by disabling compressed instructions and
+        # linker relaxation, matching the directives in the dev/ sources.
+        # This must precede .balign, which otherwise emits relaxable padding.
+        if args.arch == "riscv64":
+            autogen_header += [".option push", ".option norvc", ".option norelax"]
+            simplified = simplified + [".option pop"]
+
+        autogen_header += [".balign 4"]
 
         # Add syntax specifier for Intel syntax
         if args.syntax and args.syntax.lower() == "intel":
@@ -394,8 +403,8 @@ def simplify(logger, args, asm_input, asm_output=None):
 
         logger.debug("Checking that byte-code is unchanged ...")
 
-        # When CFI is enabled or for Armv8.1-M/ppc64le, compare only the __text section content
-        if args.cfify or args.arch in ("armv81m", "ppc64le"):
+        # When CFI is enabled or for Armv8.1-M/ppc64le/riscv64, compare only the __text section content
+        if args.cfify or args.arch in ("armv81m", "ppc64le", "riscv64"):
             logger.debug("Comparing __text section content for CFI comparison...")
 
             # Extract __text section from both files
