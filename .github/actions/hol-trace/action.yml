@@ -14,8 +14,8 @@ runs:
   using: composite
   steps:
     # Each phase finishes for all proofs before the next starts. A later
-    # phase runs even if an earlier one failed for some proofs, and any
-    # failure fails the job.
+    # step runs even if an earlier one failed, for some proofs or for the
+    # accepted files, and any failure fails the job.
     - name: Set up the HOLTrace shell
       uses: ./.github/actions/setup-shell
       env:
@@ -28,10 +28,20 @@ runs:
           [[ ${#proofs[@]} -gt 0 ]]
           # Validated by lib.sh: only ARCH/FUNC names and spaces.
           echo "HOLTRACE_PROOFS=${proofs[*]}" >> "$GITHUB_ENV"
+    # Replay and compare check traces against the accepted files only.
+    # Regenerate accepted/base and accepted/spec from the pinned HOL Light
+    # and s2n-bignum and the specification files, which runs no proof code,
+    # and fail if any of their files would change, appear or disappear.
+    # This also runs autogen's other checks.
+    - name: Check that the accepted base and spec files are up to date
+      shell: ${{ env.SHELL }}
+      run: |
+        autogen --dry-run --hol-trace-defs base,specs
     # This runs the proof scripts, which are not trusted, in the checkout
     # that the later steps use; see "Not yet isolated" in
     # proofs/hol_light/hol_trace/README.md.
     - name: Capture traces
+      if: ${{ !cancelled() }}
       shell: ${{ env.SHELL }}
       run: |
         source .github/actions/hol-trace/lib.sh
