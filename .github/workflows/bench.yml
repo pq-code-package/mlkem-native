@@ -59,7 +59,7 @@ jobs:
         - system: bpi
           name: SpacemiT K1 8 (Banana Pi F3) benchmarks
           bench_pmu: PERF
-          archflags: "-march=rv64imafdcv_zicsr_zifencei"
+          archflags: "-march=rv64imafdcv_zicsr_zifencei_zbb"
           cflags: ""
           ldflags: "-static"
           bench_extra_args: -w exec-on-bpi
