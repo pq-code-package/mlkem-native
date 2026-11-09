@@ -61,55 +61,29 @@ blank line:
 
 ```
 definition MLKEM_Q
-  |- (= MLKEM_Q #3329)
+  |- MLKEM_Q = 3329
 ```
 
-Objects are printed as fully parenthesized prefix expressions:
+Objects are printed as HOL Light prints them: its binders, `let`, infix
+operators with their precedences, numerals (`&12` is `int_of_num 12`),
+lists, and s2n-bignum's word types (`int64` is `64 word`). Line breaks
+carry no meaning. Where HOL Light's printing is ambiguous, the notation
+differs, so that different objects never print the same:
 
 | Text | Meaning |
 |---|---|
-| `(f a b)` | `f` applied to `a`, then `b` |
-| `(\x:ty. body)` | abstraction over the variable `x` of type `ty` |
-| `x` | the variable bound by the innermost binder named `x` |
-| `{x:ty}` | any other variable `x` of type `ty`, for example a free one |
-| `c`, `c:ty` | a constant; its type is shown unless its generic type and its arguments determine it |
-| `$c`, `$c:ty` | a constant whose name is bound by an enclosing binder |
-| `#12` | the numeral `NUMERAL (BIT0 (BIT0 (BIT1 (BIT1 _0))))` |
-| `&12` | the integer `int_of_num #12` |
-| `[a; b]` | `CONS a (CONS b NIL)` |
-| `#x[0a ff]` | the byte list `[word 10; word 255]`, when every element is `word n` with a canonical numeral `n` < 256 |
-| `'A`, `(a -> b)`, `(list num)` | a type variable, a function type, a type constructor |
-| `(a # b # c)` | the product type `prod a (prod b c)` |
-| `#64` | the numeral type `tybit0 (... 1)` |
-| `_1`, `'?1` | generated variables and parser-invented type variables, renumbered in order of first occurrence |
-| `"GEN%PVAR%1"` | a variable that the parser invents for a set comprehension, renumbered likewise |
-| `_<C>` | the temporary constant that `define_type` creates for the constructor `C`, defined by `C = _<C>`; HOL Light calls it `_<n>` |
+| `{x:ty}` | a variable that is free, or whose binder is hidden by an inner binder of the same name and another type |
+| `(c args : ty)` | the application of `c` to `args` has type `ty`; shown where the type does not follow from `c` and `args` |
+| `(op)` | an operator or keyword used as a constant without its notation, e.g. `(/\)` |
+| `$c` | a constant whose name is bound by an enclosing binder |
+| `"+"`, `"abs"` | a name that is a keyword, or neither alphanumeric nor symbolic |
+| `-x` | `int_neg x` |
+| `specification "c" f:ty. body` | `(@f. !g. body[f g]) (99, ...)`, the form in which `define` defines `c`; the tuple holds the character codes of `c` |
+| `#x[0a ff]` | the byte list `[word 10; word 255]` |
+| `_1`, `'?1`, `"GEN%PVAR%1"` | generated names, renumbered in order of first occurrence because HOL Light's counters depend on load order |
+| `_<C>` | the temporary constant that `define_type` creates for the constructor `C` |
 
-Names are printed as written if they are alphanumeric, or symbolic and
-not the name of a variable or type variable, and as JSON strings
-otherwise: a variable named `+` is `"+"` wherever it appears.
-Type-definition entries always show the types of their abs and rep
-constants, which give the order of the new type's arguments. Different
-objects never print the same, except for the renumbering, which is a
-bijection that keeps the structure of the term; HOL Light numbers these
-names by global counters, so they depend on load order and on how many
-fresh names earlier proofs used. A temporary constant is shown as
-`_<C>` only if exactly one definition has the form `C = _<n>`;
-otherwise it keeps its name `_<n>`.
-
-Renderings longer than 64 KiB are stored as their SHA-256 hash. Today
-only s2n-bignum's instruction decoders and execution functions, its x86
-`instruction` type and its arm `__opaque_bitmatch_3` are that large;
-they are trusted through the s2n-bignum pin. `--accept` refuses
-to add or change a hashed entry in a proof's file unless
-`--accept-hashed` is given, and never stores a main theorem as a hash.
-
-A definition whose rendering is a byte list, `|- (= c #x[...])`, is
-preceded by a comment with its length and SHA-256, for example
-
-```
-# poly_tomont_asm_mc: 204 bytes, sha256 064c8bdd...
-```
-
-The comment is written by `--accept`; check-binary recomputes it from the
-hex and fails if they disagree.
+Renderings over 64 KiB are stored as their SHA-256 hash, and `--accept`
+adds one to a proof's files only with `--accept-hashed`. A byte list is preceded by a comment
+with its length and SHA-256, which check-binary checks. An axiom's
+header is a hash of its text.

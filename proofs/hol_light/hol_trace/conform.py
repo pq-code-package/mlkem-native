@@ -326,8 +326,8 @@ class Theory:
         return {t: f"_<{cs[0]}>" for t, cs in aliases.items() if len(cs) == 1}
 
     def const_name(self, name):
-        """How a constant's name is printed; see temporaries."""
-        return self.display.get(name) or qname(name)
+        """A constant's name in entry headers; see temporaries."""
+        return self.display.get(name) or header_name(name)
 
     def closure(self, roots):
         """Definitions and type definitions that the roots depend on."""
@@ -380,60 +380,174 @@ class Theory:
 
 # ----- rendering
 #
-# Kernel objects are printed as fully parenthesized prefix expressions:
+# Kernel objects are printed in a notation close to HOL Light's own, but
+# one in which every object has exactly one text and every text at most
+# one object (up to the renumbering of generated names, below):
 #
-#   (f a b)          application of f to a and b
-#   (\x:ty. body)    abstraction
-#   x                the variable bound by the innermost binder named x
-#   {x:ty}           any other variable, e.g. a free one
-#   c, c:ty          a constant; the type is shown unless it follows
-#                    from the constant's generic type and its arguments
-#   $c, $c:ty        a constant whose name is bound by an enclosing binder
-#   _1, _2, ...      variables named _<digits> (HOL Light's genvars),
-#                    renumbered in order of first occurrence
-#   '?1, '?2, ...    type variables named ?<digits> (invented by the
-#                    parser), renumbered likewise
-#   "GEN%PVAR%1"     variables of set comprehensions (invented by the
-#                    parser), renumbered likewise
-#   _<C>             define_type's temporary constant _<n> for the
-#                    constructor C; see Theory.temporaries
-#   #12              a numeral NUMERAL (BIT0 (BIT0 (BIT1 (BIT1 _0))))
-#   &12              an integer literal int_of_num #12
-#   [a; b]           CONS a (CONS b NIL)
-#   #x[0a ff]        [word 10; word 255] : (word 8) list, every element
-#                    `word n` with a canonical numeral n < 256
-#   'A               a type variable
-#   (a -> b -> c)    a function type
-#   (a # b # c)      a product type prod a (prod b c)
-#   (list num)       a type constructor applied to arguments
-#   #64              a numeral type (tybit0 (... 1))
+#   f a b              application of f to a and b; arguments that are not
+#                      atoms are parenthesized
+#   \x:ty y:ty. body   abstraction; also !, ?, ?!, @ for the binder constants
+#                      applied to an abstraction. A binder, an infix
+#                      expression or a `let` is parenthesized wherever it is
+#                      not a whole term, a binder body or an operand of
+#                      lower precedence
+#   let x:ty = v in b  LET (\x. LET_END b) v; with several bindings,
+#                      let x:ty = v and y:ty = w in b for
+#                      LET (\x y. LET_END b) v w
+#   a OP b             an infix operator; see INFIX for the operators, their
+#                      precedence and associativity, and the exact types at
+#                      which overloaded symbols such as <= stand for the
+#                      num or the int constant
+#   (a == b) r         == a b r, a congruence such as (a == b) (mod n)
+#   abs x, mod n       int_abs x and int_mod n, at their int types
+#   -x                 int_neg x; binds tighter than * and looser than
+#                      DIV, MOD, div, rem, EXP, pow, o and :>
+#   specification "c" f:ty. body
+#                      (@f. !g. body[f g / f]) (99, ...), the form in
+#                      which new_specification defines c: the tuple holds
+#                      the character codes of "c", g is a genvar, and f
+#                      occurs only applied to g; see Renderer.specification
+#   x                  the variable bound by the innermost binder named x
+#   {x:ty}             any other variable: a free one, or one whose
+#                      binder is hidden by an inner binder of the same
+#                      name and another type
+#   c                  a constant whose type follows from its generic type
+#                      and its arguments
+#   (c args : ty)      a constant applied to args, the application of type
+#                      ty; with no args, the constant has type ty
+#   (op)               an operator symbol or keyword used as a constant
+#                      without its notation, e.g. (/\) or (abs)
+#   $c                 a constant whose name is bound by an enclosing binder
+#   _1, _2, ...        variables named _<digits> (HOL Light's genvars),
+#                      renumbered in order of first occurrence
+#   "GEN%PVAR%1"       variables of set comprehensions (invented by the
+#                      parser), renumbered likewise
+#   _<C>               define_type's temporary constant _<n> for the
+#                      constructor C; see Theory.temporaries
+#   12, &12            a canonical numeral, and int_of_num of one
+#   [a; b]             CONS a (CONS b NIL)
+#   #x[0a ff]          [word 10; word 255] : byte list, every element
+#                      `word n` with a canonical numeral n < 256
 #
-# Names are printed raw if they are alphanumeric, or symbolic and not
-# the name of a variable or type variable, and as JSON strings otherwise:
-# a variable named + is "+" in its binder and in the body. Equal text
-# implies equal kernel objects, up to the renumbering of genvars: a
-# reviewer who reads the text reads exactly the object that is compared.
+# and types:
+#
+#   'A, '?1            a type variable; ?<digits> renumbered like genvars
+#   a -> b, a # b      function and product types, both right-nested;
+#                      # binds tighter than ->
+#   num list           a type constructor after its argument; with several,
+#                      (a, b) name
+#   64                 a numeral type tybit0 (... 1)
+#   byte, int16, ...   word 8, word 16, word 32, word 64, word 128
+#
+# Names are printed raw if they are alphanumeric and no keyword, or
+# symbolic, and as JSON strings otherwise: a variable named + or abs is
+# "+" or "abs" wherever it appears, and so is a name that starts with a
+# digit. A type constant named like an abbreviation, only of digits, or
+# with a symbolic name, is quoted too. Equal text therefore implies equal kernel objects, up to
+# the renumbering of generated names: a reviewer who reads the text reads
+# exactly the object that is compared. Every subterm's type follows from
+# its text, which is what lets the overloaded symbols name one constant.
 
-RAW_ALNUM = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_']*\Z")
-RAW_SYMBOL = re.compile(r"[!#%&*+,\-/<=>?@\\^|~]+\Z")
-RESERVED = {"\\", "->", "#", "|-"}
+RAW_ALNUM = re.compile(r"[A-Za-z_][A-Za-z0-9_']*\Z")
+RAW_SYMBOL = re.compile(r"[!#%&*+,\-/<=>?@\\^|~:]+\Z")
 GENVAR = re.compile(r"_[0-9]+\Z")
 GENTYVAR = re.compile(r"\?[0-9]+\Z")
 # Variables that the parser invents for set comprehensions {x | P x}.
 GENPVAR = re.compile(r"GEN%PVAR%[0-9]+\Z")
-WIDTH = 100
-# Binder constants, applied to an abstraction, are printed (!x:ty. body).
+# Lines of the accepted files are at most 100 characters wide where
+# breaking allows; write_entries indents each rendering by two.
+WIDTH = 100 - 2
+APP = 100  # precedence of application; atoms are APP + 1
+# Binder constants, applied to an abstraction, are printed !x:ty. body.
 BINDERS = {"!", "?", "?!", "@"}
-# Right-nested applications of these constants are printed as one:
-# (/\ a (/\ b c)) as (/\ a b c). That is unambiguous because each takes
-# two arguments and returns no function, so (/\ a b c) cannot mean
-# anything else.
-CHAINS = {"/\\", "\\/", "==>", ","}
+BOOL2 = fun(BOOL, fun(BOOL, BOOL))
+NUM2B, NUM2 = fun(NUM, fun(NUM, BOOL)), fun(NUM, fun(NUM, NUM))
+INT2B, INT2 = fun(INT, fun(INT, BOOL)), fun(INT, fun(INT, INT))
+# constant -> (exact type or None for any type, symbol, precedence,
+# associativity). A constant is printed infix only at that type, with two
+# arguments and no type annotation needed. Symbols shared by a num and an
+# int constant are told apart by the type of their operands.
+INFIX = {
+    "==>": (BOOL2, "==>", 4, "r"),
+    "\\/": (BOOL2, "\\/", 6, "r"),
+    "/\\": (BOOL2, "/\\", 8, "r"),
+    "=": (None, "=", 12, "n"),
+    "<": (NUM2B, "<", 12, "n"),
+    "<=": (NUM2B, "<=", 12, "n"),
+    ">": (NUM2B, ">", 12, "n"),
+    ">=": (NUM2B, ">=", 12, "n"),
+    "int_lt": (INT2B, "<", 12, "n"),
+    "int_le": (INT2B, "<=", 12, "n"),
+    "int_gt": (INT2B, ">", 12, "n"),
+    "int_ge": (INT2B, ">=", 12, "n"),
+    ",,": (None, ",,", 13, "r"),
+    ",": (None, ",", 14, "r"),
+    "..": (fun(NUM, fun(NUM, fun(NUM, BOOL))), "..", 15, "r"),
+    "+": (NUM2, "+", 16, "r"),
+    "int_add": (INT2, "+", 16, "r"),
+    "-": (NUM2, "-", 18, "l"),
+    "int_sub": (INT2, "-", 18, "l"),
+    "*": (NUM2, "*", 20, "r"),
+    "int_mul": (INT2, "*", 20, "r"),
+    "DIV": (NUM2, "DIV", 22, "l"),
+    "MOD": (NUM2, "MOD", 22, "l"),
+    "div": (INT2, "div", 22, "l"),
+    "rem": (INT2, "rem", 22, "l"),
+    "EXP": (NUM2, "EXP", 24, "n"),
+    "int_pow": (fun(INT, fun(NUM, INT)), "pow", 24, "n"),
+    "o": (None, "o", 26, "r"),
+    ":>": (None, ":>", 30, "r"),
+}
+# int_neg x is printed -x, with this precedence.
+NEG, NEG_PREC = ("c", "int_neg", fun(INT, INT)), 21
+# constant -> (exact type, name printed in its place)
+PREFIX = {
+    "int_abs": (fun(INT, INT), "abs"),
+    "int_mod": (fun(INT, fun(INT, fun(INT, BOOL))), "mod"),
+}
+# Words with a meaning in this notation. A variable or constant with such
+# a name is quoted; an operator constant used without its notation is
+# printed (op).
+KEYWORDS = {
+    "let",
+    "and",
+    "in",
+    "o",
+    "EXP",
+    "pow",
+    "abs",
+    "mod",
+    "DIV",
+    "MOD",
+    "div",
+    "rem",
+    "specification",
+}
+OPERATORS = (
+    {sym for _, sym, _, _ in INFIX.values()}
+    | set(INFIX)
+    | {name for _, name in PREFIX.values()}
+    | BINDERS
+    | {"==", "\\", "->", "#", "|-", "&", ":"}
+)
+TYPE_ABBREV = {8: "byte", 16: "int16", 32: "int32", 64: "int64", 128: "int128"}
+
+
+def header_name(name):
+    """name as written in an entry's header: raw if alphanumeric or
+    symbolic, else as a JSON string. Headers are keys, not terms."""
+    if re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_']*|[!#%&*+,\-/<=>?@\\^|~]+", name) and (
+        name not in {"\\", "->", "#", "|-"}
+    ):
+        return name
+    return json.dumps(name)
 
 
 def qname(name, symbols=True):
-    if RAW_ALNUM.match(name) or (
-        symbols and RAW_SYMBOL.match(name) and name not in RESERVED
+    """name as printed: raw if alphanumeric and no keyword, or, with
+    symbols, symbolic; else as a JSON string."""
+    if name not in KEYWORDS and (
+        RAW_ALNUM.match(name) or (symbols and RAW_SYMBOL.match(name))
     ):
         return name
     return json.dumps(name)
@@ -453,26 +567,66 @@ def finty(ty):
     return n
 
 
-def render_type(ty, tyvars={}):
-    """tyvars renames type variables; see Renderer.number_generated."""
+def type_name(name):
+    if name == "1":  # the numeral type 1 is the type constant 1
+        return name
+    if name in TYPE_ABBREV.values() or name.isdigit():
+        return json.dumps(name)
+    # A symbolic type name such as # or -> would read as notation.
+    return qname(name, symbols=False)
+
+
+def type_doc(ty, tyvars={}, atomic=False):
+    """The layout of ty; with atomic, parenthesized unless it is an atom.
+    tyvars renames type variables; see Renderer.number_generated."""
     if ty[0] == "v":
         name = tyvars.get(ty[1], ty[1])
-        return "'" + (name if GENTYVAR.match(name) else qname(name, symbols=False))
+        return atom(
+            "'" + (name if GENTYVAR.match(name) else qname(name, symbols=False))
+        )
     n = finty(ty)
     if n is not None:
-        return f"#{n}"
-    for infix, test in ((" -> ", is_fun), (" # ", is_prod)):
-        if test(ty):
-            parts = []
-            while test(ty):
-                parts.append(ty[2][0])
-                ty = ty[2][1]
-            parts.append(ty)
-            return "(" + infix.join(render_type(p, tyvars) for p in parts) + ")"
+        return atom(str(n))
+    if ty[1] == "word" and len(ty[2]) == 1 and finty(ty[2][0]) in TYPE_ABBREV:
+        return atom(TYPE_ABBREV[finty(ty[2][0])])
     if not ty[2]:
-        return qname(ty[1])
-    args = [render_type(a, tyvars) for a in ty[2]]
-    return "(" + " ".join([qname(ty[1])] + args) + ")"
+        return atom(type_name(ty[1]))
+    if is_fun(ty) or is_prod(ty):
+        test, op = (is_fun, "->") if is_fun(ty) else (is_prod, "#")
+        parts = []
+        while test(ty):
+            parts.append(ty[2][0])
+            ty = ty[2][1]
+        parts.append(ty)
+        # Operands are atoms, constructor applications or parenthesized;
+        # an operand of -> may also be a product, since # binds tighter.
+        docs = [
+            type_doc(
+                p,
+                tyvars,
+                atomic=(is_fun(p) or is_prod(p)) and not (op == "->" and is_prod(p)),
+            )
+            for p in parts
+        ]
+        doc = Doc("fill", ("", f" {op} ", "", 4), tuple(docs))
+    elif len(ty[2]) == 1:
+        doc = Doc(
+            "seq",
+            items=(type_doc(ty[2][0], tyvars, atomic=True), atom(type_name(ty[1]))),
+        )
+    else:
+        args = tuple(type_doc(a, tyvars) for a in ty[2])
+        doc = Doc(
+            "seq", items=(Doc("fill", ("(", ", ", ")"), args), atom(type_name(ty[1])))
+        )
+    return Doc("paren", items=(doc,)) if atomic else doc
+
+
+def render_type(ty, tyvars={}, atomic=False):
+    """ty as printed on one line."""
+    parts = []
+    type_doc(ty, tyvars, atomic).flat(parts)
+    return "".join(parts)
 
 
 def numeral(tm):
@@ -493,27 +647,113 @@ def numeral(tm):
     return n
 
 
+def app_of(f, x):
+    return ("a", f, x)
+
+
+def tag_name(tm):
+    """The name whose character codes the right-nested tuple tm holds, as
+    new_specification builds it, or None. Only printable ASCII."""
+    codes = []
+    while (
+        tm[0] == "a" and tm[1][0] == "a" and tm[1][1][0] == "c" and tm[1][1][1] == ","
+    ):
+        n = numeral(tm[1][2])
+        if n is None:
+            return None
+        codes.append(n)
+        tm = tm[2]
+    n = numeral(tm)
+    if n is None:
+        return None
+    codes.append(n)
+    if not all(32 <= n < 127 for n in codes):
+        return None
+    return "".join(map(chr, codes))
+
+
+def drop_tag(tm, f, g):
+    """(tm with every f g replaced by a variable f of the type of f g,
+    the number of replacements), or None if f or g occur otherwise,
+    another variable has either name, or a binder rebinds one."""
+    stack, out, uses = [(tm, False)], [], 0
+    names = (f[1], g[1])
+    while stack:
+        t, done = stack.pop()
+        if done:
+            right, left = out.pop(), out.pop()
+            out.append(("a", left, right) if t[0] == "a" else ("l", left, right))
+            continue
+        if t == ("a", f, g):
+            out.append(("v", f[1], f[2][2][1]))
+            uses += 1
+        elif t[0] == "v":
+            if t[1] in names:
+                return None
+            out.append(t)
+        elif t[0] == "c":
+            out.append(t)
+        elif t[0] == "l":
+            if t[1][1] in names:
+                return None
+            stack.append((t, True))
+            stack.append((t[2], False))
+            out.append(t[1])
+        else:
+            stack.append((t, True))
+            stack.append((t[2], False))
+            stack.append((t[1], False))
+    return out[0], uses
+
+
 class Doc:
-    """A layout unit: an atom, an abstraction "(\\x:ty. body)", or a
-    delimited sequence: an application "(head args...)", a list
-    "[a; b]" or a byte list "#x[0a 1b]"."""
+    """A layout unit, with its width when printed on one line:
+
+    atom   text
+    seq    items separated by spaces; broken, every item after the first
+           on a new line, indented by 2
+    chain  first, then (op, item) pairs; broken, each pair on a new line
+    bind   a binder head (a fill of its variables) and its body; broken,
+           the body on a new line, indented by 2
+    let    `let v = x and ... in` and the body; broken, each binding on
+           its own line, the body on a new line
+    paren  an item in parentheses
+    join   items without separators, e.g. a variable and its type
+    fill   opening, items separated by sep, closing; broken, as many items
+           on each line as fit, continued below the first item or, with a
+           fourth text element n, indented by n (used for long types)
+    """
 
     __slots__ = ("kind", "text", "items", "width")
-    # kind -> (opening, separator, closing, indent of continuation lines)
-    DELIMITERS = {
-        "app": ("(", " ", ")", 2),
-        "list": ("[", "; ", "]", 1),
-        "bytes": ("#x[", " ", "]", 3),
-    }
 
     def __init__(self, kind, text="", items=()):
         self.kind, self.text, self.items = kind, text, items
         if kind == "atom":
             self.width = len(text)
-        elif kind == "abs":
-            self.width = len(text) + 2 + items[0].width
-        else:
-            opening, sep, closing, _ = self.DELIMITERS[kind]
+        elif kind == "seq":
+            self.width = sum(i.width for i in items) + len(items) - 1
+        elif kind == "chain":
+            self.width = items[0].width + sum(
+                len(self.op_text(op)) + i.width for op, i in items[1:]
+            )
+        elif kind == "bind":
+            self.width = items[0].width + 1 + items[1].width
+        elif kind == "let":
+            # let h v and h v in body
+            pairs = items[:-1]
+            self.width = (
+                sum(h.width + 1 + v.width for h, v in pairs)
+                + 4
+                + 5 * (len(pairs) - 1)
+                + 4
+                + items[-1].width
+            )
+        elif kind == "paren":
+            self.width = items[0].width + 2
+        elif kind == "join":
+            self.width = sum(i.width for i in items)
+        else:  # fill: text = (opening, sep, closing[, indent])
+            opening, sep, closing = text[:3]
             self.width = (
                 len(opening)
                 + sum(i.width for i in items)
@@ -521,52 +761,136 @@ class Doc:
                 + len(closing)
             )
 
+    @staticmethod
+    def op_text(op):
+        return {",": ", ", "..": ".."}.get(op, f" {op} ")
+
     def flat(self, out):
-        if self.kind == "atom":
+        k = self.kind
+        if k == "atom":
             out.append(self.text)
-        elif self.kind == "abs":
-            out.append(self.text + " ")
+        elif k == "seq":
+            for n, item in enumerate(self.items):
+                if n:
+                    out.append(" ")
+                item.flat(out)
+        elif k == "chain":
+            self.items[0].flat(out)
+            for op, item in self.items[1:]:
+                out.append(self.op_text(op))
+                item.flat(out)
+        elif k == "bind":
+            self.items[0].flat(out)
+            out.append(" ")
+            self.items[1].flat(out)
+        elif k == "join":
+            for item in self.items:
+                item.flat(out)
+        elif k == "let":
+            for n, (head, value) in enumerate(self.items[:-1]):
+                out.append("let " if n == 0 else " and ")
+                head.flat(out)
+                out.append(" ")
+                value.flat(out)
+            out.append(" in ")
+            self.items[-1].flat(out)
+        elif k == "paren":
+            out.append("(")
             self.items[0].flat(out)
             out.append(")")
         else:
-            opening, sep, closing, _ = self.DELIMITERS[self.kind]
+            opening, sep, closing = self.text[:3]
             out.append(opening)
-            for k, item in enumerate(self.items):
-                if k:
+            for n, item in enumerate(self.items):
+                if n:
                     out.append(sep)
                 item.flat(out)
             out.append(closing)
 
-    def lines(self, indent, out):
+    def lines(self, indent, out, tail=0):
         """Append to out, a list of lines; the first continues out[-1].
-        A unit that does not fit is broken: a delimited sequence keeps as
-        many items on a line as fit, and puts an item that it has to
-        break, and everything after it, on new lines; an abstraction puts
-        its body on a new line."""
-        if self.kind == "atom" or indent + self.width <= WIDTH:
+        Continuation lines are indented relative to indent; tail is the
+        width of what follows on the last line, such as closing
+        parentheses. Layout only places line breaks between tokens: it
+        does not change the text's meaning."""
+        if self.kind == "atom" or len(out[-1]) + self.width + tail <= WIDTH:
             parts = []
             self.flat(parts)
             out[-1] += "".join(parts)
-        elif self.kind == "abs":
-            out[-1] += self.text
+            return
+        k = self.kind
+        if k == "seq":
+            last = len(self.items) - 1
+            self.items[0].lines(indent, out, tail if last == 0 else 0)
+            broken = False
+            for n, item in enumerate(self.items[1:], 1):
+                after = tail if n == last else 0
+                fits = len(out[-1]) + 1 + item.width + after <= WIDTH
+                # A last argument that does not fit continues the line,
+                # so that f (g (h ...)) does not indent once per level.
+                hang = n == last and len(out[-1]) < WIDTH // 2
+                if not broken and (fits or hang):
+                    out[-1] += " "
+                    item.lines(indent if hang and not fits else indent + 2, out, after)
+                else:
+                    out.append(" " * (indent + 2))
+                    broken = True
+                    item.lines(indent + 2, out, after)
+        elif k == "chain":
+            last = len(self.items) - 1
+            self.items[0].lines(indent, out)
+            for n, (op, item) in enumerate(self.items[1:], 1):
+                lead = op + " "
+                out.append(" " * indent + lead)
+                item.lines(indent + len(lead), out, tail if n == last else 0)
+        elif k == "bind":
+            self.items[0].lines(indent, out)
             out.append(" " * (indent + 2))
-            self.items[0].lines(indent + 2, out)
+            self.items[1].lines(indent + 2, out, tail)
+        elif k == "join":
+            rest = [i.width for i in self.items]
+            for n, item in enumerate(self.items):
+                item.lines(indent, out, tail + sum(rest[n + 1 :]))
+        elif k == "let":
+            for n, (head, value) in enumerate(self.items[:-1]):
+                if n:
+                    out.append(" " * indent + "and ")
+                else:
+                    out[-1] += "let "
+                head.lines(indent + 4, out)
+                # " in" follows the last value.
+                after = 3 if n == len(self.items) - 2 else 0
+                if len(out[-1]) + 1 + value.width + after <= WIDTH:
+                    out[-1] += " "
+                else:
+                    out.append(" " * (indent + 4))
+                value.lines(indent + 4, out, after)
+            out[-1] += " in"
+            out.append(" " * indent)
+            self.items[-1].lines(indent, out, tail)
+        elif k == "paren":
+            out[-1] += "("
+            self.items[0].lines(indent, out, tail + 1)
             out[-1] += ")"
         else:
-            opening, sep, closing, cont = self.DELIMITERS[self.kind]
+            opening, sep, closing = self.text[:3]
+            cont = len(out[-1]) + len(opening)
+            if len(self.text) > 3:
+                cont = indent + self.text[3]
             out[-1] += opening
-            self.items[0].lines(indent + len(opening), out)
-            broken = False
-            for item in self.items[1:]:
-                if not broken and len(out[-1]) + len(sep) + item.width <= WIDTH:
+            last = len(self.items) - 1
+            self.items[0].lines(
+                cont, out, tail + len(closing) if last == 0 else len(sep.rstrip())
+            )
+            for n, item in enumerate(self.items[1:], 1):
+                after = tail + len(closing) if n == last else len(sep.rstrip())
+                if len(out[-1]) + len(sep) + item.width + after <= WIDTH:
                     out[-1] += sep
-                    item.lines(indent + cont, out)
+                    item.lines(len(out[-1]), out, after)
                 else:
                     out[-1] += sep.rstrip()
-                    out.append(" " * (indent + cont))
-                    before = len(out)
-                    item.lines(indent + cont, out)
-                    broken = len(out) > before
+                    out.append(" " * cont)
+                    item.lines(cont, out, after)
             out[-1] += closing
 
 
@@ -580,7 +904,7 @@ class Renderer:
         self.display = theory.display
         self.type_of = TypeOf()
         self.annotate = ()
-        self.genvars, self.tyvars = {}, {}
+        self.genvars, self.tyvars, self.name_counts = {}, {}, {}
 
     def const_annotation_needed(self, name, args):
         generic = self.generic.get(name)
@@ -597,15 +921,30 @@ class Renderer:
             ty = ty[2][1]
         return not wanted <= have
 
-    def const(self, tm, args, env):
-        if tm[1] in self.display:
+    def ty(self, ty, atomic=False):
+        return type_doc(ty, self.tyvars, atomic)
+
+    def typed(self, name, ty):
+        """(name : ty), a constant at its type."""
+        return Doc("paren", items=(Doc("seq", items=(atom(name), self.ascribed(ty))),))
+
+    def ascribed(self, ty):
+        """`: ty`, kept on one line with its type's first part."""
+        return Doc("join", items=(atom(": "), self.ty(ty)))
+
+    def const_name(self, name, env):
+        if name in self.display:
             # _<C> is never the printed name of a variable.
-            name = self.display[tm[1]]
+            return self.display[name]
+        if name in OPERATORS or name in KEYWORDS:
+            text = (
+                f"({name})"
+                if RAW_SYMBOL.match(name) or name in KEYWORDS or name == ".."
+                else qname(name)
+            )
         else:
-            name = ("$" if tm[1] in env else "") + qname(tm[1])
-        if tm[1] in self.annotate or self.const_annotation_needed(tm[1], args):
-            name += ":" + render_type(tm[2], self.tyvars)
-        return atom(name)
+            text = qname(name)
+        return ("$" if name in env else "") + text
 
     def list_items(self, tm):
         items, elem = [], None
@@ -625,75 +964,230 @@ class Renderer:
             items.append(x)
             tm = tm[2]
 
-    def term(self, tm, env):
-        # env: rendered variable name -> types of the enclosing binders
-        if tm[0] == "v":
-            name = self.var_name(tm[1])
-            text = qname(name, symbols=False)
-            if env.get(name, [None])[-1] == tm[2]:
-                return atom(text)
-            return atom("{" + text + ":" + render_type(tm[2], self.tyvars) + "}")
-        if tm[0] == "c":
-            return self.const(tm, (), env)
-        if tm[0] == "l" or self.binder(tm, env):
-            return self.binding(tm, env)
-        n = numeral(tm)
-        if n is not None:
-            return atom(f"#{n}")
-        if tm[1] == ("c", "int_of_num", fun(NUM, INT)):
-            n = numeral(tm[2])
-            if n is not None:
-                return atom(f"&{n}")
-        data = byte_elements(tm)
-        if data and None not in data:
-            return Doc("bytes", items=tuple(atom(f"{b:02x}") for b in data))
-        items = self.list_items(tm)
-        if items is not None:
-            docs = tuple(self.term(x, env) for x in items)
-            return Doc("list", items=docs)
+    def spine(self, tm):
         args = []
         while tm[0] == "a":
             args.append(tm[2])
             tm = tm[1]
         args.reverse()
-        head = self.const(tm, args, env) if tm[0] == "c" else self.term(tm, env)
-        # (op a (op b c)) is printed as (op a b c); see CHAINS.
-        while (
-            tm[0] == "c"
-            and tm[1] in CHAINS
-            and tm[1] not in env
-            and len(args) >= 2
-            and self.plain(args[-1], tm[1], 2, env)
-        ):
-            args[-1:] = [args[-1][1][2], args[-1][2]]
-        docs = (head,) + tuple(self.term(a, env) for a in args)
-        return Doc("app", items=docs)
+        return tm, args
 
-    def plain(self, tm, name, nargs, env):
-        """Whether tm is the constant name applied to nargs arguments and
-        printed without a type or $ mark."""
-        args = []
-        while tm[0] == "a" and len(args) < nargs:
-            args.append(tm[2])
-            tm = tm[1]
-        return (
-            len(args) == nargs
-            and tm[0] == "c"
-            and tm[1] == name
-            and name not in env
-            and not self.const_annotation_needed(name, args)
+    def notation(self, head, args, env):
+        """(symbol, precedence, associativity) if head applied to args is
+        printed infix, else None."""
+        if head[0] != "c" or head[1] in env or len(args) != 2:
+            return None
+        entry = INFIX.get(head[1])
+        if entry is None or (entry[0] is not None and head[2] != entry[0]):
+            return None
+        if head[1] in self.annotate or self.const_annotation_needed(head[1], args):
+            return None
+        return entry[1:]
+
+    def term(self, tm, env, ctx=0):
+        """The layout of tm, parenthesized if its precedence is below ctx.
+        env: printed variable name -> types of the enclosing binders."""
+        doc, prec = self.build(tm, env)
+        return Doc("paren", items=(doc,)) if prec < ctx else doc
+
+    def build(self, tm, env):
+        if tm[0] == "v":
+            name = self.var_name(tm[1])
+            text = qname(name, symbols=False)
+            if env.get(name, [None])[-1] == tm[2]:
+                return atom(text), APP + 1
+            return Doc(
+                "join", items=(atom("{" + text + ":"), self.ty(tm[2]), atom("}"))
+            ), APP + 1
+        if tm[0] == "c":
+            name = self.const_name(tm[1], env)
+            if tm[1] in self.annotate or self.const_annotation_needed(tm[1], ()):
+                return self.typed(name, tm[2]), APP + 1
+            return atom(name), APP + 1
+        if tm[0] == "l" or self.binder(tm, env):
+            return self.binding(tm, env), 0
+        n = numeral(tm)
+        if n is not None:
+            return atom(str(n)), APP + 1
+        if tm[1] == ("c", "int_of_num", fun(NUM, INT)):
+            n = numeral(tm[2])
+            if n is not None:
+                return atom(f"&{n}"), APP + 1
+        data = byte_elements(tm)
+        if data and None not in data:
+            items = tuple(atom(f"{b:02x}") for b in data)
+            return Doc("fill", ("#x[", " ", "]"), items), APP + 1
+        items = self.list_items(tm)
+        if items is not None:
+            docs = tuple(self.term(x, env, 1) for x in items)
+            return Doc("fill", ("[", "; ", "]"), docs), APP + 1
+        let = self.let(tm, env)
+        if let:
+            return let, 0
+        spec = self.specification(tm, env)
+        if spec:
+            return spec, 0
+        head, args = self.spine(tm)
+        if (
+            head[0] == "c"
+            and head[1] == "=="
+            and "==" not in env
+            and len(args) == 3
+            and not self.const_annotation_needed("==", args)
+        ):
+            # (a == b) r
+            pair = Doc(
+                "chain",
+                items=(
+                    self.term(args[0], env, APP),
+                    ("==", self.term(args[1], env, APP)),
+                ),
+            )
+            rel = self.term(args[2], env, APP + 1)
+            return Doc("seq", items=(Doc("paren", items=(pair,)), rel)), APP
+        infix = self.notation(head, args, env)
+        if infix:
+            return self.chain(head, args, env, *infix)
+        if (
+            head == NEG
+            and len(args) == 1
+            and NEG[1] not in env
+            and NEG[1] not in self.annotate
+        ):
+            return self.negation(args[0], env), NEG_PREC
+        if len(args) > 1 and self.binder(app_of(head, args[0]), env):
+            # (@x. body) y: a binder applied to further arguments.
+            docs = (self.term(app_of(head, args[0]), env, APP + 1),)
+            docs += tuple(self.term(a, env, APP + 1) for a in args[1:])
+            return Doc("seq", items=docs), APP
+        if head[0] == "c":
+            name = self.const_name(head[1], env)
+            alias = PREFIX.get(head[1])
+            if alias and head[2] == alias[0] and head[1] not in env:
+                hdoc, annotated = atom(alias[1]), False
+            elif head[1] in self.annotate:
+                hdoc, annotated = self.typed(name, head[2]), False
+            else:
+                hdoc = atom(name)
+                annotated = self.const_annotation_needed(head[1], args)
+            docs = (hdoc,) + tuple(self.term(a, env, APP + 1) for a in args)
+            if annotated:
+                # (c args : ty), the type of the whole application.
+                docs += (self.ascribed(self.type_of(tm)),)
+                return Doc("paren", items=(Doc("seq", items=docs),)), APP + 1
+            return Doc("seq", items=docs), APP
+        docs = (self.term(head, env, APP + 1),) + tuple(
+            self.term(a, env, APP + 1) for a in args
         )
+        return Doc("seq", items=docs), APP
+
+    def negation(self, x, env):
+        """-x. An operand that is not an atom is parenthesized, and so is a
+        symbolic constant, so that -x never reads as one name."""
+        doc = self.term(x, env, APP + 1)
+        if (
+            doc.kind == "atom"
+            and RAW_SYMBOL.match(doc.text[0])
+            and not re.match(r"&[0-9]", doc.text)
+        ):
+            doc = Doc("paren", items=(doc,))
+        return Doc("join", items=(atom("-"), doc))
+
+    def specification(self, tm, env):
+        """specification "c" f:ty. body, for
+
+            (@f:tag -> ty. !g:tag. body[f g / f]) (99, ...)
+
+        the form in which new_specification defines the constant c: the
+        tag is the tuple of c's character codes, right-nested, and makes
+        constants with equivalent specifications differ. Printed so only
+        if g is a genvar that occurs nowhere else, and f occurs only
+        applied to g, and no binder in body rebinds either name. The text
+        then determines the term: the tag and its type follow from "c",
+        and g, a genvar bound right after f, is renumbered the same in
+        every term that prints alike."""
+        if not (tm[0] == "a" and tm[1][0] == "a" and tm[1][2][0] == "l"):
+            return None
+        eps, (_, f, body), tag = tm[1][1], tm[1][2], tm[2]
+        if eps[0] != "c" or eps[1] != "@" or "@" in env or "@" in self.annotate:
+            return None
+        name = tag_name(tag)
+        tag_ty = self.type_of(tag)
+        if name is None or not is_fun(f[2]) or f[2][2][0] != tag_ty:
+            return None
+        if not (
+            body[0] == "a"
+            and body[1] == ("c", "!", fun(fun(tag_ty, BOOL), BOOL))
+            and body[2][0] == "l"
+            and "!" not in env
+            and "!" not in self.annotate
+        ):
+            return None
+        g, inner = body[2][1], body[2][2]
+        if g[2] != tag_ty or not GENVAR.match(g[1]) or f[1] == g[1]:
+            return None
+        dropped = drop_tag(inner, f, g)
+        if dropped is None:
+            return None
+        inner, uses = dropped
+        # g's name occurs only in its binder and in the uses dropped here,
+        # so leaving it out loses nothing that the renumbering keeps.
+        if self.name_counts.get(g[1], 0) != 1 + uses:
+            return None
+        ty = f[2][2][1]
+        fname = self.var_name(f[1])
+        env.setdefault(fname, []).append(ty)
+        doc = self.term(inner, env)
+        env[fname].pop()
+        if not env[fname]:
+            del env[fname]
+        bound = Doc(
+            "join",
+            items=(
+                atom(qname(fname, symbols=False) + ":"),
+                self.ty(ty, atomic=True),
+                atom("."),
+            ),
+        )
+        head = Doc("seq", items=(atom(f"specification {json.dumps(name)}"), bound))
+        return Doc("bind", items=(head, doc))
+
+    def chain(self, head, args, env, sym, prec, assoc):
+        """a OP b, with right-nested operands of the same constant of a
+        right-associative operator in one chain."""
+        left = prec + (1 if assoc != "l" else 0)
+        right = prec + (1 if assoc != "r" else 0)
+        if sym == "..":
+            # Written without spaces, so an infix operand would read as
+            # binding looser: (n - 1)..m, not n - 1..m.
+            left = right = APP
+        items = [self.term(args[0], env, left)]
+        x = args[1]
+        while assoc == "r":
+            h, a = self.spine(x)
+            if h != head or self.notation(h, a, env) is None:
+                break
+            items.append((sym, self.term(a[0], env, left)))
+            x = a[1]
+        items.append((sym, self.term(x, env, right)))
+        return Doc("chain", items=tuple(items)), prec
 
     def binder(self, tm, env):
-        """The binder constant if tm is (b (\\x. body)), printed (bx. body)."""
+        """The binder constant if tm is (b (\\x. body)), printed bx. body."""
         if tm[0] == "a" and tm[2][0] == "l" and tm[1][0] == "c":
-            if tm[1][1] in BINDERS and self.plain(tm, tm[1][1], 1, env):
-                return tm[1][1]
+            b = tm[1][1]
+            if (
+                b in BINDERS
+                and b not in env
+                and b not in self.annotate
+                and not self.const_annotation_needed(b, (tm[2],))
+            ):
+                return b
         return None
 
     def binding(self, tm, env):
         """An abstraction or binder, with nested ones of the same kind:
-        (\\x:a y:b. body) or (!x:a y:b. body)."""
+        \\x:a y:b. body or !x:a y:b. body."""
         kind = "\\" if tm[0] == "l" else self.binder(tm, env)
         names, texts = [], []
         while True:
@@ -704,8 +1198,15 @@ class Renderer:
             else:
                 break
             name = self.var_name(v[1])
-            ty = render_type(v[2], self.tyvars)
-            texts.append(qname(name, symbols=False) + ":" + ty)
+            texts.append(
+                Doc(
+                    "join",
+                    items=(
+                        atom(qname(name, symbols=False) + ":"),
+                        self.ty(v[2], atomic=True),
+                    ),
+                )
+            )
             names.append(name)
             env.setdefault(name, []).append(v[2])
         body = self.term(tm, env)
@@ -713,7 +1214,51 @@ class Renderer:
             env[name].pop()
             if not env[name]:
                 del env[name]
-        return Doc("abs", "(" + kind + " ".join(texts) + ".", (body,))
+        head = Doc("fill", (kind, " ", "."), tuple(texts))
+        return Doc("bind", items=(head, body))
+
+    def let(self, tm, env):
+        """let x:ty = v and ... in body, for LET (\\x. ... LET_END body) v ...,
+        as HOL Light parses it."""
+        head, args = self.spine(tm)
+        if head[0] != "c" or head[1] != "LET" or "LET" in env or len(args) < 2:
+            return None
+        f, values = args[0], args[1:]
+        bound = []
+        for _ in values:
+            if f[0] != "l":
+                return None
+            bound.append(f[1])
+            f = f[2]
+        end, end_args = self.spine(f)
+        if end[0] != "c" or end[1] != "LET_END" or len(end_args) != 1:
+            return None
+        if "LET_END" in env or self.const_annotation_needed("LET", args):
+            return None
+        if self.const_annotation_needed("LET_END", end_args):
+            return None
+        # The values are outside the scope of the bound variables.
+        items = []
+        for v, value in zip(bound, values):
+            name = self.var_name(v[1])
+            text = Doc(
+                "join",
+                items=(
+                    atom(qname(name, symbols=False) + ":"),
+                    self.ty(v[2], atomic=True),
+                    atom(" ="),
+                ),
+            )
+            items.append((text, self.term(value, env)))
+        names = [self.var_name(v[1]) for v in bound]
+        for name, v in zip(names, bound):
+            env.setdefault(name, []).append(v[2])
+        body = self.term(end_args[0], env)
+        for name in names:
+            env[name].pop()
+            if not env[name]:
+                del env[name]
+        return Doc("let", items=tuple(items) + (body,))
 
     def var_name(self, name):
         return self.genvars.get(name, name)
@@ -729,12 +1274,15 @@ class Renderer:
         renaming is a bijection on its names and leaves all other names
         alone, so it preserves the structure of the term."""
         self.genvars, self.tyvars, stack = {}, {}, [tm]
+        self.name_counts = {}
         counts = {"_": 0, "GEN%PVAR%": 0}
         while stack:
             t = stack.pop()
             if t[0] in "al":
                 stack.extend((t[2], t[1]))
                 continue
+            if t[0] == "v":
+                self.name_counts[t[1]] = self.name_counts.get(t[1], 0) + 1
             if t[0] == "v" and t[1] not in self.genvars:
                 for prefix, pattern in (("_", GENVAR), ("GEN%PVAR%", GENPVAR)):
                     if pattern.match(t[1]):
@@ -803,9 +1351,9 @@ def read_entries(path):
 
 
 def rendered_bytes(text):
-    """(name, bytes) if text renders a definition `|- (= name #x[..])`,
+    """(name, bytes) if text renders a definition `|- name = #x[..]`,
     else None. check-binary reads byte lists this way."""
-    m = re.fullmatch(r"\|- \(= (\S+)\s+#x\[([0-9a-f\s]*)\]\)", text)
+    m = re.fullmatch(r"\|- (\S+)\s+= #x\[([0-9a-f\s]*)\]", text)
     if m is None:
         return None
     return m.group(1), bytes(int(b, 16) for b in m.group(2).split())
@@ -1009,7 +1557,7 @@ def conform(
         )
     for name, th in sorted(type_defs.items()):
         check_entry(
-            f"typedef {qname(name)}",
+            f"typedef {header_name(name)}",
             render.theorem(th, theory.typedef_consts[name]),
             defs,
             new_defs,
