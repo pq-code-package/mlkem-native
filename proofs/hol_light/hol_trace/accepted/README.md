@@ -39,12 +39,20 @@ each specification file, in one process for each architecture, and
 writes the definitions that each step adds to `base/` and `spec/`. It
 then loads each proof of one architecture, the host's or `--arch`'s, in
 a process of its own and rewrites the proof's files as `hol-trace
-compare --accept` does. `hol-trace outline --base` writes only `base/`,
-`--specs` only `spec/`, and `-p FUNC ...` only those proofs' files.
-`scripts/autogen --hol-trace-defs` runs `--base --specs` and then
-writes the outlines of every proof of both architectures. With
-`-j 12`, writing all outlines took 17 minutes, each proof 37 to 217 s
-and at most 0.4 GiB; `gen` takes up to hours and over 100 GB per proof.
+compare --accept` does. `--base`, `--specs` and `-p FUNC ...` select
+`base/`, `spec/` and those proofs' files, in any combination; without
+any of them, `hol-trace outline` writes everything. `--out DIR` writes
+the files to `DIR` instead, laid out the same way.
+`scripts/autogen --hol-trace-defs` writes the shared files and the
+outlines of every proof of both architectures into a temporary
+directory, and then updates `base/`, `spec/` and the proofs' `.defs` and
+`.thms` from it like its other generated files: with `--dry-run`, it
+fails if any of them would change, appear or disappear. It reads the
+shared files before any proof outline runs proof code.
+`--hol-trace-defs base,specs,FUNC,...` selects as `hol-trace outline`
+does. With `-j 12`, writing all outlines took 17 minutes, each proof 37
+to 217 s and at most 0.4 GiB; `gen` takes up to hours and over 100 GB
+per proof.
 
 An outline checks nothing: it asserts every statement, true or not. The
 files it writes are for review, and `hol-trace check`, in CI or by hand,

@@ -1501,16 +1501,19 @@ def conform(
     thms_path,
     accept=False,
     accept_hashed=False,
+    out_defs_path=None,
+    out_thms_path=None,
 ):
     """Check one replay result. Return a list of report lines.
 
     proof: the function's name; theorem_names: the proof's main theorems;
     layer_paths: the generated layer files
     (base and spec), HOL Light's first, never written here; defs_path, thms_path: the
-    proof's own accepted files. With accept, rewrite the proof's files to
-    hold exactly what the result needs beyond the layers, but only if
-    nothing differs from a layer, and only if every new entry is shown in
-    full or accept_hashed is set."""
+    proof's own accepted files. With accept, rewrite the proof's files, or
+    write out_defs_path and out_thms_path if given, to hold exactly what
+    the result needs beyond the layers, but only if nothing differs from a
+    layer, and only if every new entry is shown in full or accept_hashed
+    is set."""
     axioms, definitions, typedefs, named = read_result(result_path)
     theory = Theory(definitions, typedefs)
     render = Renderer(theory)
@@ -1601,8 +1604,10 @@ def conform(
         )
     if accept:
         comment = DEFS_COMMENT.format(proof=proof)
-        write_entries(defs_path, comment, new_defs)
-        write_entries(thms_path, THMS_COMMENT.format(proof=proof), new_thms)
+        write_entries(out_defs_path or defs_path, comment, new_defs)
+        write_entries(
+            out_thms_path or thms_path, THMS_COMMENT.format(proof=proof), new_thms
+        )
         report.extend(f"removed: {m}" for m in moved)
         report.extend(f"accepted: {p}" for p in problems + residue)
         return report

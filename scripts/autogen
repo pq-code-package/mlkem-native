@@ -4001,32 +4001,90 @@ def run_quietly(cmd):
         raise subprocess.CalledProcessError(p.returncode, cmd)
 
 
-def gen_hol_trace_defs():
+def gen_hol_trace_defs(selection):
+    """Regenerate accepted HOLTrace files. selection is "all" or a
+    comma-separated list of `base`, `specs` and function names, as for
+    `hol-trace outline -p`."""
     hol_trace = "proofs/hol_light/hol_trace/hol-trace"
-    # The shared files, for both architectures, then each architecture's
-    # proofs. Each outline is one HOL Light process that loads
-    # definitions only.
-    run_quietly([hol_trace, "outline", "--base", "--specs"])
+    accepted = "proofs/hol_light/hol_trace/accepted"
     machine = platform.machine().lower()
     native = "aarch64" if machine in ["arm64", "aarch64"] else machine
-    for arch in ["aarch64", "x86_64"]:
-        # The proofs read their object files; as the proof Makefiles do,
-        # assemble other architectures with the cross assembler.
-        if arch != native and shutil.which(f"{arch}-unknown-linux-gnu-as") is None:
-            print(
-                f"Skipping the HOLTrace outlines of the {arch} proofs: no "
-                f"{arch} assembler. Use `nix develop .#hol_light-cross` to "
-                "write those of both architectures.",
-                flush=True,
-            )
-            continue
-        funcs = subprocess.run(
+    funcs_of = {
+        arch: subprocess.run(
             [hol_trace, "list", "--arch", arch],
             check=True,
             capture_output=True,
             text=True,
         ).stdout.split()
-        run_quietly([hol_trace, "outline", "--arch", arch, "-p"] + funcs)
+        for arch in ["aarch64", "x86_64"]
+    }
+    everything = selection == "all"
+    names = [] if everything else [n for n in selection.split(",") if n]
+    known = {"base", "specs"} | {f for fs in funcs_of.values() for f in fs}
+    unknown = [n for n in names if n not in known]
+    if unknown:
+        raise Exception(
+            "--hol-trace-defs: unknown "
+            + ", ".join(unknown)
+            + "; expected base, specs or functions listed by `hol-trace list`"
+        )
+    shared = [d for d in ("base", "specs") if everything or d in names]
+
+    def files(root, d, pattern):
+        found = pathlib.Path(root, d).glob(pattern)
+        return {str(p.relative_to(root)) for p in found if p.is_file()}
+
+    def sync(out, scope):
+        # Update the files in scope like any other generated file, so that
+        # --dry-run fails if one of them is stale.
+        for d, pattern in scope:
+            new = files(out, d, pattern)
+            for f in sorted(files(accepted, d, pattern) | new):
+                content = pathlib.Path(out, f).read_text() if f in new else None
+                update_file(os.path.join(accepted, f), content)
+
+    with tempfile.TemporaryDirectory(prefix="hol-trace-accepted-") as out:
+        # hol-trace writes to `out`. Each outline is one HOL Light process
+        # that loads definitions only.
+        if shared:
+            run_quietly(
+                [hol_trace, "outline", "--out", out] + [f"--{d}" for d in shared]
+            )
+            # Read the shared files before any proof outline runs: those
+            # run proof code, which must not change what is compared.
+            scope = {"base": ("base", "*"), "specs": ("spec", "**/*")}
+            sync(out, [scope[d] for d in shared])
+        for arch in ["aarch64", "x86_64"]:
+            funcs = [f for f in funcs_of[arch] if everything or f in names]
+            if not funcs:
+                continue
+            # The proofs read their object files; as the proof Makefiles do,
+            # assemble other architectures with the cross assembler.
+            if arch != native and shutil.which(f"{arch}-unknown-linux-gnu-as") is None:
+                message = (
+                    f"no {arch} assembler for the HOLTrace outlines of the "
+                    f"{arch} proofs. Use `nix develop .#hol_light-cross` to "
+                    "write those of both architectures."
+                )
+                if not everything:
+                    raise Exception(message)
+                print(f"Skipping: {message}", flush=True)
+                continue
+            run_quietly(
+                [hol_trace, "outline", "--arch", arch, "--out", out, "-p"] + funcs
+            )
+            if everything:
+                # Also remove the files of functions that no longer exist.
+                sync(out, [(f"proofs/{arch}", "*.defs"), (f"proofs/{arch}", "*.thms")])
+            else:
+                sync(
+                    out,
+                    [
+                        (f"proofs/{arch}", f"{f}.{e}")
+                        for f in funcs
+                        for e in ("defs", "thms")
+                    ],
+                )
 
 
 def gen_slothy(funcs):
@@ -5546,12 +5604,15 @@ def _main():
     )
     parser.add_argument(
         "--hol-trace-defs",
-        default=False,
-        action="store_true",
+        nargs="?",
+        const="all",
+        default=None,
+        metavar="LIST",
         help="Regenerate the trusted HOL definitions of the HOL Light and "
         "s2n-bignum proof infrastructure, and of our own specifications and "
-        "proofs, in proofs/hol_light/hol_trace/accepted/. "
-        "See proofs/hol_light/hol_trace/accepted/README.md.",
+        "proofs, in proofs/hol_light/hol_trace/accepted/. LIST, "
+        "comma-separated, selects `base`, `specs` and functions; without "
+        "it, everything. See proofs/hol_light/hol_trace/accepted/README.md.",
     )
     parser.add_argument(
         "--test-vectors",
@@ -5603,8 +5664,8 @@ def _main():
         ),
         (
             "Generate HOLTrace accepted files (outlines)",
-            gen_hol_trace_defs,
-            args.hol_trace_defs and not args.dry_run,
+            lambda: gen_hol_trace_defs(args.hol_trace_defs),
+            args.hol_trace_defs is not None,
         ),
     ]
 
