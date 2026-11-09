@@ -758,7 +758,7 @@ def new_entries(dumps):
         for th in reversed(typedefs):  # newest first, too
             name = conform.dest_typedef(th)[0]
             text = render.theorem(th, theory.typedef_consts[name])
-            entries.append((f"typedef {conform.qname(name)}", text))
+            entries.append((f"typedef {conform.header_name(name)}", text))
         entries = [(h, conform.stored(t)) for h, t in entries if h not in seen]
         seen.update(h for h, _ in entries)
         out.append(entries)

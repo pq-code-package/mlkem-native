@@ -79,7 +79,7 @@ def check_note(defs_path, name, data):
     """The comment before a byte list states its length and SHA-256."""
     with open(defs_path, encoding="utf-8") as f:
         lines = f.read().split("\n")
-    at = lines.index(f"definition {conform.qname(name)}")
+    at = lines.index(f"definition {conform.header_name(name)}")
     note = conform.byte_note(name, data)
     if "\n".join(lines[at - note.count("\n") - 1 : at]) != note:
         raise Failed(f"the comment before {name} is not `{note}`")
@@ -97,8 +97,8 @@ def defs_hashes(defs_path):
     hashes = {name: hashlib.sha256(data).hexdigest()}
     if name.endswith("_mc"):
         trimmed = name[: -len("_mc")] + "_tmc"
-        text = entries.get(f"definition {conform.qname(trimmed)}")
-        if text == f"|- (= {trimmed} (TRIM_LIST (, #4 #0) {name}))":
+        text = entries.get(f"definition {conform.header_name(trimmed)}")
+        if text == f"|- {trimmed} = TRIM_LIST (4, 0) {name}":
             hashes[trimmed] = hashlib.sha256(data[4:]).hexdigest()
     return hashes
 
