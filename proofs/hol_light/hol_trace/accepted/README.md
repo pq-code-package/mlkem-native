@@ -86,4 +86,5 @@ differs, so that different objects never print the same:
 Renderings over 64 KiB are stored as their SHA-256 hash, and `--accept`
 adds one to a proof's files only with `--accept-hashed`. A byte list is preceded by a comment
 with its length and SHA-256, which check-binary checks. An axiom's
-header is a hash of its text.
+header is a hash of its text; `base/hol_light.defs` gives HOL Light's
+names for its three axioms in comments.
