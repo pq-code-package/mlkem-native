@@ -159,7 +159,7 @@ yourself, use `hol-trace gen -p FUNC` and then
 ```bash
 nix develop .#hol_trace-cross   # outline and HOL Light replay: any HOL Light shell
 hol-trace list
-hol-trace outline [-p FUNC ...] [--base] [--specs] [-j N]   # used by scripts/autogen --hol-trace-defs
+hol-trace outline [--base] [--specs] [-p FUNC ...] [--out DIR] [-j N]   # used by scripts/autogen --hol-trace-defs
 hol-trace gen [-p FUNC ...] [--no-prune] [-j N]
 hol-trace check [--backend BACKEND] [-p FUNC ...] [-j N] [--accept]
 check-binary [--show-all] [--force-all] FILE ...
@@ -170,10 +170,10 @@ separately, and `compare` can be rerun without replaying. As with `tests
 hol_light`, each command works on one architecture: the host's, or the
 one given by `--arch aarch64|x86_64`. `-p` names functions of that
 architecture, such as `mlkem_ntt_aarch64_asm`; without `-p`, the
-commands select all of them (see `hol-trace list`). The shared files,
-which `hol-trace outline` writes without `-p` and with `--base` or
-`--specs`, always cover both architectures. `hol-trace --help` lists all
-options.
+commands select all of them (see `hol-trace list`). `hol-trace outline`
+also takes `--base` and `--specs` for the shared files, which always
+cover both architectures; these and `-p` combine, and with none of them
+it writes everything. `hol-trace --help` lists all options.
 
 ## CI
 
