@@ -177,32 +177,19 @@ it writes everything. `hol-trace --help` lists all options.
 
 ## CI
 
-[hol_trace.yml](../../../.github/workflows/hol_trace.yml) runs in the
-upstream repository and skips fork pull requests. Manual dispatch checks
-all proofs.
-
-A hosted runner selects the affected proofs before starting an
-instance, with `proofs/hol_light/scripts/deps rev` from
-[proofs/hol_light/deps.yml](../deps.yml), exactly as HOL-Light CI
-does. An empty selection skips EC2 provisioning.
-
-One temporary `r9g.24xlarge` runner with a 512 GB disk checks the entire
-selection; there is no EC2 proof matrix. The ARM64 runner
-cross-assembles x86_64 proofs in `nix develop .#hol_trace-cross`.
-It sets a 1 GiB stack and uses eight workers for each phase. Each phase
-is a step of its own, so the job's log shows them separately:
-1. capture traces of every selected proof (`gen`);
-2. replay them with HOL Light;
-3. compare every replay result with the accepted files;
-4. check the proofs' object files with `check-binary --force-all`: each
+[hol_trace.yml](../../../.github/workflows/hol_trace.yml) selects the
+affected proofs with `proofs/hol_light/scripts/deps rev`, as HOL-Light
+CI does, and checks them on one EC2 runner, one step per phase:
+1. regenerate `accepted/base` and `accepted/spec` with
+   `scripts/autogen --dry-run --hol-trace-defs base,specs`, and fail if any
+   of their files would change, appear or disappear;
+2. capture traces of every selected proof (`gen`);
+3. replay them with HOL Light;
+4. compare every replay result with the accepted files;
+5. check the proofs' object files with `check-binary --force-all`: each
    must contain only proved functions, with the proved bytes.
 
-Each phase finishes for all proofs before the next starts, and runs
-`hol-trace` once per architecture. Comparisons use eight separate
-processes. Other proofs and later phases continue if one fails, and any
-failure fails the job. Traces and replay results are removed after all
-checks finish. CI never accepts new definitions or statements.
-Generation and replay logs and manifests are retained for seven days;
-the large trace files are not uploaded. The job has a 24-hour timeout.
-The existing EC2 workflow stops the runner after the job, including on
-failure or cancellation.
+Step 1 is what ties `accepted/base` and `accepted/spec` to the pinned
+HOL Light and s2n-bignum and to the specification files: replay and
+compare only check a trace against the accepted files. Any failed step
+fails the job.

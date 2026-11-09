@@ -2,65 +2,35 @@
 
 # Accepted definitions and statements
 
-`hol-trace compare` accepts a replayed proof only if every axiom appears
-in `base/hol_light.defs`, and every definition that its main theorems
-use and every main theorem appears here exactly. No other file may list
-an axiom; `hol-trace outline` fails if a later load step adds one. A
-proof's `FUNC.defs` includes its machine code as a byte list;
-[check-binary](../../../../scripts/check-binary) compares that with functions in binaries,
-through `proofs/hol_light/bind.yml`. See [../README.md](../README.md)
-for the checks; the notation is below.
+The files in this directory contain trusted or manually reviewed
+definitions and theorems. Definitions are recorded in `*.defs` files,
+theorems are recorded in `*.thms` files.
 
-| Directory | Contents | Written by | Review |
-|---|---|---|---|
-| `base/` | HOL Light's axioms and definitions, and the s2n-bignum files that the proofs load (one file per architecture) | `hol-trace outline --base` | check that a diff is explained by a pin change |
-| `spec/` | each mlkem-native file that the proofs load and that is not a proof: `spec/NAME.defs` for `common/NAME.ml`, `spec/ARCH/NAME.defs` for `ARCH/proofs/NAME.ml` | `hol-trace outline --specs` | careful: these are the specifications |
-| `proofs/ARCH/` | per proof: `FUNC.thms`, the main theorems, and `FUNC.defs`, the definitions it uses beyond the layers | `hol-trace outline` or `hol-trace compare --accept` | careful: this is what the proof claims |
+The directory has three layers:
 
-`base/` and `spec/` hold everything that each load step defines, whether
-or not a proof uses it. Each file records the pins or the source file it
-was generated from; conform fails when they no longer match.
+- **Base layer** (`base/`): Definitions from the core infrastructure of
+  HOL-Light and s2n-bignum. Those are the base definitions that we expect
+  all our proofs to build on and reproduce upon replay. They must either
+  be reviewed or trusted.
+- **Spec** (`spec/`): Definitions of specifications used by our proofs.
+  As with HOL-Light and s2n-bignum definitions, proof scripts are checked
+  to not use conflicting definitions for these specifications. These must
+  be reviewed by hand.
+- **Proof** (`proofs/ARCH/`): The top-level statement of our correctness
+  and security theorems, plus all required definitions not covered by the
+  base and spec layers. These must be reviewed by hand.
 
-`proofs/ARCH/FUNC.*` hold only what that proof needs beyond the layers,
-usually a few constants and the statements.
+Each file in `base/` and `spec/` records the pins or the source it was
+generated from, and compare fails when they no longer match. A proof's
+`FUNC.defs` includes its machine code as a byte list;
+[check-binary](../../../../scripts/check-binary) compares that with
+functions in binaries, through `proofs/hol_light/bind.yml`.
 
-To regenerate the files, run in
-`nix develop .#hol_light-cross`; in `nix develop .#hol_light`, autogen
-writes the proofs' files of the host's architecture only:
-
-```bash
-scripts/autogen --hol-trace-defs
-```
-
-`hol-trace outline` loads files with `prove` replaced by one that
-asserts its goal, so it makes every definition but proves no theorem.
-It first loads the pinned HOL Light, then the s2n-bignum files, then
-each specification file, in one process for each architecture, and
-writes the definitions that each step adds to `base/` and `spec/`. It
-then loads each proof of one architecture, the host's or `--arch`'s, in
-a process of its own and rewrites the proof's files as `hol-trace
-compare --accept` does. `--base`, `--specs` and `-p FUNC ...` select
-`base/`, `spec/` and those proofs' files, in any combination; without
-any of them, `hol-trace outline` writes everything. `--out DIR` writes
-the files to `DIR` instead, laid out the same way.
-`scripts/autogen --hol-trace-defs` writes the shared files and the
-outlines of every proof of both architectures into a temporary
-directory, and then updates `base/`, `spec/` and the proofs' `.defs` and
-`.thms` from it like its other generated files: with `--dry-run`, it
-fails if any of them would change, appear or disappear. It reads the
-shared files before any proof outline runs proof code.
-`--hol-trace-defs base,specs,FUNC,...` selects as `hol-trace outline`
-does. With `-j 12`, writing all outlines took 17 minutes, each proof 37
-to 217 s and at most 0.4 GiB; `gen` takes up to hours and over 100 GB
-per proof.
-
-An outline checks nothing: it asserts every statement, true or not. The
-files it writes are for review, and `hol-trace check`, in CI or by hand,
-confirms them against a replayed trace. If a definition did depend on a
-proof, for example on whether it succeeds, an outline could have a
-different entry; that replay would then fail, not pass.
-`hol-trace compare --accept` rewrites a proof's files from a replay
-result and never changes `base/` or `spec/`.
+All files in this directory are auto-generated. To regenerate the files,
+run `scripts/autogen --hol-trace-defs` in
+`nix develop .#hol_light-cross`, or in `nix develop .#hol_light` for the
+host's architecture only. `--hol-trace-defs base,specs,FUNC,...`
+regenerates only those, and `--dry-run` fails if any is stale.
 
 ## Entries and notation
 
@@ -91,8 +61,9 @@ differs, so that different objects never print the same:
 | `_1`, `'?1`, `"GEN%PVAR%1"` | generated names, renumbered in order of first occurrence because HOL Light's counters depend on load order |
 | `_<C>` | the temporary constant that `define_type` creates for the constructor `C` |
 
-Renderings over 64 KiB are stored as their SHA-256 hash, and `--accept`
-adds one to a proof's files only with `--accept-hashed`. A byte list is preceded by a comment
+Renderings over 64 KiB are stored as their SHA-256 hash; CI checks those
+in `base/` by regenerating it, and `--accept` adds one to a proof's
+files only with `--accept-hashed`. A byte list is preceded by a comment
 with its length and SHA-256, which check-binary checks. An axiom's
 header is a hash of its text; `base/hol_light.defs` gives HOL Light's
 names for its three axioms in comments.
