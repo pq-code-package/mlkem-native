@@ -1375,6 +1375,8 @@ def write_entries(path, comment, entries, order=None):
             text = entries[header]
             data = rendered_bytes(text)
             note = byte_note(*data) + "\n" if data else ""
+            if is_axiom(header) and text in AXIOM_NAMES:
+                note += f"# {AXIOM_NAMES[text]}\n"
             body = text.replace("\n", "\n  ")
             f.write(f"\n{note}{header}\n  {body}\n")
 
@@ -1410,6 +1412,12 @@ def read_layers(paths):
 
 
 AXIOM = "axiom "
+# HOL Light's names for its axioms, written as a comment before each.
+AXIOM_NAMES = {
+    "|- ?f:(ind -> ind). ONE_ONE f /\\ ~ (ONTO f)": "INFINITY_AX",
+    "|- !P:('A -> bool) x:'A. P x ==> P ((@) P)": "SELECT_AX",
+    "|- !t:('A -> 'B). (\\x:'A. t x) = t": "ETA_AX",
+}
 
 
 def axiom_header(text):
