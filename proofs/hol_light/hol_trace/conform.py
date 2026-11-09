@@ -1360,8 +1360,9 @@ def rendered_bytes(text):
 
 
 def byte_note(name, data):
-    """The comment written before a byte-list definition."""
-    return f"# {name}: {len(data)} bytes, sha256 {hashlib.sha256(data).hexdigest()}"
+    """The two comment lines written before a byte-list definition."""
+    digest = hashlib.sha256(data).hexdigest()
+    return f"# {name}: {len(data)} bytes\n# sha256 {digest}"
 
 
 def write_entries(path, comment, entries, order=None):
