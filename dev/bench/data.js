@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794211544821,
+  "lastUpdate": 1794211572423,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -1931,6 +1931,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 98326,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "48417c22640661cf6d923dfc721f672655ae123c",
+          "message": "HOL-Light: Drop duplicate SIMD simplifier from mlkem_utils.ml\n\nmlkem_utils.ml redefined SIMD_SIMPLIFY_CONV and SIMD_SIMPLIFY_TAC,\nshadowing the shared definitions in common/mlkem_specs.ml that every\nproof loading it already loads. The conversion is identical and the\nshared tactic only additionally matches x86 int256 registers, which\nnever occur in Arm goals, so use the shared definitions.\n\n - Resolves #1979.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-09T06:35:16Z",
+          "tree_id": "8416b801f7a9889beb85fdb5c77e0b459fcae116",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/48417c22640661cf6d923dfc721f672655ae123c"
+        },
+        "date": 1794211220260,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 28251,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 34080,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 44528,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 47618,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 53841,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 68473,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 70152,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 78562,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 98327,
             "unit": "cycles"
           }
         ]
