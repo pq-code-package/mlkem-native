@@ -232,8 +232,11 @@
  * Can be overridden by setting the config option MLK_CONFIG_CUSTOM_ALLOC_FREE
  * and defining MLK_CUSTOM_ALLOC and MLK_CUSTOM_FREE.
  *
- * If MLK_CUSTOM_ALLOC is defined using a traditional "malloc" style API,
- * then the returned pointer MUST respect MLK_DEFAULT_ALIGN alignment.
+ * Note that the standard LibC malloc() function should NOT be used
+ * to implement MLK_CUSTOM_ALLOC, since it does not guarantee alignment.
+ * Instead, POSIX's posix_memalign() or Windows' _aligned_malloc() should
+ * be used. See test/configs/custom_heap_alloc_config.h for examples
+ * of how to define MLK_CUSTOM_ALLOC.
  */
 #if defined(MLK_CONFIG_CUSTOM_ALLOC_FREE) != \
     (defined(MLK_CUSTOM_ALLOC) && defined(MLK_CUSTOM_FREE))
