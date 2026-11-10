@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794305468463,
+  "lastUpdate": 1794306613996,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -46066,6 +46066,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 43689,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "a446d5a14b25ea1c768e6790ea81317b250512c9",
+          "message": "bench: Enable Zbb for the Banana Pi F3\n\nThe SpacemiT X60 cores of the Banana Pi F3 implement the Zbb bit\nmanipulation extension (RV64GCVB), but the benchmark built for\nrv64imafdcv only. Add _zbb to -march, so that the compiler can use\nZbb instructions such as rori and andn, for example in the C Keccak.\n\nSo far, the -march given in archflags had no effect, because auto.mk\nappended -march=rv64gcv after it. With the previous commit, the\narchflags are respected, and the benchmark should describe the actual\nhardware.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-10T07:48:46Z",
+          "tree_id": "762cc35d87638e8736179f42c8c52fbb6459edd2",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/a446d5a14b25ea1c768e6790ea81317b250512c9"
+        },
+        "date": 1794306563597,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 12319,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 14758,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 19313,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 21256,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 23485,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 30027,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 30319,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 34092,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 43687,
             "unit": "cycles"
           }
         ]
