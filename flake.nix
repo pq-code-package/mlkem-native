@@ -50,7 +50,7 @@
             export PATH="$REPO_ROOT/scripts:$PATH"
             export PROOF_DIR="$REPO_ROOT/proofs/hol_light"
             # Namespaced imports root for HOL-Light proofs.
-            # See scripts/check-hol-light-imports for the enforced rule.
+            # See proofs/hol_light/scripts/deps for the enforced rule.
             export IMPORTS_DIR="$PROOF_DIR/.imports"
             mkdir -p "$IMPORTS_DIR"
             ln -sfn "$S2N_BIGNUM_DIR" "$IMPORTS_DIR/s2n_bignum"
