@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 # In addition to ruff's default (*.py, *.pyi), format and lint the
-# extension-less python scripts under scripts/.
+# extension-less python scripts under scripts/ and proofs/.
 extend-include = [
+    "proofs/hol_light/scripts/deps",
     "scripts/autogen",
     "scripts/cfify",
     "scripts/check-contracts",
