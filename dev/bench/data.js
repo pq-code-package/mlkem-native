@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794302153718,
+  "lastUpdate": 1794302172468,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -8009,6 +8009,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 140849,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "46fd116d8cf877bc0d0977f20fc821a36ef73a43",
+          "message": "CBMC: Cover the PCT breakage test in check_pct\n\nEnable MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST in the CBMC config and use\nmlk_break_pct by contract in the check_pct proof.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-10T07:48:18Z",
+          "tree_id": "3d4c0e4f02ba217068e653161d25e103499e219d",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/46fd116d8cf877bc0d0977f20fc821a36ef73a43"
+        },
+        "date": 1794302050434,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 39018,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 46552,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 56852,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 69635,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 76893,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 91991,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 110483,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 121073,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 140063,
             "unit": "cycles"
           }
         ]
