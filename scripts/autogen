@@ -4493,6 +4493,35 @@ def update_hol_light_bytecode_for_arch(arch, force_cross=()):
         update_bytecode_in_proof_script(ml_file, bytecode_dict[asm_file.stem])
 
 
+def gen_hol_light_deps():
+    """Write proofs/hol_light/deps.yml: each proof's dependencies, as
+    proofs/hol_light/scripts/deps finds them with HOL Light's loader."""
+    if not os.environ.get("HOLDIR"):
+        print(
+            "Skipping proofs/hol_light/deps.yml: HOL Light is not available. "
+            "Run in `nix develop` or `nix develop .#hol_light`.",
+            flush=True,
+        )
+        return
+    out = subprocess.run(
+        ["proofs/hol_light/scripts/deps", "gen"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    header = [
+        "# Copyright (c) The mlkem-native project authors",
+        "# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT",
+        "#",
+        "# WARNING: This file is auto-generated from scripts/autogen",
+        "#          in the mlkem-native repository.",
+        "#          Do not modify it directly.",
+        "#",
+        "# See proofs/hol_light/scripts/deps.",
+    ]
+    update_file("proofs/hol_light/deps.yml", "\n".join(header) + "\n" + out)
+
+
 def update_hol_light_bytecode(force_cross=()):
     """Update HOL Light proof files with bytecode from make dump_bytecode."""
     update_hol_light_bytecode_for_arch("aarch64", force_cross=force_cross)
@@ -5532,6 +5561,7 @@ def _main():
             lambda: update_hol_light_bytecode(force_cross),
             args.update_hol_light_bytecode,
         ),
+        ("Generate HOL Light proof dependencies", gen_hol_light_deps),
         ("Generate monolithic source files", gen_monolithic),
         ("Generate undefs", gen_undefs),
         ("Generate test configs", gen_test_configs),
