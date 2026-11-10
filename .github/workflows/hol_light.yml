@@ -13,17 +13,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Coarse gate so the proof runners only start when relevant files changed.
+  # Select the proofs that the change can affect, with
+  # proofs/hol_light/scripts/deps rev, from proofs/hol_light/deps.yml.
   # The owner/fork guard lives here, so on forks all downstream jobs skip too.
   check_modified_files:
     name: Determine changed files
     runs-on: ubuntu-latest
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
     outputs:
-      run_needed: ${{ steps.changed-files.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch' }}
+      run_needed: ${{ steps.select.outputs.run_needed }}
+      aarch64: ${{ steps.select.outputs.aarch64 }}
+      x86_64: ${{ steps.select.outputs.x86_64 }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: github.event_name != 'workflow_dispatch'
         with:
           persist-credentials: false
           # Enough history for changed-files (rebase-merge pushes can be multi-commit)
@@ -32,13 +34,28 @@ jobs:
         id: changed-files
         if: github.event_name != 'workflow_dispatch'
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+      - uses: ./.github/actions/setup-apt
         with:
-          files: |
-            .github/workflows/hol_light.yml
-            proofs/hol_light/**
-            flake.nix
-            flake.lock
-            nix/**
+          packages: python3-yaml
+      - name: Select proofs
+        id: select
+        shell: bash
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
+          ALL_PROOFS: ${{ github.event_name == 'workflow_dispatch' || contains(steps.changed-files.outputs.all_changed_and_modified_files, '.github/workflows/hol_light.yml') }}
+        run: |
+          all=()
+          if [[ "$ALL_PROOFS" == "true" ]]; then
+            all=(--all)
+          fi
+          # shellcheck disable=SC2086 # one argument per changed file
+          selected=$(/usr/bin/python3 proofs/hol_light/scripts/deps rev --json "${all[@]}" $CHANGED_FILES)
+          echo "Selected proofs: $selected"
+          {
+            echo "aarch64=$(jq -c .aarch64 <<<"$selected")"
+            echo "x86_64=$(jq -c .x86_64 <<<"$selected")"
+            echo "run_needed=$(jq '[.[] | length] | add > 0' <<<"$selected")"
+          } >> "$GITHUB_OUTPUT"
   # The proofs also check that the byte code is up to date,
   # but we use this as a fast path to not even start the proofs
   # if the byte code needs updating.
@@ -75,83 +92,23 @@ jobs:
             echo 'needs "mlkem_native/aarch64/proofs/mlkem_poly_tobytes_aarch64_asm.ml";;' | hol.sh
   hol_light_proofs:
     needs: [ check_modified_files, hol_light_bytecode ]
+    if: needs.check_modified_files.outputs.aarch64 != '[]'
     strategy:
       fail-fast: false
       matrix:
-        proof:
-          # Dependencies on {name}.{S,ml} are implicit
-          - name: mlkem_ntt_aarch64_asm
-            needs: ["mlkem_specs.ml", "mlkem_utils.ml", "mlkem_zetas.ml"]
-          - name: mlkem_intt_aarch64_asm
-            needs: ["mlkem_specs.ml", "mlkem_utils.ml", "mlkem_zetas.ml"]
-          - name: mlkem_poly_tomont_aarch64_asm
-            needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
-          - name: mlkem_poly_mulcache_compute_aarch64_asm
-            needs: ["mlkem_specs.ml", "mlkem_utils.ml", "mlkem_zetas.ml"]
-          - name: mlkem_poly_reduce_aarch64_asm
-            needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
-          - name: mlkem_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm
-            needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
-          - name: mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm
-            needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
-          - name: mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm
-            needs: ["mlkem_specs.ml", "mlkem_utils.ml"]
-          - name: mlkem_poly_tobytes_aarch64_asm
-            needs: ["mlkem_specs.ml", "mlkem_utils.ml" ]
-          - name: mlkem_rej_uniform_aarch64_asm
-            needs: ["mlkem_specs.ml", "mlkem_utils.ml", "mlkem_rej_uniform_table.ml"]
-          - name: keccak_f1600_x1_scalar_aarch64_asm
-            needs: ["keccak_spec.ml"]
-          - name: keccak_f1600_x1_v84a_aarch64_asm
-            needs: ["keccak_spec.ml"]
-          - name: keccak_f1600_x2_v84a_aarch64_asm
-            needs: ["keccak_spec.ml"]
-          - name: keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm
-            needs: ["keccak_spec.ml"]
-          - name: keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm
-            needs: ["keccak_spec.ml"]
-    name: AArch64 HOL Light proof for ${{ matrix.proof.name }}.S
+        proof: ${{ fromJSON(needs.check_modified_files.outputs.aarch64) }}
+    name: AArch64 HOL Light proof for ${{ matrix.proof }}.S
     runs-on: ubuntu-24.04-arm
-    if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          # Enough history for changed-files (rebase-merge pushes can be multi-commit)
-          fetch-depth: 100
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
-      - name: Check if dependencies changed
-        id: check_run
-        shell: bash
-        env:
-          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-        run: |
-          run_needed=0
-          dependencies="${{ join(matrix.proof.needs, ' ') }} ${{ format('{0}.S {0}.ml', matrix.proof.name) }}"
-          for changed in $CHANGED_FILES; do
-            for needs in $dependencies; do
-               if [[ "$changed" == *"$needs" ]]; then
-                 run_needed=1
-               fi
-            done
-          done
-
-          # Always re-run upon change to nix files for HOL-Light
-          if [[ "$CHANGED_FILES" == *"nix/"* ]] || [[ "$CHANGED_FILES" == *"hol_light.yml"* ]] || [[ "$CHANGED_FILES" == *"flake"* ]] || [[ "$CHANGED_FILES" == *"proofs/hol_light/aarch64/Makefile"* ]]; then
-            run_needed=1
-          fi
-
-          echo "run_needed=${run_needed}" >> "$GITHUB_OUTPUT"
       - uses: ./.github/actions/setup-shell
-        if: |
-          steps.check_run.outputs.run_needed == '1'
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light'
           script: |
-            tests hol_light -p ${{ matrix.proof.name }} --verbose
+            tests hol_light -p ${{ matrix.proof }} --verbose
 
   # x86_64 proofs
   hol_light_bytecode_x86_64:
@@ -187,92 +144,20 @@ jobs:
             echo 'needs "mlkem_native/x86_64/proofs/mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.ml";;' | hol.sh
   hol_light_proofs_x86_64:
     needs: [ check_modified_files, hol_light_bytecode_x86_64 ]
+    if: needs.check_modified_files.outputs.x86_64 != '[]'
     strategy:
       fail-fast: false
       matrix:
-        proof:
-          # Dependencies on {name}.{S,ml} are implicit
-          - name: mlkem_ntt_avx2_asm
-            needs: ["mlkem_specs.ml", "mlkem_zetas.ml"]
-          - name: mlkem_intt_avx2_asm
-            needs: ["mlkem_specs.ml", "mlkem_zetas.ml"]
-          - name: mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm
-            needs: ["mlkem_specs.ml"]
-          - name: mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2_asm
-            needs: ["mlkem_specs.ml"]
-          - name: mlkem_polyvec_basemul_acc_montgomery_cached_k4_avx2_asm
-            needs: ["mlkem_specs.ml"]
-          - name: mlkem_reduce_avx2_asm
-            needs: ["mlkem_specs.ml"]
-          - name: mlkem_ntttobytes_avx2_asm
-            needs: ["mlkem_specs.ml"]
-          - name: mlkem_rej_uniform_avx2_asm
-            needs: ["mlkem_specs.ml", "mlkem_rej_uniform_table.ml"]
-          - name: mlkem_nttfrombytes_avx2_asm
-            needs: ["mlkem_specs.ml"]
-          - name: mlkem_tomont_avx2_asm
-            needs: ["mlkem_specs.ml"]
-          - name: mlkem_nttunpack_avx2_asm
-            needs: ["mlkem_specs.ml"]
-          - name: mlkem_poly_mulcache_compute_avx2_asm
-            needs: ["mlkem_specs.ml", "mlkem_zetas.ml"]
-          - name: mlkem_poly_compress_d4_avx2_asm
-            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
-          - name: mlkem_poly_decompress_d4_avx2_asm
-            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
-          - name: mlkem_poly_compress_d5_avx2_asm
-            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
-          - name: mlkem_poly_decompress_d5_avx2_asm
-            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
-          - name: mlkem_poly_compress_d10_avx2_asm
-            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
-          - name: mlkem_poly_decompress_d10_avx2_asm
-            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
-          - name: mlkem_poly_compress_d11_avx2_asm
-            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
-          - name: mlkem_poly_decompress_d11_avx2_asm
-            needs: ["mlkem_specs.ml", "mlkem_compress_consts.ml"]
-          - name: keccak_f1600_x4_avx2_asm
-            needs: ["keccak_utils.ml", "keccak_spec.ml", "keccak_f1600_x4_avx2_constants.ml", "keccak_constants.ml"]
-    name: x86_64 HOL Light proof for ${{ matrix.proof.name }}.S
+        proof: ${{ fromJSON(needs.check_modified_files.outputs.x86_64) }}
+    name: x86_64 HOL Light proof for ${{ matrix.proof }}.S
     runs-on: ubuntu-latest
-    if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          # Enough history for changed-files (rebase-merge pushes can be multi-commit)
-          fetch-depth: 100
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
-      - name: Check if dependencies changed
-        id: check_run
-        shell: bash
-        env:
-          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-        run: |
-          run_needed=0
-          dependencies="${{ join(matrix.proof.needs, ' ') }} ${{ format('{0}.S {0}.ml', matrix.proof.name) }}"
-          for changed in $CHANGED_FILES; do
-            for needs in $dependencies; do
-               if [[ "$changed" == *"$needs" ]]; then
-                 run_needed=1
-               fi
-            done
-          done
-
-          # Always re-run upon change to nix files for HOL-Light
-          if [[ "$CHANGED_FILES" == *"nix/"* ]] || [[ "$CHANGED_FILES" == *"hol_light.yml"* ]] || [[ "$CHANGED_FILES" == *"flake"* ]] || [[ "$CHANGED_FILES" == *"proofs/hol_light/x86_64/Makefile"* ]]; then
-            run_needed=1
-          fi
-
-          echo "run_needed=${run_needed}" >> "$GITHUB_OUTPUT"
       - uses: ./.github/actions/setup-shell
-        if: |
-          steps.check_run.outputs.run_needed == '1'
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light'
           script: |
-            tests hol_light -p ${{ matrix.proof.name }} --verbose
+            tests hol_light -p ${{ matrix.proof }} --verbose
