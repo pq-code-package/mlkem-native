@@ -37,6 +37,16 @@ make run_acvp
 
 The resulting binaries can be found in `test/build` (their full path is printed by `make`).
 
+To check that the assembled byte code in the final libraries match the machine code that the
+[HOL Light Proofs](proofs/hol_light) reason about, use
+
+```bash
+make CHECK_BINARY=1  # with any target, e.g. `make test CHECK_BINARY=1`
+```
+
+This checks each library and binary as `make` builds it, and fails on a mismatch. Files that
+are already built are not checked again; use `scripts/check-binary FILE ...` for those.
+
 For benchmarking, specify the cycle counting method. Currently, **mlkem-native** is supporting NO, PERF, PMU, and MAC:
 * `NO` means that no cycle counting will be used; this can be used to confirm that benchmarks compile fine.
 * `PERF` uses the `perf` kernel module for cycle counting. Does not work on Apple platforms.
@@ -65,6 +75,9 @@ will compile and run functionality tests. Similarly,
 ```
 
 will compile and run benchmarks, using PERF for cycle counting (`-c PERF`) and running as root (`-r`).
+
+On Linux, `./scripts/tests` builds with `CHECK_BINARY=1`, described above, if readelf and
+`python3` with PyYAML are available; `--no-check-binary` turns this off.
 
 #### Test platforms
 

@@ -402,17 +402,15 @@ With HOLTrace replay (see [C1](#c1-hol-light-kernel-and-ocaml-runtime)), the loa
 longer trusted: the accepted definitions fix each proof's machine code as a byte list, and
 `scripts/check-binary` checks that the proofs' object files contain exactly those bytes.
 
-**Reassembly risk.** When mlkem-native's `.S` files are assembled on a different system --
-whether by mlkem-native's own build, by a downstream consumer such as AWS-LC, or by a
-cross-compilation toolchain -- there is currently no systematic check that the resulting
-object code matches the bytes the proofs were verified against.
-Assembler bugs, version differences, or different assembler dialects can and
-do produce different object code (for example, it has been observed that some x86
-assemblers swap operands of AVX2 `VPADD` instruction to reduce code size).
+**Reassembly risk.** Every build reassembles the `.S` files: mlkem-native's own build, a
+downstream consumer such as AWS-LC, or a cross toolchain. The result can differ from the
+bytes the proofs are about. Assemblers do emit different code (for example, some x86
+assemblers swap the operands of AVX2 `VPADD` to shorten the encoding).
 
-**Potential improvements.**
-- Provide a tool to consumers for checking that assembly/compilation results contain
-  the expected byte code for all native functions covered by HOL Light proofs.  ([#1602](https://github.com/pq-code-package/mlkem-native/issues/1602))
+Building with `make CHECK_BINARY=1` (see [BUILDING.md](BUILDING.md)) compares the backend
+kernels in a build with the proved bytes, and CI runs it on mlkem-native's own builds.
+Consumers should run `scripts/check-binary` on their own binaries. Kernels are found by
+symbol name, so stripped binaries cannot be checked.
 
 ### B3. Model omissions (assembly)
 

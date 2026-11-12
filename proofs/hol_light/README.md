@@ -111,6 +111,11 @@ that loads none of s2n-bignum or the proof scripts. **When you change or add a p
 with `scripts/autogen --hol-trace-defs FUNC` in the `hol_light` nix shell, review the diff and commit it with the proof;
 see [Changing or adding a proof](hol_trace/README.md#changing-or-adding-a-proof).
 
+The proofs are about the machine code in these object files. To check that a build of
+mlkem-native contains the same code, build it with `make CHECK_BINARY=1`, or run
+`check-binary FILE ...` on any ELF object, library or executable; see
+[hol_trace/README.md](hol_trace/README.md#how-it-works) and [BUILDING.md](../../BUILDING.md).
+
 ## Interactive proof development
 
 For interactive proof development, start the HOL Light server:

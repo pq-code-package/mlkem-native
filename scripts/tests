@@ -8,6 +8,7 @@ building and running tests and benchmarks.
 See the command line interface for more information."""
 
 import platform
+import shutil
 import argparse
 import os
 import re
@@ -548,6 +549,36 @@ class Tests:
         config_logger(args.verbose)
         self.args = args
         self.failed = []
+        self.check_binary = self.check_binary_supported()
+
+    def check_binary_supported(self):
+        """Whether builds can check the libraries and binaries that they
+        produce against the HOL Light proofs (CHECK_BINARY=1, see
+        scripts/check-binary): on Linux, which builds ELF files, with
+        readelf and PyYAML. --no-check-binary turns this off."""
+        if not getattr(self.args, "check_binary", True):
+            return False
+        if platform.system() != "Linux":
+            return False
+        prefix = self.args.cross_prefix or os.environ.get("CROSS_PREFIX", "")
+        if not (shutil.which(prefix + "readelf") or shutil.which("readelf")):
+            logging.warning("Not checking binaries: no readelf")
+            return False
+        p = subprocess.run(["python3", "-c", "import yaml"], capture_output=True)
+        if p.returncode != 0:
+            logging.warning("Not checking binaries: python3 has no PyYAML")
+        return p.returncode == 0
+
+    def expects_kernels(self, test_type, opt):
+        """Whether an opt build of test_type contains proved kernels: on
+        x86_64 and AArch64, with the native backends that AUTO enables."""
+        if test_type.is_example() or opt is not True or not self.args.auto:
+            return False
+        if self.args.extra_makefile or (self.args.cflags or "").strip():
+            return False
+        prefix = self.args.cross_prefix or os.environ.get("CROSS_PREFIX", "")
+        arch = prefix.split("-")[0] if prefix else platform.machine().lower()
+        return arch in ("x86_64", "aarch64", "arm64")
 
     def fail(self, info):
         self.failed.append(info)
@@ -621,6 +652,10 @@ class Tests:
             extra_make_args += [f"CYCLES={self.args.cycles}"]
         if self.args.extra_makefile and self.args.cross_prefix:
             extra_make_args += [f"CROSS_PREFIX={self.args.cross_prefix}"]
+        if self.check_binary:
+            extra_make_args += ["CHECK_BINARY=1"]
+            if self.expects_kernels(test_type, opt):
+                extra_make_args += ["CHECK_BINARY_FLAGS=--require-match"]
         if test_type.make_dir() != "":
             extra_make_args += ["-C", test_type.make_dir()]
         extra_make_args += self.make_j()
@@ -1385,6 +1420,24 @@ def cli():
     )
     run_group.add_argument(
         "--no-run", action="store_false", dest="run", help="Do not run the binaries"
+    )
+
+    # --check-binary / --no-check-binary
+    check_binary_group = common_parser.add_mutually_exclusive_group()
+    check_binary_group.add_argument(
+        "--check-binary",
+        action="store_true",
+        dest="check_binary",
+        help="Build with CHECK_BINARY=1: check the proved kernels in each library "
+        "and binary against the HOL Light proofs (default, on Linux with readelf "
+        "and PyYAML)",
+        default=True,
+    )
+    check_binary_group.add_argument(
+        "--no-check-binary",
+        action="store_false",
+        dest="check_binary",
+        help="Do not check the built kernels against the HOL Light proofs",
     )
 
     common_parser.add_argument(

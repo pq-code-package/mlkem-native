@@ -94,6 +94,7 @@ $(BINARY_NAME_FULL): $(APP_SOURCE) $(LIB_NAME_FULL)
 	echo "$@"
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INC) $^ -o $@
+	$(Q)$(CHECK)
 
 all: build
 
@@ -101,6 +102,14 @@ build: $(BINARY_NAME_FULL)
 
 run: $(BINARY_NAME_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
+
+
+# With CHECK_BINARY=1, check each binary as it is built: the backend
+# kernels in it must match the bytecode that mlkem-native's HOL Light
+# proofs reason about. Needs a checkout of the mlkem-native repository;
+# see scripts/check-binary. A binary that fails is removed.
+CHECK_BINARY_SCRIPT ?= ../../scripts/check-binary
+CHECK = $(if $(filter 1,$(CHECK_BINARY)),echo "  CHECK   $@" && { CROSS_PREFIX="$(CROSS_PREFIX)" python3 $(CHECK_BINARY_SCRIPT) --quiet $(CHECK_BINARY_FLAGS) $@ >&2 || { rm -f $@; exit 1; }; },:)
 
 clean:
 	rm -rf $(BUILD_DIR)
