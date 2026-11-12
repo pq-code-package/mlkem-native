@@ -122,16 +122,19 @@ $(BIN512_FULL): $(APP_SOURCE) $(LIB512_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
 	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_PARAMETER_SET=512 $(INC) $^ -o $@
+	$(Q)$(CHECK)
 
 $(BIN768_FULL): $(APP_SOURCE) $(LIB768_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
 	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_PARAMETER_SET=768 $(INC) $^ -o $@
+	$(Q)$(CHECK)
 
 $(BIN1024_FULL): $(APP_SOURCE) $(LIB1024_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
 	$(Q)$(CC) $(CFLAGS) -DMLK_CONFIG_PARAMETER_SET=1024 $(INC) $^ -o $@
+	$(Q)$(CHECK)
 
 all: build
 
@@ -141,6 +144,14 @@ run: $(BIN512_FULL) $(BIN768_FULL) $(BIN1024_FULL)
 	$(Q)$(EXEC_WRAPPER) ./$(BIN512_FULL)
 	$(Q)$(EXEC_WRAPPER) ./$(BIN768_FULL)
 	$(Q)$(EXEC_WRAPPER) ./$(BIN1024_FULL)
+
+
+# With CHECK_BINARY=1, check each binary as it is built: the backend
+# kernels in it must match the bytecode that mlkem-native's HOL Light
+# proofs reason about. Needs a checkout of the mlkem-native repository;
+# see scripts/check-binary. A binary that fails is removed.
+CHECK_BINARY_SCRIPT ?= ../../scripts/check-binary
+CHECK = $(if $(filter 1,$(CHECK_BINARY)),echo "  CHECK   $@" && { CROSS_PREFIX="$(CROSS_PREFIX)" python3 $(CHECK_BINARY_SCRIPT) --quiet $(CHECK_BINARY_FLAGS) $@ >&2 || { rm -f $@; exit 1; }; },:)
 
 clean:
 	rm -rf $(BUILD_DIR)

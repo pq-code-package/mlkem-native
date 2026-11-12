@@ -81,12 +81,12 @@ rec {
 
   mkShellWithCC' = cc:
     mkShellWithCC cc {
-      packages = [ pkgs.python3 ];
+      packages = [ (pkgs.python3.withPackages (ps: [ ps.pyyaml ])) ];
       hardeningDisable = [ "fortify" ];
     };
   mkShellWithCC_valgrind' = cc:
     mkShellWithCC cc {
-      packages = [ pkgs.python3 ] ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ valgrind_varlat ];
+      packages = [ (pkgs.python3.withPackages (ps: [ ps.pyyaml ])) ] ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ valgrind_varlat ];
       hardeningDisable = [ "fortify" ];
     };
 
