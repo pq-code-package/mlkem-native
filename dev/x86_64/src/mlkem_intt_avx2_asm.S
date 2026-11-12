@@ -62,25 +62,50 @@
 #include "shuffle.inc"
 #include "fq.inc"
 
+/*
+ * Note on operand order: if a commutative VEX instruction such as vpaddw
+ * has one source register in ymm8-15 and the other in ymm0-7, the one in
+ * ymm8-15 comes second. Only then do all assemblers emit the same bytes:
+ * clang's assembler would swap the operands itself to use the 2-byte VEX
+ * prefix, while GNU as keeps the order. The HOL Light proofs are about
+ * these bytes. Where the registers are macro parameters, .if chooses.
+ */
+
 /* Compute four GS butterflies between rh{0,1,2,3} and rl{0,1,2,3}.
  * Butterflies 0,1 use root zh0 and twisted root zl0, and butterflies
  * 2,3 use root zh1 and twisted root zl1
  * Results are again in rl{0-3} and rh{0-3} */
 .macro butterfly rl0, rl1, rl2, rl3, rh0, rh1, rh2, rh3, zl0=2, zl1=2, zh0=3, zh1=3
 vpsubw %ymm\rl0,%ymm\rh0,%ymm12    /* ymm12 = rh0 - rl0 */
+.if \rh0 >= 8 && \rl0 < 8 /* see the note on operand order */
+vpaddw %ymm\rl0,%ymm\rh0,%ymm\rl0  /* rl0   = rh0 + rl0 */
+.else
 vpaddw %ymm\rh0,%ymm\rl0,%ymm\rl0  /* rl0   = rh0 + rl0 */
+.endif
 vpsubw %ymm\rl1,%ymm\rh1,%ymm13    /* ymm13 = rh1 - rl1 */
 
 vpmullw %ymm\zl0,%ymm12,%ymm\rh0    /* rh0   = (rh0 - rl0) * root0_twisted */
+.if \rh1 >= 8 && \rl1 < 8 /* see the note on operand order */
+vpaddw %ymm\rl1,%ymm\rh1,%ymm\rl1  /* rl1   = rh1 + rh1 */
+.else
 vpaddw %ymm\rh1,%ymm\rl1,%ymm\rl1  /* rl1   = rh1 + rh1 */
+.endif
 vpsubw %ymm\rl2,%ymm\rh2,%ymm14    /* ymm14 = rh2 - rl2 */
 
 vpmullw %ymm\zl0,%ymm13,%ymm\rh1    /* rh1   = (rh1 - rl1) * root0_twisted */
+.if \rh2 >= 8 && \rl2 < 8 /* see the note on operand order */
+vpaddw %ymm\rl2,%ymm\rh2,%ymm\rl2  /* rl2   = rh2 + rl2 */
+.else
 vpaddw %ymm\rh2,%ymm\rl2,%ymm\rl2  /* rl2   = rh2 + rl2 */
+.endif
 vpsubw %ymm\rl3,%ymm\rh3,%ymm15    /* ymm15 = rh3 - rl3 */
 
 vpmullw %ymm\zl1,%ymm14,%ymm\rh2    /* rh2   = (rh2 - rl2) * root1_twisted */
+.if \rh3 >= 8 && \rl3 < 8 /* see the note on operand order */
+vpaddw %ymm\rl3,%ymm\rh3,%ymm\rl3  /* rl3   = rh3 + rl3 */
+.else
 vpaddw %ymm\rh3,%ymm\rl3,%ymm\rl3  /* rl3   = rh3 + rl3 */
+.endif
 vpmullw %ymm\zl1,%ymm15,%ymm\rh3    /* rh3   = (rh3 - rl3) * root1_twisted */
 
 vpmulhw %ymm\zh0,%ymm12,%ymm12      /* ymm12 = (rh0 - rl0) * root0 */

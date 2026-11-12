@@ -37,21 +37,14 @@ let mlkem_basemul_k3_mc =
   0xc5; 0xfd; 0x6f; 0x31;  (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,0))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -81,21 +74,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,32))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -126,21 +112,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,64))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -171,21 +150,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,96))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -216,21 +188,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,128))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -261,21 +226,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,160))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -306,21 +264,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,192))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -351,21 +302,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,224))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -396,21 +340,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,256))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -446,21 +383,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,288))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -498,21 +428,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,320))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -550,21 +473,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,352))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -602,21 +518,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,384))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -654,21 +563,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,416))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -706,21 +608,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,448))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -758,21 +653,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,480))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -810,21 +698,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,512))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -860,21 +741,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,544))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -912,21 +786,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,576))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -964,21 +831,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,608))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -1016,21 +876,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,640))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -1068,21 +921,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,672))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -1120,21 +966,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,704))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -1172,21 +1011,14 @@ let mlkem_basemul_k3_mc =
                            (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rcx,736))) *)
   0xc5; 0x75; 0xd5; 0xea;  (* VPMULLW (%_% ymm13) (%_% ymm1) (%_% ymm2) *)
   0xc5; 0x75; 0xd5; 0xf3;  (* VPMULLW (%_% ymm14) (%_% ymm1) (%_% ymm3) *)
-  0xc4; 0xc1; 0x5d; 0xd5; 0xfd;
-                           (* VPMULLW (%_% ymm7) (%_% ymm4) (%_% ymm13) *)
-  0xc4; 0x41; 0x55; 0xd5; 0xcd;
-                           (* VPMULLW (%_% ymm9) (%_% ymm5) (%_% ymm13) *)
-  0xc4; 0x41; 0x4d; 0xd5; 0xc6;
-                           (* VPMULLW (%_% ymm8) (%_% ymm6) (%_% ymm14) *)
-  0xc4; 0x41; 0x5d; 0xd5; 0xd6;
-                           (* VPMULLW (%_% ymm10) (%_% ymm4) (%_% ymm14) *)
+  0xc5; 0x95; 0xd5; 0xfc;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm4) *)
+  0xc5; 0x15; 0xd5; 0xcd;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm5) *)
+  0xc5; 0x0d; 0xd5; 0xc6;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm6) *)
+  0xc5; 0x0d; 0xd5; 0xd4;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm4) *)
   0xc5; 0xfd; 0xe5; 0xff;  (* VPMULHW (%_% ymm7) (%_% ymm0) (%_% ymm7) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc9;
-                           (* VPMULHW (%_% ymm9) (%_% ymm0) (%_% ymm9) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xc0;
-                           (* VPMULHW (%_% ymm8) (%_% ymm0) (%_% ymm8) *)
-  0xc4; 0x41; 0x7d; 0xe5; 0xd2;
-                           (* VPMULHW (%_% ymm10) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0x35; 0xe5; 0xc8;  (* VPMULHW (%_% ymm9) (%_% ymm9) (%_% ymm0) *)
+  0xc5; 0x3d; 0xe5; 0xc0;  (* VPMULHW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
+  0xc5; 0x2d; 0xe5; 0xd0;  (* VPMULHW (%_% ymm10) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0x5d; 0xe5; 0xda;  (* VPMULHW (%_% ymm11) (%_% ymm4) (%_% ymm2) *)
   0xc5; 0x55; 0xe5; 0xe2;  (* VPMULHW (%_% ymm12) (%_% ymm5) (%_% ymm2) *)
   0xc5; 0x4d; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm6) (%_% ymm3) *)
@@ -1289,6 +1121,56 @@ let pmulaccred1_k3 = define
                   (a1: int) (b1 : int) (c1 : int) (d1 : int) (dz1 : int)
                   (a2: int) (b2 : int) (c2 : int) (d2 : int) (dz2 : int) =
      (&(inverse_mod 3329 65536) * pmulacc1_k3 a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1 a2 b2 c2 d2 dz2) rem &3329`;;
+
+
+(* The assembly lists the operands of some vpmullw and vpmulhw in the
+ * order that every assembler encodes alike (see poly_basemul.inc), so the
+ * products of a Montgomery multiplication come in more than one order.
+ * These are montmul_x86 and montmul_odd_x86 with the products swapped,
+ * so that SIMD_SIMPLIFY_TAC folds each of those orders. *)
+let montmul_x86_swap_lo = prove
+ (`montmul_x86 x y =
+   word_sub
+     (word_subword (word_mul (word_sx y : int32) (word_sx x)) (16,16) : int16)
+     (word_subword
+        (word_mul (word 3329)
+           (word_sx (word_mul (word_mul (word 62209) x) y) : int32))
+        (16,16))`,
+  REWRITE_TAC[montmul_x86] THEN REWRITE_TAC[WORD_MUL_SYM] THEN
+  CONV_TAC WORD_RULE);;
+
+let montmul_x86_swap_lo_hi = prove
+ (`montmul_x86 x y =
+   word_sub
+     (word_subword (word_mul (word_sx y : int32) (word_sx x)) (16,16) : int16)
+     (word_subword
+        (word_mul (word_sx (word_mul (word_mul (word 62209) x) y) : int32)
+           (word 3329))
+        (16,16))`,
+  REWRITE_TAC[montmul_x86] THEN REWRITE_TAC[WORD_MUL_SYM] THEN
+  CONV_TAC WORD_RULE);;
+
+let montmul_odd_x86_swap_lo = prove
+ (`word_neg(montmul_x86 x y) =
+   word_sub
+     (word_subword
+        (word_mul (word 3329)
+           (word_sx (word_mul (word_mul (word 62209) x) y) : int32))
+        (16,16))
+     (word_subword (word_mul (word_sx y : int32) (word_sx x)) (16,16) : int16)`,
+  REWRITE_TAC[montmul_x86] THEN REWRITE_TAC[WORD_MUL_SYM] THEN
+  CONV_TAC WORD_RULE);;
+
+let montmul_odd_x86_swap_lo_hi = prove
+ (`word_neg(montmul_x86 x y) =
+   word_sub
+     (word_subword
+        (word_mul (word_sx (word_mul (word_mul (word 62209) x) y) : int32)
+           (word 3329))
+        (16,16))
+     (word_subword (word_mul (word_sx y : int32) (word_sx x)) (16,16) : int16)`,
+  REWRITE_TAC[montmul_x86] THEN REWRITE_TAC[WORD_MUL_SYM] THEN
+  CONV_TAC WORD_RULE);;
 
 let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K3_CORRECT = prove(
   `!src1 src2 src2t dst a0 b0 c0 d0 dz0 a1 b1 c1 d1 dz1 a2 b2 c2 d2 dz2 pc.
@@ -1424,7 +1306,9 @@ let MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K3_CORRECT = prove(
   REPEAT STRIP_TAC THEN
 
   (let step = X86_STEPS_TAC mlkem_basemul_k3_tmc_EXEC
-   and simplify = SIMD_SIMPLIFY_TAC [montmul_x86; montmul_odd_x86] in
+   and simplify = SIMD_SIMPLIFY_TAC [montmul_x86; montmul_odd_x86;
+                                montmul_x86_swap_lo; montmul_x86_swap_lo_hi;
+                                montmul_odd_x86_swap_lo; montmul_odd_x86_swap_lo_hi] in
    MAP_UNTIL_TARGET_PC (fun n -> step [n] THEN simplify) 1) THEN
 
   ENSURES_FINAL_STATE_TAC THEN

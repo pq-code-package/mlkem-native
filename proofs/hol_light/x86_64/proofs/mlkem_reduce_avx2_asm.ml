@@ -97,38 +97,32 @@ let mlkem_reduce_mc =
   0xc5; 0x9d; 0x71; 0xe2; 0x0f;
                            (* VPSRAW (%_% ymm12) (%_% ymm2) (Imm8 (word 15)) *)
   0xc5; 0x1d; 0xdb; 0xe0;  (* VPAND (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
-  0xc4; 0xc1; 0x6d; 0xfd; 0xd4;
-                           (* VPADDW (%_% ymm2) (%_% ymm2) (%_% ymm12) *)
+  0xc5; 0x9d; 0xfd; 0xd2;  (* VPADDW (%_% ymm2) (%_% ymm12) (%_% ymm2) *)
   0xc5; 0xe5; 0xf9; 0xd8;  (* VPSUBW (%_% ymm3) (%_% ymm3) (%_% ymm0) *)
   0xc5; 0x9d; 0x71; 0xe3; 0x0f;
                            (* VPSRAW (%_% ymm12) (%_% ymm3) (Imm8 (word 15)) *)
   0xc5; 0x1d; 0xdb; 0xe0;  (* VPAND (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
-  0xc4; 0xc1; 0x65; 0xfd; 0xdc;
-                           (* VPADDW (%_% ymm3) (%_% ymm3) (%_% ymm12) *)
+  0xc5; 0x9d; 0xfd; 0xdb;  (* VPADDW (%_% ymm3) (%_% ymm12) (%_% ymm3) *)
   0xc5; 0xdd; 0xf9; 0xe0;  (* VPSUBW (%_% ymm4) (%_% ymm4) (%_% ymm0) *)
   0xc5; 0x9d; 0x71; 0xe4; 0x0f;
                            (* VPSRAW (%_% ymm12) (%_% ymm4) (Imm8 (word 15)) *)
   0xc5; 0x1d; 0xdb; 0xe0;  (* VPAND (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
-  0xc4; 0xc1; 0x5d; 0xfd; 0xe4;
-                           (* VPADDW (%_% ymm4) (%_% ymm4) (%_% ymm12) *)
+  0xc5; 0x9d; 0xfd; 0xe4;  (* VPADDW (%_% ymm4) (%_% ymm12) (%_% ymm4) *)
   0xc5; 0xd5; 0xf9; 0xe8;  (* VPSUBW (%_% ymm5) (%_% ymm5) (%_% ymm0) *)
   0xc5; 0x9d; 0x71; 0xe5; 0x0f;
                            (* VPSRAW (%_% ymm12) (%_% ymm5) (Imm8 (word 15)) *)
   0xc5; 0x1d; 0xdb; 0xe0;  (* VPAND (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
-  0xc4; 0xc1; 0x55; 0xfd; 0xec;
-                           (* VPADDW (%_% ymm5) (%_% ymm5) (%_% ymm12) *)
+  0xc5; 0x9d; 0xfd; 0xed;  (* VPADDW (%_% ymm5) (%_% ymm12) (%_% ymm5) *)
   0xc5; 0xcd; 0xf9; 0xf0;  (* VPSUBW (%_% ymm6) (%_% ymm6) (%_% ymm0) *)
   0xc5; 0x9d; 0x71; 0xe6; 0x0f;
                            (* VPSRAW (%_% ymm12) (%_% ymm6) (Imm8 (word 15)) *)
   0xc5; 0x1d; 0xdb; 0xe0;  (* VPAND (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
-  0xc4; 0xc1; 0x4d; 0xfd; 0xf4;
-                           (* VPADDW (%_% ymm6) (%_% ymm6) (%_% ymm12) *)
+  0xc5; 0x9d; 0xfd; 0xf6;  (* VPADDW (%_% ymm6) (%_% ymm12) (%_% ymm6) *)
   0xc5; 0xc5; 0xf9; 0xf8;  (* VPSUBW (%_% ymm7) (%_% ymm7) (%_% ymm0) *)
   0xc5; 0x9d; 0x71; 0xe7; 0x0f;
                            (* VPSRAW (%_% ymm12) (%_% ymm7) (Imm8 (word 15)) *)
   0xc5; 0x1d; 0xdb; 0xe0;  (* VPAND (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
-  0xc4; 0xc1; 0x45; 0xfd; 0xfc;
-                           (* VPADDW (%_% ymm7) (%_% ymm7) (%_% ymm12) *)
+  0xc5; 0x9d; 0xfd; 0xff;  (* VPADDW (%_% ymm7) (%_% ymm12) (%_% ymm7) *)
   0xc5; 0x3d; 0xf9; 0xc0;  (* VPSUBW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
   0xc4; 0xc1; 0x1d; 0x71; 0xe0; 0x0f;
                            (* VPSRAW (%_% ymm12) (%_% ymm8) (Imm8 (word 15)) *)
@@ -224,38 +218,32 @@ let mlkem_reduce_mc =
   0xc5; 0x9d; 0x71; 0xe2; 0x0f;
                            (* VPSRAW (%_% ymm12) (%_% ymm2) (Imm8 (word 15)) *)
   0xc5; 0x1d; 0xdb; 0xe0;  (* VPAND (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
-  0xc4; 0xc1; 0x6d; 0xfd; 0xd4;
-                           (* VPADDW (%_% ymm2) (%_% ymm2) (%_% ymm12) *)
+  0xc5; 0x9d; 0xfd; 0xd2;  (* VPADDW (%_% ymm2) (%_% ymm12) (%_% ymm2) *)
   0xc5; 0xe5; 0xf9; 0xd8;  (* VPSUBW (%_% ymm3) (%_% ymm3) (%_% ymm0) *)
   0xc5; 0x9d; 0x71; 0xe3; 0x0f;
                            (* VPSRAW (%_% ymm12) (%_% ymm3) (Imm8 (word 15)) *)
   0xc5; 0x1d; 0xdb; 0xe0;  (* VPAND (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
-  0xc4; 0xc1; 0x65; 0xfd; 0xdc;
-                           (* VPADDW (%_% ymm3) (%_% ymm3) (%_% ymm12) *)
+  0xc5; 0x9d; 0xfd; 0xdb;  (* VPADDW (%_% ymm3) (%_% ymm12) (%_% ymm3) *)
   0xc5; 0xdd; 0xf9; 0xe0;  (* VPSUBW (%_% ymm4) (%_% ymm4) (%_% ymm0) *)
   0xc5; 0x9d; 0x71; 0xe4; 0x0f;
                            (* VPSRAW (%_% ymm12) (%_% ymm4) (Imm8 (word 15)) *)
   0xc5; 0x1d; 0xdb; 0xe0;  (* VPAND (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
-  0xc4; 0xc1; 0x5d; 0xfd; 0xe4;
-                           (* VPADDW (%_% ymm4) (%_% ymm4) (%_% ymm12) *)
+  0xc5; 0x9d; 0xfd; 0xe4;  (* VPADDW (%_% ymm4) (%_% ymm12) (%_% ymm4) *)
   0xc5; 0xd5; 0xf9; 0xe8;  (* VPSUBW (%_% ymm5) (%_% ymm5) (%_% ymm0) *)
   0xc5; 0x9d; 0x71; 0xe5; 0x0f;
                            (* VPSRAW (%_% ymm12) (%_% ymm5) (Imm8 (word 15)) *)
   0xc5; 0x1d; 0xdb; 0xe0;  (* VPAND (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
-  0xc4; 0xc1; 0x55; 0xfd; 0xec;
-                           (* VPADDW (%_% ymm5) (%_% ymm5) (%_% ymm12) *)
+  0xc5; 0x9d; 0xfd; 0xed;  (* VPADDW (%_% ymm5) (%_% ymm12) (%_% ymm5) *)
   0xc5; 0xcd; 0xf9; 0xf0;  (* VPSUBW (%_% ymm6) (%_% ymm6) (%_% ymm0) *)
   0xc5; 0x9d; 0x71; 0xe6; 0x0f;
                            (* VPSRAW (%_% ymm12) (%_% ymm6) (Imm8 (word 15)) *)
   0xc5; 0x1d; 0xdb; 0xe0;  (* VPAND (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
-  0xc4; 0xc1; 0x4d; 0xfd; 0xf4;
-                           (* VPADDW (%_% ymm6) (%_% ymm6) (%_% ymm12) *)
+  0xc5; 0x9d; 0xfd; 0xf6;  (* VPADDW (%_% ymm6) (%_% ymm12) (%_% ymm6) *)
   0xc5; 0xc5; 0xf9; 0xf8;  (* VPSUBW (%_% ymm7) (%_% ymm7) (%_% ymm0) *)
   0xc5; 0x9d; 0x71; 0xe7; 0x0f;
                            (* VPSRAW (%_% ymm12) (%_% ymm7) (Imm8 (word 15)) *)
   0xc5; 0x1d; 0xdb; 0xe0;  (* VPAND (%_% ymm12) (%_% ymm12) (%_% ymm0) *)
-  0xc4; 0xc1; 0x45; 0xfd; 0xfc;
-                           (* VPADDW (%_% ymm7) (%_% ymm7) (%_% ymm12) *)
+  0xc5; 0x9d; 0xfd; 0xff;  (* VPADDW (%_% ymm7) (%_% ymm12) (%_% ymm7) *)
   0xc5; 0x3d; 0xf9; 0xc0;  (* VPSUBW (%_% ymm8) (%_% ymm8) (%_% ymm0) *)
   0xc4; 0xc1; 0x1d; 0x71; 0xe0; 0x0f;
                            (* VPSRAW (%_% ymm12) (%_% ymm8) (Imm8 (word 15)) *)
@@ -339,6 +327,9 @@ let overall_lemma = prove
 let overall_lemma2 = SPEC_ALL overall_lemma;;
 let overall_lemma3 = AP_TERM `iword:int -> (16)word` overall_lemma2 ;;
 let overall_lemma4 = REWRITE_RULE[IWORD_IVAL] overall_lemma3;;
+(* The same with the summands swapped: the final vpaddw has the register
+ * in ymm8-15 second, so its operands come in either order. *)
+let overall_lemma4_sym = ONCE_REWRITE_RULE[WORD_ADD_SYM] overall_lemma4;;
 
 let SIMD_SIMPLIFY_TAC_LOCAL unfold_defs =
   RULE_ASSUM_TAC(CONV_RULE(SIMD_SIMPLIFY_CONV unfold_defs));;
@@ -403,7 +394,7 @@ let MLKEM_REDUCE_CORRECT = prove(
   RULE_ASSUM_TAC(REWRITE_RULE[GSYM barred_x86]) THEN
   SIMD_SIMPLIFY_TAC_LOCAL [] THEN
 
-  RULE_ASSUM_TAC(REWRITE_RULE[overall_lemma4]) THEN
+  RULE_ASSUM_TAC(REWRITE_RULE[overall_lemma4; overall_lemma4_sym]) THEN
 
   REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
   CONV_RULE(SIMD_SIMPLIFY_CONV[]) o
@@ -413,7 +404,7 @@ let MLKEM_REDUCE_CORRECT = prove(
   CONV_TAC(EXPAND_CASES_CONV THENC ONCE_DEPTH_CONV NUM_MULT_CONV) THEN
   ASM_REWRITE_TAC[WORD_ADD_0] THEN
   DISCARD_MATCHING_ASSUMPTIONS [`read c s = x`] THEN
-  REWRITE_TAC[GSYM barred_x86; overall_lemma4] THEN
+  REWRITE_TAC[GSYM barred_x86; overall_lemma4; overall_lemma4_sym] THEN
   REWRITE_TAC[helper_lemma]
 );;
 

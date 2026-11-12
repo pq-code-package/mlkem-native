@@ -198,34 +198,34 @@ LLmlk_keccak_f1600_x4_avx2:
         vpsllq $0x1, %ymm12, %ymm3
         vpor %ymm4, %ymm3, %ymm3
         vpsllq $0x1, %ymm11, %ymm4
-        vpxor %ymm14, %ymm1, %ymm1
+        vpxor %ymm1, %ymm14, %ymm1
         vpor %ymm5, %ymm4, %ymm4
         vpsrlq $0x3f, %ymm10, %ymm14
         vpxor %ymm1, %ymm3, %ymm3
         vpsllq $0x1, %ymm10, %ymm5
         vpxor %ymm0, %ymm4, %ymm4
-        vpor %ymm14, %ymm5, %ymm5
+        vpor %ymm5, %ymm14, %ymm5
         vpxor %ymm6, %ymm4, %ymm6
-        vpxor %ymm12, %ymm5, %ymm5
+        vpxor %ymm5, %ymm12, %ymm5
         vpsrlq $0x3f, %ymm1, %ymm12
         vpsllq $0x1, %ymm1, %ymm1
         vpxor %ymm7, %ymm5, %ymm7
-        vpxor %ymm9, %ymm5, %ymm9
-        vpor %ymm12, %ymm1, %ymm1
+        vpxor %ymm5, %ymm9, %ymm9
+        vpor %ymm1, %ymm12, %ymm1
         vpxor (%rsp), %ymm3, %ymm12
-        vpxor %ymm11, %ymm1, %ymm1
+        vpxor %ymm1, %ymm11, %ymm1
         vpsrlq $0x3f, %ymm0, %ymm11
         vpsllq $0x1, %ymm0, %ymm0
-        vpxor %ymm13, %ymm1, %ymm13
-        vpxor %ymm8, %ymm1, %ymm8
-        vpor %ymm11, %ymm0, %ymm0
-        vpxor %ymm10, %ymm0, %ymm0
+        vpxor %ymm1, %ymm13, %ymm13
+        vpxor %ymm1, %ymm8, %ymm8
+        vpor %ymm0, %ymm11, %ymm0
+        vpxor %ymm0, %ymm10, %ymm0
         vpxor 0xc0(%rsp), %ymm4, %ymm10
         vpxor %ymm2, %ymm0, %ymm2
         vpsrlq $0x14, %ymm10, %ymm11
         vpsllq $0x2c, %ymm10, %ymm10
         vpor %ymm11, %ymm10, %ymm10
-        vpxor %ymm15, %ymm5, %ymm11
+        vpxor %ymm5, %ymm15, %ymm11
         vpbroadcastq (%rsi), %ymm15
         vpsrlq $0x15, %ymm11, %ymm14
         vpsllq $0x2b, %ymm11, %ymm11
@@ -242,7 +242,7 @@ LLmlk_keccak_f1600_x4_avx2:
         vpsrlq $0x32, %ymm2, %ymm14
         vpsllq $0xe, %ymm2, %ymm2
         vmovdqu %ymm15, 0x20(%rsp)
-        vpor %ymm14, %ymm2, %ymm2
+        vpor %ymm2, %ymm14, %ymm2
         vpandn %ymm2, %ymm13, %ymm14
         vpxor %ymm11, %ymm14, %ymm11
         vmovdqu %ymm11, 0x40(%rsp)
@@ -258,7 +258,7 @@ LLmlk_keccak_f1600_x4_avx2:
         vpxor 0xe0(%rsp), %ymm0, %ymm2
         vpsrlq $0x2c, %ymm2, %ymm10
         vpsllq $0x14, %ymm2, %ymm2
-        vpor %ymm10, %ymm2, %ymm2
+        vpor %ymm2, %ymm10, %ymm2
         vpxor 0x100(%rsp), %ymm3, %ymm10
         vpsrlq $0x3d, %ymm10, %ymm11
         vpsllq $0x3, %ymm10, %ymm10
@@ -275,7 +275,7 @@ LLmlk_keccak_f1600_x4_avx2:
         vmovdqu %ymm12, 0xc0(%rsp)
         vpsrlq $0x3, %ymm7, %ymm12
         vpsllq $0x3d, %ymm7, %ymm7
-        vpor %ymm12, %ymm7, %ymm7
+        vpor %ymm7, %ymm12, %ymm7
         vpandn %ymm7, %ymm11, %ymm12
         vpxor %ymm10, %ymm12, %ymm10
         vpandn %ymm8, %ymm7, %ymm12

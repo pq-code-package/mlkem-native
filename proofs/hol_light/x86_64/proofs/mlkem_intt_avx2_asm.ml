@@ -145,20 +145,16 @@ let mlkem_intt_mc = define_assert_from_elf "mlkem_intt_mc" "x86_64/mlkem/mlkem_i
   0xc4; 0xe2; 0x65; 0x00; 0xd9;
                            (* VPSHUFB (%_% ymm3) (%_% ymm3) (%_% ymm1) *)
   0xc5; 0x3d; 0xf9; 0xe4;  (* VPSUBW (%_% ymm12) (%_% ymm8) (%_% ymm4) *)
-  0xc4; 0xc1; 0x5d; 0xfd; 0xe0;
-                           (* VPADDW (%_% ymm4) (%_% ymm4) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfd; 0xe4;  (* VPADDW (%_% ymm4) (%_% ymm8) (%_% ymm4) *)
   0xc5; 0x35; 0xf9; 0xed;  (* VPSUBW (%_% ymm13) (%_% ymm9) (%_% ymm5) *)
   0xc5; 0x1d; 0xd5; 0xc2;  (* VPMULLW (%_% ymm8) (%_% ymm12) (%_% ymm2) *)
-  0xc4; 0xc1; 0x55; 0xfd; 0xe9;
-                           (* VPADDW (%_% ymm5) (%_% ymm5) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfd; 0xed;  (* VPADDW (%_% ymm5) (%_% ymm9) (%_% ymm5) *)
   0xc5; 0x2d; 0xf9; 0xf6;  (* VPSUBW (%_% ymm14) (%_% ymm10) (%_% ymm6) *)
   0xc5; 0x15; 0xd5; 0xca;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm2) *)
-  0xc4; 0xc1; 0x4d; 0xfd; 0xf2;
-                           (* VPADDW (%_% ymm6) (%_% ymm6) (%_% ymm10) *)
+  0xc5; 0xad; 0xfd; 0xf6;  (* VPADDW (%_% ymm6) (%_% ymm10) (%_% ymm6) *)
   0xc5; 0x25; 0xf9; 0xff;  (* VPSUBW (%_% ymm15) (%_% ymm11) (%_% ymm7) *)
   0xc5; 0x0d; 0xd5; 0xd2;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm2) *)
-  0xc4; 0xc1; 0x45; 0xfd; 0xfb;
-                           (* VPADDW (%_% ymm7) (%_% ymm7) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfd; 0xff;  (* VPADDW (%_% ymm7) (%_% ymm11) (%_% ymm7) *)
   0xc5; 0x05; 0xd5; 0xda;  (* VPMULLW (%_% ymm11) (%_% ymm15) (%_% ymm2) *)
   0xc5; 0x1d; 0xe5; 0xe3;  (* VPMULHW (%_% ymm12) (%_% ymm12) (%_% ymm3) *)
   0xc5; 0x15; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm13) (%_% ymm3) *)
@@ -221,8 +217,7 @@ let mlkem_intt_mc = define_assert_from_elf "mlkem_intt_mc" "x86_64/mlkem/mlkem_i
   0xc5; 0xdd; 0xfd; 0xe7;  (* VPADDW (%_% ymm4) (%_% ymm4) (%_% ymm7) *)
   0xc5; 0x35; 0xf9; 0xf6;  (* VPSUBW (%_% ymm14) (%_% ymm9) (%_% ymm6) *)
   0xc5; 0x95; 0xd5; 0xfa;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm2) *)
-  0xc4; 0xc1; 0x4d; 0xfd; 0xf1;
-                           (* VPADDW (%_% ymm6) (%_% ymm6) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfd; 0xf6;  (* VPADDW (%_% ymm6) (%_% ymm9) (%_% ymm6) *)
   0xc4; 0x41; 0x25; 0xf9; 0xf8;
                            (* VPSUBW (%_% ymm15) (%_% ymm11) (%_% ymm8) *)
   0xc5; 0x0d; 0xd5; 0xca;  (* VPMULLW (%_% ymm9) (%_% ymm14) (%_% ymm2) *)
@@ -297,15 +292,13 @@ let mlkem_intt_mc = define_assert_from_elf "mlkem_intt_mc" "x86_64/mlkem/mlkem_i
   0xc5; 0x2d; 0xfd; 0xd4;  (* VPADDW (%_% ymm10) (%_% ymm10) (%_% ymm4) *)
   0xc5; 0x3d; 0xf9; 0xeb;  (* VPSUBW (%_% ymm13) (%_% ymm8) (%_% ymm3) *)
   0xc5; 0x9d; 0xd5; 0xe2;  (* VPMULLW (%_% ymm4) (%_% ymm12) (%_% ymm2) *)
-  0xc4; 0xc1; 0x65; 0xfd; 0xd8;
-                           (* VPADDW (%_% ymm3) (%_% ymm3) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfd; 0xdb;  (* VPADDW (%_% ymm3) (%_% ymm8) (%_% ymm3) *)
   0xc5; 0x45; 0xf9; 0xf6;  (* VPSUBW (%_% ymm14) (%_% ymm7) (%_% ymm6) *)
   0xc5; 0x15; 0xd5; 0xc2;  (* VPMULLW (%_% ymm8) (%_% ymm13) (%_% ymm2) *)
   0xc5; 0xcd; 0xfd; 0xf7;  (* VPADDW (%_% ymm6) (%_% ymm6) (%_% ymm7) *)
   0xc5; 0x25; 0xf9; 0xfd;  (* VPSUBW (%_% ymm15) (%_% ymm11) (%_% ymm5) *)
   0xc5; 0x8d; 0xd5; 0xfa;  (* VPMULLW (%_% ymm7) (%_% ymm14) (%_% ymm2) *)
-  0xc4; 0xc1; 0x55; 0xfd; 0xeb;
-                           (* VPADDW (%_% ymm5) (%_% ymm5) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfd; 0xed;  (* VPADDW (%_% ymm5) (%_% ymm11) (%_% ymm5) *)
   0xc5; 0x05; 0xd5; 0xda;  (* VPMULLW (%_% ymm11) (%_% ymm15) (%_% ymm2) *)
   0xc4; 0x41; 0x1d; 0xe5; 0xe1;
                            (* VPMULHW (%_% ymm12) (%_% ymm12) (%_% ymm9) *)
@@ -356,12 +349,10 @@ let mlkem_intt_mc = define_assert_from_elf "mlkem_intt_mc" "x86_64/mlkem/mlkem_i
   0xc5; 0x2d; 0xfd; 0xd5;  (* VPADDW (%_% ymm10) (%_% ymm10) (%_% ymm5) *)
   0xc5; 0x3d; 0xf9; 0xf6;  (* VPSUBW (%_% ymm14) (%_% ymm8) (%_% ymm6) *)
   0xc5; 0x95; 0xd5; 0xea;  (* VPMULLW (%_% ymm5) (%_% ymm13) (%_% ymm2) *)
-  0xc4; 0xc1; 0x4d; 0xfd; 0xf0;
-                           (* VPADDW (%_% ymm6) (%_% ymm6) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfd; 0xf6;  (* VPADDW (%_% ymm6) (%_% ymm8) (%_% ymm6) *)
   0xc5; 0x25; 0xf9; 0xfc;  (* VPSUBW (%_% ymm15) (%_% ymm11) (%_% ymm4) *)
   0xc5; 0x0d; 0xd5; 0xc2;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm2) *)
-  0xc4; 0xc1; 0x5d; 0xfd; 0xe3;
-                           (* VPADDW (%_% ymm4) (%_% ymm4) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfd; 0xe4;  (* VPADDW (%_% ymm4) (%_% ymm11) (%_% ymm4) *)
   0xc5; 0x05; 0xd5; 0xda;  (* VPMULLW (%_% ymm11) (%_% ymm15) (%_% ymm2) *)
   0xc5; 0x1d; 0xe5; 0xe7;  (* VPMULHW (%_% ymm12) (%_% ymm12) (%_% ymm7) *)
   0xc5; 0x15; 0xe5; 0xef;  (* VPMULHW (%_% ymm13) (%_% ymm13) (%_% ymm7) *)
@@ -404,8 +395,7 @@ let mlkem_intt_mc = define_assert_from_elf "mlkem_intt_mc" "x86_64/mlkem/mlkem_i
   0xc5; 0x7d; 0x6f; 0x86; 0x40; 0x02; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm8) (Memop Word256 (%% (rsi,576))) *)
   0xc5; 0x2d; 0xf9; 0xe7;  (* VPSUBW (%_% ymm12) (%_% ymm10) (%_% ymm7) *)
-  0xc4; 0xc1; 0x45; 0xfd; 0xfa;
-                           (* VPADDW (%_% ymm7) (%_% ymm7) (%_% ymm10) *)
+  0xc5; 0xad; 0xfd; 0xff;  (* VPADDW (%_% ymm7) (%_% ymm10) (%_% ymm7) *)
   0xc4; 0x41; 0x5d; 0xf9; 0xe9;
                            (* VPSUBW (%_% ymm13) (%_% ymm4) (%_% ymm9) *)
   0xc5; 0x1d; 0xd5; 0xd2;  (* VPMULLW (%_% ymm10) (%_% ymm12) (%_% ymm2) *)
@@ -415,8 +405,7 @@ let mlkem_intt_mc = define_assert_from_elf "mlkem_intt_mc" "x86_64/mlkem/mlkem_i
   0xc5; 0xcd; 0xfd; 0xf5;  (* VPADDW (%_% ymm6) (%_% ymm6) (%_% ymm5) *)
   0xc5; 0x25; 0xf9; 0xfb;  (* VPSUBW (%_% ymm15) (%_% ymm11) (%_% ymm3) *)
   0xc5; 0x8d; 0xd5; 0xea;  (* VPMULLW (%_% ymm5) (%_% ymm14) (%_% ymm2) *)
-  0xc4; 0xc1; 0x65; 0xfd; 0xdb;
-                           (* VPADDW (%_% ymm3) (%_% ymm3) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfd; 0xdb;  (* VPADDW (%_% ymm3) (%_% ymm11) (%_% ymm3) *)
   0xc5; 0x05; 0xd5; 0xda;  (* VPMULLW (%_% ymm11) (%_% ymm15) (%_% ymm2) *)
   0xc4; 0x41; 0x1d; 0xe5; 0xe0;
                            (* VPMULHW (%_% ymm12) (%_% ymm12) (%_% ymm8) *)
@@ -582,20 +571,16 @@ let mlkem_intt_mc = define_assert_from_elf "mlkem_intt_mc" "x86_64/mlkem/mlkem_i
   0xc4; 0xe2; 0x65; 0x00; 0xd9;
                            (* VPSHUFB (%_% ymm3) (%_% ymm3) (%_% ymm1) *)
   0xc5; 0x3d; 0xf9; 0xe4;  (* VPSUBW (%_% ymm12) (%_% ymm8) (%_% ymm4) *)
-  0xc4; 0xc1; 0x5d; 0xfd; 0xe0;
-                           (* VPADDW (%_% ymm4) (%_% ymm4) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfd; 0xe4;  (* VPADDW (%_% ymm4) (%_% ymm8) (%_% ymm4) *)
   0xc5; 0x35; 0xf9; 0xed;  (* VPSUBW (%_% ymm13) (%_% ymm9) (%_% ymm5) *)
   0xc5; 0x1d; 0xd5; 0xc2;  (* VPMULLW (%_% ymm8) (%_% ymm12) (%_% ymm2) *)
-  0xc4; 0xc1; 0x55; 0xfd; 0xe9;
-                           (* VPADDW (%_% ymm5) (%_% ymm5) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfd; 0xed;  (* VPADDW (%_% ymm5) (%_% ymm9) (%_% ymm5) *)
   0xc5; 0x2d; 0xf9; 0xf6;  (* VPSUBW (%_% ymm14) (%_% ymm10) (%_% ymm6) *)
   0xc5; 0x15; 0xd5; 0xca;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm2) *)
-  0xc4; 0xc1; 0x4d; 0xfd; 0xf2;
-                           (* VPADDW (%_% ymm6) (%_% ymm6) (%_% ymm10) *)
+  0xc5; 0xad; 0xfd; 0xf6;  (* VPADDW (%_% ymm6) (%_% ymm10) (%_% ymm6) *)
   0xc5; 0x25; 0xf9; 0xff;  (* VPSUBW (%_% ymm15) (%_% ymm11) (%_% ymm7) *)
   0xc5; 0x0d; 0xd5; 0xd2;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm2) *)
-  0xc4; 0xc1; 0x45; 0xfd; 0xfb;
-                           (* VPADDW (%_% ymm7) (%_% ymm7) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfd; 0xff;  (* VPADDW (%_% ymm7) (%_% ymm11) (%_% ymm7) *)
   0xc5; 0x05; 0xd5; 0xda;  (* VPMULLW (%_% ymm11) (%_% ymm15) (%_% ymm2) *)
   0xc5; 0x1d; 0xe5; 0xe3;  (* VPMULHW (%_% ymm12) (%_% ymm12) (%_% ymm3) *)
   0xc5; 0x15; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm13) (%_% ymm3) *)
@@ -658,8 +643,7 @@ let mlkem_intt_mc = define_assert_from_elf "mlkem_intt_mc" "x86_64/mlkem/mlkem_i
   0xc5; 0xdd; 0xfd; 0xe7;  (* VPADDW (%_% ymm4) (%_% ymm4) (%_% ymm7) *)
   0xc5; 0x35; 0xf9; 0xf6;  (* VPSUBW (%_% ymm14) (%_% ymm9) (%_% ymm6) *)
   0xc5; 0x95; 0xd5; 0xfa;  (* VPMULLW (%_% ymm7) (%_% ymm13) (%_% ymm2) *)
-  0xc4; 0xc1; 0x4d; 0xfd; 0xf1;
-                           (* VPADDW (%_% ymm6) (%_% ymm6) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfd; 0xf6;  (* VPADDW (%_% ymm6) (%_% ymm9) (%_% ymm6) *)
   0xc4; 0x41; 0x25; 0xf9; 0xf8;
                            (* VPSUBW (%_% ymm15) (%_% ymm11) (%_% ymm8) *)
   0xc5; 0x0d; 0xd5; 0xca;  (* VPMULLW (%_% ymm9) (%_% ymm14) (%_% ymm2) *)
@@ -734,15 +718,13 @@ let mlkem_intt_mc = define_assert_from_elf "mlkem_intt_mc" "x86_64/mlkem/mlkem_i
   0xc5; 0x2d; 0xfd; 0xd4;  (* VPADDW (%_% ymm10) (%_% ymm10) (%_% ymm4) *)
   0xc5; 0x3d; 0xf9; 0xeb;  (* VPSUBW (%_% ymm13) (%_% ymm8) (%_% ymm3) *)
   0xc5; 0x9d; 0xd5; 0xe2;  (* VPMULLW (%_% ymm4) (%_% ymm12) (%_% ymm2) *)
-  0xc4; 0xc1; 0x65; 0xfd; 0xd8;
-                           (* VPADDW (%_% ymm3) (%_% ymm3) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfd; 0xdb;  (* VPADDW (%_% ymm3) (%_% ymm8) (%_% ymm3) *)
   0xc5; 0x45; 0xf9; 0xf6;  (* VPSUBW (%_% ymm14) (%_% ymm7) (%_% ymm6) *)
   0xc5; 0x15; 0xd5; 0xc2;  (* VPMULLW (%_% ymm8) (%_% ymm13) (%_% ymm2) *)
   0xc5; 0xcd; 0xfd; 0xf7;  (* VPADDW (%_% ymm6) (%_% ymm6) (%_% ymm7) *)
   0xc5; 0x25; 0xf9; 0xfd;  (* VPSUBW (%_% ymm15) (%_% ymm11) (%_% ymm5) *)
   0xc5; 0x8d; 0xd5; 0xfa;  (* VPMULLW (%_% ymm7) (%_% ymm14) (%_% ymm2) *)
-  0xc4; 0xc1; 0x55; 0xfd; 0xeb;
-                           (* VPADDW (%_% ymm5) (%_% ymm5) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfd; 0xed;  (* VPADDW (%_% ymm5) (%_% ymm11) (%_% ymm5) *)
   0xc5; 0x05; 0xd5; 0xda;  (* VPMULLW (%_% ymm11) (%_% ymm15) (%_% ymm2) *)
   0xc4; 0x41; 0x1d; 0xe5; 0xe1;
                            (* VPMULHW (%_% ymm12) (%_% ymm12) (%_% ymm9) *)
@@ -793,12 +775,10 @@ let mlkem_intt_mc = define_assert_from_elf "mlkem_intt_mc" "x86_64/mlkem/mlkem_i
   0xc5; 0x2d; 0xfd; 0xd5;  (* VPADDW (%_% ymm10) (%_% ymm10) (%_% ymm5) *)
   0xc5; 0x3d; 0xf9; 0xf6;  (* VPSUBW (%_% ymm14) (%_% ymm8) (%_% ymm6) *)
   0xc5; 0x95; 0xd5; 0xea;  (* VPMULLW (%_% ymm5) (%_% ymm13) (%_% ymm2) *)
-  0xc4; 0xc1; 0x4d; 0xfd; 0xf0;
-                           (* VPADDW (%_% ymm6) (%_% ymm6) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfd; 0xf6;  (* VPADDW (%_% ymm6) (%_% ymm8) (%_% ymm6) *)
   0xc5; 0x25; 0xf9; 0xfc;  (* VPSUBW (%_% ymm15) (%_% ymm11) (%_% ymm4) *)
   0xc5; 0x0d; 0xd5; 0xc2;  (* VPMULLW (%_% ymm8) (%_% ymm14) (%_% ymm2) *)
-  0xc4; 0xc1; 0x5d; 0xfd; 0xe3;
-                           (* VPADDW (%_% ymm4) (%_% ymm4) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfd; 0xe4;  (* VPADDW (%_% ymm4) (%_% ymm11) (%_% ymm4) *)
   0xc5; 0x05; 0xd5; 0xda;  (* VPMULLW (%_% ymm11) (%_% ymm15) (%_% ymm2) *)
   0xc5; 0x1d; 0xe5; 0xe7;  (* VPMULHW (%_% ymm12) (%_% ymm12) (%_% ymm7) *)
   0xc5; 0x15; 0xe5; 0xef;  (* VPMULHW (%_% ymm13) (%_% ymm13) (%_% ymm7) *)
@@ -841,8 +821,7 @@ let mlkem_intt_mc = define_assert_from_elf "mlkem_intt_mc" "x86_64/mlkem/mlkem_i
   0xc5; 0x7d; 0x6f; 0x86; 0x80; 0x00; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm8) (Memop Word256 (%% (rsi,128))) *)
   0xc5; 0x2d; 0xf9; 0xe7;  (* VPSUBW (%_% ymm12) (%_% ymm10) (%_% ymm7) *)
-  0xc4; 0xc1; 0x45; 0xfd; 0xfa;
-                           (* VPADDW (%_% ymm7) (%_% ymm7) (%_% ymm10) *)
+  0xc5; 0xad; 0xfd; 0xff;  (* VPADDW (%_% ymm7) (%_% ymm10) (%_% ymm7) *)
   0xc4; 0x41; 0x5d; 0xf9; 0xe9;
                            (* VPSUBW (%_% ymm13) (%_% ymm4) (%_% ymm9) *)
   0xc5; 0x1d; 0xd5; 0xd2;  (* VPMULLW (%_% ymm10) (%_% ymm12) (%_% ymm2) *)
@@ -852,8 +831,7 @@ let mlkem_intt_mc = define_assert_from_elf "mlkem_intt_mc" "x86_64/mlkem/mlkem_i
   0xc5; 0xcd; 0xfd; 0xf5;  (* VPADDW (%_% ymm6) (%_% ymm6) (%_% ymm5) *)
   0xc5; 0x25; 0xf9; 0xfb;  (* VPSUBW (%_% ymm15) (%_% ymm11) (%_% ymm3) *)
   0xc5; 0x8d; 0xd5; 0xea;  (* VPMULLW (%_% ymm5) (%_% ymm14) (%_% ymm2) *)
-  0xc4; 0xc1; 0x65; 0xfd; 0xdb;
-                           (* VPADDW (%_% ymm3) (%_% ymm3) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfd; 0xdb;  (* VPADDW (%_% ymm3) (%_% ymm11) (%_% ymm3) *)
   0xc5; 0x05; 0xd5; 0xda;  (* VPMULLW (%_% ymm11) (%_% ymm15) (%_% ymm2) *)
   0xc4; 0x41; 0x1d; 0xe5; 0xe0;
                            (* VPMULHW (%_% ymm12) (%_% ymm12) (%_% ymm8) *)
@@ -915,20 +893,16 @@ let mlkem_intt_mc = define_assert_from_elf "mlkem_intt_mc" "x86_64/mlkem/mlkem_i
   0xc4; 0xe2; 0x7d; 0x59; 0x5e; 0x48;
                            (* VPBROADCASTQ (%_% ymm3) (Memop Quadword (%% (rsi,72))) *)
   0xc5; 0x3d; 0xf9; 0xe4;  (* VPSUBW (%_% ymm12) (%_% ymm8) (%_% ymm4) *)
-  0xc4; 0xc1; 0x5d; 0xfd; 0xe0;
-                           (* VPADDW (%_% ymm4) (%_% ymm4) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfd; 0xe4;  (* VPADDW (%_% ymm4) (%_% ymm8) (%_% ymm4) *)
   0xc5; 0x35; 0xf9; 0xed;  (* VPSUBW (%_% ymm13) (%_% ymm9) (%_% ymm5) *)
   0xc5; 0x1d; 0xd5; 0xc2;  (* VPMULLW (%_% ymm8) (%_% ymm12) (%_% ymm2) *)
-  0xc4; 0xc1; 0x55; 0xfd; 0xe9;
-                           (* VPADDW (%_% ymm5) (%_% ymm5) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfd; 0xed;  (* VPADDW (%_% ymm5) (%_% ymm9) (%_% ymm5) *)
   0xc5; 0x2d; 0xf9; 0xf6;  (* VPSUBW (%_% ymm14) (%_% ymm10) (%_% ymm6) *)
   0xc5; 0x15; 0xd5; 0xca;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm2) *)
-  0xc4; 0xc1; 0x4d; 0xfd; 0xf2;
-                           (* VPADDW (%_% ymm6) (%_% ymm6) (%_% ymm10) *)
+  0xc5; 0xad; 0xfd; 0xf6;  (* VPADDW (%_% ymm6) (%_% ymm10) (%_% ymm6) *)
   0xc5; 0x25; 0xf9; 0xff;  (* VPSUBW (%_% ymm15) (%_% ymm11) (%_% ymm7) *)
   0xc5; 0x0d; 0xd5; 0xd2;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm2) *)
-  0xc4; 0xc1; 0x45; 0xfd; 0xfb;
-                           (* VPADDW (%_% ymm7) (%_% ymm7) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfd; 0xff;  (* VPADDW (%_% ymm7) (%_% ymm11) (%_% ymm7) *)
   0xc5; 0x05; 0xd5; 0xda;  (* VPMULLW (%_% ymm11) (%_% ymm15) (%_% ymm2) *)
   0xc5; 0x1d; 0xe5; 0xe3;  (* VPMULHW (%_% ymm12) (%_% ymm12) (%_% ymm3) *)
   0xc5; 0x15; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm13) (%_% ymm3) *)
@@ -982,20 +956,16 @@ let mlkem_intt_mc = define_assert_from_elf "mlkem_intt_mc" "x86_64/mlkem/mlkem_i
   0xc4; 0xe2; 0x7d; 0x59; 0x5e; 0x48;
                            (* VPBROADCASTQ (%_% ymm3) (Memop Quadword (%% (rsi,72))) *)
   0xc5; 0x3d; 0xf9; 0xe4;  (* VPSUBW (%_% ymm12) (%_% ymm8) (%_% ymm4) *)
-  0xc4; 0xc1; 0x5d; 0xfd; 0xe0;
-                           (* VPADDW (%_% ymm4) (%_% ymm4) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfd; 0xe4;  (* VPADDW (%_% ymm4) (%_% ymm8) (%_% ymm4) *)
   0xc5; 0x35; 0xf9; 0xed;  (* VPSUBW (%_% ymm13) (%_% ymm9) (%_% ymm5) *)
   0xc5; 0x1d; 0xd5; 0xc2;  (* VPMULLW (%_% ymm8) (%_% ymm12) (%_% ymm2) *)
-  0xc4; 0xc1; 0x55; 0xfd; 0xe9;
-                           (* VPADDW (%_% ymm5) (%_% ymm5) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfd; 0xed;  (* VPADDW (%_% ymm5) (%_% ymm9) (%_% ymm5) *)
   0xc5; 0x2d; 0xf9; 0xf6;  (* VPSUBW (%_% ymm14) (%_% ymm10) (%_% ymm6) *)
   0xc5; 0x15; 0xd5; 0xca;  (* VPMULLW (%_% ymm9) (%_% ymm13) (%_% ymm2) *)
-  0xc4; 0xc1; 0x4d; 0xfd; 0xf2;
-                           (* VPADDW (%_% ymm6) (%_% ymm6) (%_% ymm10) *)
+  0xc5; 0xad; 0xfd; 0xf6;  (* VPADDW (%_% ymm6) (%_% ymm10) (%_% ymm6) *)
   0xc5; 0x25; 0xf9; 0xff;  (* VPSUBW (%_% ymm15) (%_% ymm11) (%_% ymm7) *)
   0xc5; 0x0d; 0xd5; 0xd2;  (* VPMULLW (%_% ymm10) (%_% ymm14) (%_% ymm2) *)
-  0xc4; 0xc1; 0x45; 0xfd; 0xfb;
-                           (* VPADDW (%_% ymm7) (%_% ymm7) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfd; 0xff;  (* VPADDW (%_% ymm7) (%_% ymm11) (%_% ymm7) *)
   0xc5; 0x05; 0xd5; 0xda;  (* VPMULLW (%_% ymm11) (%_% ymm15) (%_% ymm2) *)
   0xc5; 0x1d; 0xe5; 0xe3;  (* VPMULHW (%_% ymm12) (%_% ymm12) (%_% ymm3) *)
   0xc5; 0x15; 0xe5; 0xeb;  (* VPMULHW (%_% ymm13) (%_% ymm13) (%_% ymm3) *)

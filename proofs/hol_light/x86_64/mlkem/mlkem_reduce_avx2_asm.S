@@ -107,27 +107,27 @@ mlk_reduce_avx2_asm:
         vpsubw %ymm0, %ymm2, %ymm2
         vpsraw $0xf, %ymm2, %ymm12
         vpand %ymm0, %ymm12, %ymm12
-        vpaddw %ymm12, %ymm2, %ymm2
+        vpaddw %ymm2, %ymm12, %ymm2
         vpsubw %ymm0, %ymm3, %ymm3
         vpsraw $0xf, %ymm3, %ymm12
         vpand %ymm0, %ymm12, %ymm12
-        vpaddw %ymm12, %ymm3, %ymm3
+        vpaddw %ymm3, %ymm12, %ymm3
         vpsubw %ymm0, %ymm4, %ymm4
         vpsraw $0xf, %ymm4, %ymm12
         vpand %ymm0, %ymm12, %ymm12
-        vpaddw %ymm12, %ymm4, %ymm4
+        vpaddw %ymm4, %ymm12, %ymm4
         vpsubw %ymm0, %ymm5, %ymm5
         vpsraw $0xf, %ymm5, %ymm12
         vpand %ymm0, %ymm12, %ymm12
-        vpaddw %ymm12, %ymm5, %ymm5
+        vpaddw %ymm5, %ymm12, %ymm5
         vpsubw %ymm0, %ymm6, %ymm6
         vpsraw $0xf, %ymm6, %ymm12
         vpand %ymm0, %ymm12, %ymm12
-        vpaddw %ymm12, %ymm6, %ymm6
+        vpaddw %ymm6, %ymm12, %ymm6
         vpsubw %ymm0, %ymm7, %ymm7
         vpsraw $0xf, %ymm7, %ymm12
         vpand %ymm0, %ymm12, %ymm12
-        vpaddw %ymm12, %ymm7, %ymm7
+        vpaddw %ymm7, %ymm12, %ymm7
         vpsubw %ymm0, %ymm8, %ymm8
         vpsraw $0xf, %ymm8, %ymm12
         vpand %ymm0, %ymm12, %ymm12
@@ -187,27 +187,27 @@ mlk_reduce_avx2_asm:
         vpsubw %ymm0, %ymm2, %ymm2
         vpsraw $0xf, %ymm2, %ymm12
         vpand %ymm0, %ymm12, %ymm12
-        vpaddw %ymm12, %ymm2, %ymm2
+        vpaddw %ymm2, %ymm12, %ymm2
         vpsubw %ymm0, %ymm3, %ymm3
         vpsraw $0xf, %ymm3, %ymm12
         vpand %ymm0, %ymm12, %ymm12
-        vpaddw %ymm12, %ymm3, %ymm3
+        vpaddw %ymm3, %ymm12, %ymm3
         vpsubw %ymm0, %ymm4, %ymm4
         vpsraw $0xf, %ymm4, %ymm12
         vpand %ymm0, %ymm12, %ymm12
-        vpaddw %ymm12, %ymm4, %ymm4
+        vpaddw %ymm4, %ymm12, %ymm4
         vpsubw %ymm0, %ymm5, %ymm5
         vpsraw $0xf, %ymm5, %ymm12
         vpand %ymm0, %ymm12, %ymm12
-        vpaddw %ymm12, %ymm5, %ymm5
+        vpaddw %ymm5, %ymm12, %ymm5
         vpsubw %ymm0, %ymm6, %ymm6
         vpsraw $0xf, %ymm6, %ymm12
         vpand %ymm0, %ymm12, %ymm12
-        vpaddw %ymm12, %ymm6, %ymm6
+        vpaddw %ymm6, %ymm12, %ymm6
         vpsubw %ymm0, %ymm7, %ymm7
         vpsraw $0xf, %ymm7, %ymm12
         vpand %ymm0, %ymm12, %ymm12
-        vpaddw %ymm12, %ymm7, %ymm7
+        vpaddw %ymm7, %ymm12, %ymm7
         vpsubw %ymm0, %ymm8, %ymm8
         vpsraw $0xf, %ymm8, %ymm12
         vpand %ymm0, %ymm12, %ymm12
