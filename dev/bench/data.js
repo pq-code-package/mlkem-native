@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794476004680,
+  "lastUpdate": 1794476006189,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -33561,6 +33561,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 118151,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "60fb495187312435aebe5e071395a2b683e04f97",
+          "message": "CI: Select HOL-Light proofs from deps.yml\n\nHOL-Light CI chooses proofs from hand-written dependency lists in\nhol_light.yml. Those lists can omit files that HOL Light's loader\nloads, so a change to a shared specification can leave its proofs\nunchecked.\n\nReplace the hand-written matrices and their per-job dependency checks:\nthe gate job selects proofs with `deps rev` from deps.yml and the proof\njobs build their matrix from its JSON output. Install python3-yaml\nthrough setup-apt and run the selector with /usr/bin/python3, so it uses\nthe parser installed by apt. Manual dispatch and changes to\nhol_light.yml select every proof.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-12T07:46:36Z",
+          "tree_id": "d3bfd71838337cec02ce578caa857c966ee4ca69",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/60fb495187312435aebe5e071395a2b683e04f97"
+        },
+        "date": 1794476004031,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 35996,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 42324,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 53536,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 60583,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 66516,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 80980,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 89284,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 98887,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 118170,
             "unit": "cycles"
           }
         ]
