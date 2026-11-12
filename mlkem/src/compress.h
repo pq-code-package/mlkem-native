@@ -127,7 +127,7 @@ __contract__(
 static MLK_INLINE int16_t mlk_scalar_decompress_d4(uint8_t u)
 __contract__(
   requires(0 <= u && u < 16)
-  ensures(return_value <= (MLKEM_Q - 1))
+  ensures(0 <= return_value && return_value <= (MLKEM_Q - 1))
 )
 {
   /* The return value is in 0..MLKEM_Q-1, hence not altered by the
