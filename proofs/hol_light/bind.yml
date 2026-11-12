@@ -27,8 +27,8 @@ invntt_avx2_asm:
   arch: x86_64
   function: mlkem_intt_avx2_asm
   sha256:
-    mlkem_intt_mc: 961d64e25774e5538b85b8356a4809969d4cb92735bc4e56a5bebc13beea9e4c
-    mlkem_intt_tmc: 3b8f744b261a4d6154f90dd293cdfbdb032befd27d2217e0ce5422949816765b
+    mlkem_intt_mc: 08d2b63f80e578bb7adddab40f98db07cc1787614395d47f2ba244094b4ff12d
+    mlkem_intt_tmc: d29e5c29ee177a94f2a18c056fb31ecf37cfbfd8f960fb3372136ff142ce8da3
 keccak_f1600_x1_scalar_aarch64_asm:
   arch: aarch64
   function: keccak_f1600_x1_scalar_aarch64_asm
@@ -48,8 +48,8 @@ keccak_f1600_x4_avx2_asm:
   arch: x86_64
   function: keccak_f1600_x4_avx2_asm
   sha256:
-    keccak_f1600_x4_avx2_mc: ee110dfae2b73ec0b2eba6051f50f65d719b24362a8feb6c171a0907397f77e9
-    keccak_f1600_x4_avx2_tmc: 5ac2ff0190e7f749db5759cf178f3fff0e229b9477aa5163dc651889212cad40
+    keccak_f1600_x4_avx2_mc: 2bd09e9e4371ed5b6d497e4ed38c0b421d4b4cc6d922705969234f4ef5877c20
+    keccak_f1600_x4_avx2_tmc: 104052a6386f98adeb204ea627900283570d40550f22c3c71bfc9b3b83b5ef57
 keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm:
   arch: aarch64
   function: keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm
@@ -69,14 +69,14 @@ ntt_avx2_asm:
   arch: x86_64
   function: mlkem_ntt_avx2_asm
   sha256:
-    mlkem_ntt_mc: 1c145ae5331d0324150e928ea31b15c8691ceb4820b69f701b5c7461114bec18
-    mlkem_ntt_tmc: ead43fe9882581bc656e2d8da929d3e7438e613b8b8e8cf93e6762056c38f6e6
+    mlkem_ntt_mc: cb79db7eb86c36610ad749c6b5b8946acf32a476def240846c52662b2ff063d9
+    mlkem_ntt_tmc: 9227f435a186d37840362b8ea9c09ccaf085e3139e88faab8a2e81dbf97122f4
 nttfrombytes_avx2_asm:
   arch: x86_64
   function: mlkem_nttfrombytes_avx2_asm
   sha256:
-    mlkem_frombytes_mc: bbaedb33bb4c95ba771c7fb64c155b09bb6b4ae0b7b95b6feb5d10e2c5312e7d
-    mlkem_frombytes_tmc: a51989c4a2bcdba11e5e154d225e54f81407f22578542c92634e765a187cdd40
+    mlkem_frombytes_mc: b583f7fd9f3d2d8ad4fa2b2b0f002a3e0fe95162bc93e7a01d98ac48cad0b949
+    mlkem_frombytes_tmc: 0d90d3951e8a2b9edfe792513e19fc3bf7accdbedc05fcc6bce2995f76b5d79a
 ntttobytes_avx2_asm:
   arch: x86_64
   function: mlkem_ntttobytes_avx2_asm
@@ -172,8 +172,8 @@ polyvec_basemul_acc_montgomery_cached_k2_avx2_asm:
   arch: x86_64
   function: mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm
   sha256:
-    mlkem_basemul_k2_mc: 6ecc95895ee60715c96999b472dcb9db5e8b5d3dd6276ddc6beeafdcf34e92d8
-    mlkem_basemul_k2_tmc: b1890f13d629235dbe31cda900a65895b2ec4377b9670bd01afda1d7dd3f4c4a
+    mlkem_basemul_k2_mc: bd66d098b87a93e1259d3ef1ea9ff7c50ceecc875385e9172d928540505f2f38
+    mlkem_basemul_k2_tmc: 3dfc8a464e6d9fb8fb5493925d73d341411b314bb8b48ad63ab6908efc911b15
 polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm:
   arch: aarch64
   function: mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm
@@ -183,8 +183,8 @@ polyvec_basemul_acc_montgomery_cached_k3_avx2_asm:
   arch: x86_64
   function: mlkem_polyvec_basemul_acc_montgomery_cached_k3_avx2_asm
   sha256:
-    mlkem_basemul_k3_mc: 1f204e28235c82c3c75088bcdcfa6712ee6b726a9e2fe4aacfd3afc3b0689c2a
-    mlkem_basemul_k3_tmc: efa9cfd0e6ef1e776bce1c3b4e64cf305d309e1b7f656fe405f9100759a4d521
+    mlkem_basemul_k3_mc: a44d356d3685a37e4920e38eabc229d10299f41f10afeeb3475f1d223add0e9a
+    mlkem_basemul_k3_tmc: 7b2a44381c1a329f844a1cdc6acf6afa5ac700a7f865b571108d428e5f96a1af
 polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm:
   arch: aarch64
   function: mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm
@@ -194,14 +194,14 @@ polyvec_basemul_acc_montgomery_cached_k4_avx2_asm:
   arch: x86_64
   function: mlkem_polyvec_basemul_acc_montgomery_cached_k4_avx2_asm
   sha256:
-    mlkem_basemul_k4_mc: 7798e32db6ec1f9d4d1d74283441b1772817c474cd09a9bec87d3f5073abff7f
-    mlkem_basemul_k4_tmc: 1edc855602e5913282dea9c63544e90deb244a56306c327c14616c6ff77ec34c
+    mlkem_basemul_k4_mc: aa4a91b23abfb2f8a1d084650fa7a93ff773b89b1621347c2b880106e5636ce0
+    mlkem_basemul_k4_tmc: e0e81f09fe15360365856a50d5dfd2c570d7513c6fd936620191d9121c1f5bf4
 reduce_avx2_asm:
   arch: x86_64
   function: mlkem_reduce_avx2_asm
   sha256:
-    mlkem_reduce_mc: 45c235c4b814c4709ac7ced2d1489f47c7c8edc70a53bccc6a27a18f4d3b3c0c
-    mlkem_reduce_tmc: 61a596291538b684faea6d23aa6900ecbf2228385cb8fdff971de0e895325c8d
+    mlkem_reduce_mc: 2940ac31a03e174749cd863923dfe5a1eb168e91b5407c7e2349a1c7386f5646
+    mlkem_reduce_tmc: 0928fbf004b1b08826739d732c0df7f3089b6e7509a0093af75fcfa63ed84184
 rej_uniform_aarch64_asm:
   arch: aarch64
   function: mlkem_rej_uniform_aarch64_asm

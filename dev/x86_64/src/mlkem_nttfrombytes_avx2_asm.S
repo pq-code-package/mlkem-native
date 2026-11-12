@@ -100,7 +100,7 @@ vpand %ymm0,%ymm14,%ymm14
 
 vpsrlw $8,%ymm5,%ymm15
 vpsllw $8,%ymm9,%ymm1
-vpor %ymm15,%ymm1,%ymm15
+vpor %ymm1,%ymm15,%ymm15
 vpand %ymm0,%ymm15,%ymm15
 
 vpsrlw $4,%ymm9,%ymm1
