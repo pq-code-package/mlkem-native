@@ -8,10 +8,11 @@ that the HOL Light proofs verify.
 For every assembly function with a HOL Light proof, look for a function
 symbol of the same name in the given files, with or without a namespace
 prefix. If there is one, compare the SHA-256 of its code with the hash
-of the proof's byte list in its accepted FUNC.defs. These hashes are
-collected in proofs/hol_light/bind.yml, which `check-binary gen` writes
-and scripts/autogen keeps up to date. The exit status is 1 if any
-check fails.
+of the proof's byte list in its accepted FUNC.defs, as recorded in
+proofs/hol_light/bind.yml. scripts/autogen generates bind.yml from the
+.defs, with `hol-trace bind`; check-binary reads nothing else, so a copy
+of it and of bind.yml suffices to check a build anywhere. The exit status
+is 1 if any check fails.
 
 The files are read with ${CROSS_PREFIX}readelf, GNU's or LLVM's, or
 with readelf if there is no such tool, so any ELF file that readelf
@@ -25,110 +26,38 @@ Options:
   --quiet      print only failures
   --require-match
                fail if no function in the FILEs has a proof
+  --bind FILE  read the hashes from FILE instead of this checkout's
+               proofs/hol_light/bind.yml
 
 Usage:
-  check-binary [--show-all] [--force-all] [--quiet] [--require-match] FILE ...
-  check-binary gen [--root DIR]
-                            print bind.yml, from the files below DIR
-                            (default: this checkout)
+  check-binary [--show-all] [--force-all] [--quiet] [--require-match]
+               [--bind FILE] FILE ...
 """
 
-import glob
 import hashlib
 import os
 import re
 import shutil
 import subprocess
 import sys
-import tempfile
 
 import yaml
 
 ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 HOL_LIGHT = os.path.join(ROOT, "proofs", "hol_light")
-HOL_TRACE = os.path.join(HOL_LIGHT, "hol_trace")
 BIND_YML = os.path.join(HOL_LIGHT, "bind.yml")
-sys.path.insert(0, HOL_TRACE)
-# Proof code run by `hol-trace gen` can write untracked files in the
-# checkout, such as a __pycache__ entry for conform.py, that Python
-# would load instead of conform.py. Read and write bytecode elsewhere.
-_pycache = tempfile.TemporaryDirectory(prefix="check-binary-pycache-")
-sys.pycache_prefix = _pycache.name
-import conform  # noqa: E402
 
 
 class Failed(Exception):
     pass
 
 
-# ----- bind.yml: the expected hashes, derived from the accepted .defs;
-# the checked-in file must match them.
+# ----- bind.yml: the expected hashes.
 
 
-def symbol_of(hol_light, arch, func):
-    """The proved function's symbol without namespace prefix: the
-    assembly declares it as `mlk_NAME`."""
-    path = os.path.join(hol_light, arch, "mlkem", func + ".S")
+def read_bind(path):
     with open(path, encoding="utf-8") as f:
-        names = re.findall(r"^\.global mlk_(\S+)$", f.read(), flags=re.M)
-    if len(names) != 1:
-        raise Failed(f"{path}: expected one `.global mlk_NAME`")
-    return names[0]
-
-
-def check_note(defs_path, name, data):
-    """The comment before a byte list states its length and SHA-256."""
-    with open(defs_path, encoding="utf-8") as f:
-        lines = f.read().split("\n")
-    at = lines.index(f"definition {conform.header_name(name)}")
-    note = conform.byte_note(name, data)
-    if "\n".join(lines[at - note.count("\n") - 1 : at]) != note:
-        raise Failed(f"the comment before {name} is not `{note}`")
-
-
-def defs_hashes(defs_path):
-    """{constant: SHA-256} of the byte list in a proof's .defs and, if
-    the file defines it, of its copy without the first four bytes."""
-    entries = conform.read_entries(defs_path)
-    lists = [b for b in map(conform.rendered_bytes, entries.values()) if b]
-    if len(lists) != 1:
-        raise Failed(f"{conform.short(defs_path)}: expected one byte list")
-    name, data = lists[0]
-    check_note(defs_path, name, data)
-    hashes = {name: hashlib.sha256(data).hexdigest()}
-    if name.endswith("_mc"):
-        trimmed = name[: -len("_mc")] + "_tmc"
-        text = entries.get(f"definition {conform.header_name(trimmed)}")
-        if text == f"|- {trimmed} = TRIM_LIST (4, 0) {name}":
-            hashes[trimmed] = hashlib.sha256(data[4:]).hexdigest()
-    return hashes
-
-
-def gen_bind(root=ROOT):
-    """bind.yml from the proofs' assembly and accepted .defs in root, a
-    directory laid out like the repository."""
-    hol_light = os.path.join(root, "proofs", "hol_light")
-    accepted = os.path.join(hol_light, "hol_trace", "accepted", "proofs")
-    bind = {}
-    for path in sorted(glob.glob(os.path.join(accepted, "*", "*.defs"))):
-        arch = os.path.basename(os.path.dirname(path))
-        func = os.path.basename(path)[: -len(".defs")]
-        symbol = symbol_of(hol_light, arch, func)
-        if symbol in bind:
-            raise Failed(f"two proofs are about the symbol {symbol}")
-        bind[symbol] = {"arch": arch, "function": func, "sha256": defs_hashes(path)}
-    return dict(sorted(bind.items()))
-
-
-def read_bind():
-    with open(BIND_YML, encoding="utf-8") as f:
-        bind = yaml.safe_load(f)
-    if bind != gen_bind():
-        raise Failed(
-            "proofs/hol_light/bind.yml does not match the accepted .defs; "
-            "run scripts/autogen"
-        )
-    return bind
+        return yaml.safe_load(f)
 
 
 # ----- readelf: the function symbols of an ELF file, or of each member
@@ -311,8 +240,8 @@ def paint(text, color):
 GREEN, RED, GRAY = "32", "31", "90"
 
 
-def check(paths, show_all, force_all, quiet, require_match):
-    bind, failures, matched = read_bind(), 0, 0
+def check(bind, paths, show_all, force_all, quiet, require_match):
+    failures, matched = 0, 0
 
     def report(line, color):
         if color == RED and os.environ.get("GITHUB_ACTIONS"):
@@ -370,18 +299,24 @@ def check(paths, show_all, force_all, quiet, require_match):
 
 
 def main(args):
-    try:
-        if args[:1] == ["gen"] and args[1:] in ([], ["--root", *args[2:3]]):
-            root = args[2] if len(args) == 3 else ROOT
-            print(yaml.safe_dump(gen_bind(root), sort_keys=False), end="")
-            return 0
-        flags = {"--show-all", "--force-all", "--quiet", "--require-match"}
-        paths = [a for a in args if a not in flags]
-        if not paths or any(a.startswith("-") for a in paths):
+    options = ("--show-all", "--force-all", "--quiet", "--require-match")
+    bind, paths, flags = BIND_YML, [], set()
+    rest = list(args)
+    while rest:
+        a = rest.pop(0)
+        if a == "--bind" and rest:
+            bind = rest.pop(0)
+        elif a in options:
+            flags.add(a)
+        elif a.startswith("-"):
             sys.exit(__doc__.strip())
-        options = ("--show-all", "--force-all", "--quiet", "--require-match")
-        return check(paths, *(f in args for f in options))
-    except (Failed, conform.Failed, OSError) as e:
+        else:
+            paths.append(a)
+    if not paths:
+        sys.exit(__doc__.strip())
+    try:
+        return check(read_bind(bind), paths, *(f in flags for f in options))
+    except (Failed, OSError) as e:
         print(f"check-binary: {e}", file=sys.stderr)
         return 1
 

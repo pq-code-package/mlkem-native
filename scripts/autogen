@@ -4601,11 +4601,11 @@ def update_hol_light_bytecode_for_arch(arch, force_cross=()):
 
 def gen_hol_light_bind():
     """Write proofs/hol_light/bind.yml: the SHA-256 of the code of each
-    proved function, from the accepted .defs. check-binary reads the
+    proved function, from the accepted .defs. `hol-trace bind` reads the
     .defs and the proofs' assembly as this run of autogen leaves them,
     including what earlier steps changed but have not yet written."""
-    check_binary = "scripts/check-binary"
-    if not os.path.exists(check_binary):
+    hol_trace = "proofs/hol_light/hol_trace/hol-trace"
+    if not os.path.exists(hol_trace):
         return
     patterns = [
         "proofs/hol_light/hol_trace/accepted/proofs/*/*.defs",
@@ -4624,7 +4624,7 @@ def gen_hol_light_bind():
             with open(os.path.join(root, path), "w") as f:
                 f.write(content)
         out = subprocess.run(
-            [check_binary, "gen", "--root", root],
+            [hol_trace, "bind", "--root", root],
             check=True,
             capture_output=True,
             text=True,
