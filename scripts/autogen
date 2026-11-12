@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 import subprocess
+import fnmatch
+import glob
 import tempfile
 import platform
 import argparse
@@ -4599,13 +4601,34 @@ def update_hol_light_bytecode_for_arch(arch, force_cross=()):
 
 def gen_hol_light_bind():
     """Write proofs/hol_light/bind.yml: the SHA-256 of the code of each
-    proved function, from the accepted .defs."""
+    proved function, from the accepted .defs. check-binary reads the
+    .defs and the proofs' assembly as this run of autogen leaves them,
+    including what earlier steps changed but have not yet written."""
     check_binary = "scripts/check-binary"
     if not os.path.exists(check_binary):
         return
-    out = subprocess.run(
-        [check_binary, "gen"], check=True, capture_output=True, text=True
-    ).stdout
+    patterns = [
+        "proofs/hol_light/hol_trace/accepted/proofs/*/*.defs",
+        "proofs/hol_light/*/mlkem/*.S",
+    ]
+    with _file_cache_lock:
+        cached = list(_file_cache)
+    paths = {p for pat in patterns for p in glob.glob(pat)}
+    paths |= {p for p in cached if any(fnmatch.fnmatch(p, pat) for pat in patterns)}
+    with tempfile.TemporaryDirectory(prefix="autogen-bind-") as root:
+        for path in sorted(paths):
+            content = read_file(path)
+            if content is None:  # deleted in this run
+                continue
+            os.makedirs(os.path.join(root, os.path.dirname(path)), exist_ok=True)
+            with open(os.path.join(root, path), "w") as f:
+                f.write(content)
+        out = subprocess.run(
+            [check_binary, "gen", "--root", root],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
     header = [
         "# Copyright (c) The mlkem-native project authors",
         "# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT",

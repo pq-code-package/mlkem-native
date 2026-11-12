@@ -28,7 +28,9 @@ Options:
 
 Usage:
   check-binary [--show-all] [--force-all] [--quiet] [--require-match] FILE ...
-  check-binary gen          print bind.yml
+  check-binary gen [--root DIR]
+                            print bind.yml, from the files below DIR
+                            (default: this checkout)
 """
 
 import glob
@@ -46,7 +48,6 @@ ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 HOL_LIGHT = os.path.join(ROOT, "proofs", "hol_light")
 HOL_TRACE = os.path.join(HOL_LIGHT, "hol_trace")
 BIND_YML = os.path.join(HOL_LIGHT, "bind.yml")
-ACCEPTED_PROOFS = os.path.join(HOL_TRACE, "accepted", "proofs")
 sys.path.insert(0, HOL_TRACE)
 # Proof code run by `hol-trace gen` can write untracked files in the
 # checkout, such as a __pycache__ entry for conform.py, that Python
@@ -64,10 +65,10 @@ class Failed(Exception):
 # the checked-in file must match them.
 
 
-def symbol_of(arch, func):
+def symbol_of(hol_light, arch, func):
     """The proved function's symbol without namespace prefix: the
     assembly declares it as `mlk_NAME`."""
-    path = os.path.join(HOL_LIGHT, arch, "mlkem", func + ".S")
+    path = os.path.join(hol_light, arch, "mlkem", func + ".S")
     with open(path, encoding="utf-8") as f:
         names = re.findall(r"^\.global mlk_(\S+)$", f.read(), flags=re.M)
     if len(names) != 1:
@@ -103,12 +104,16 @@ def defs_hashes(defs_path):
     return hashes
 
 
-def gen_bind():
+def gen_bind(root=ROOT):
+    """bind.yml from the proofs' assembly and accepted .defs in root, a
+    directory laid out like the repository."""
+    hol_light = os.path.join(root, "proofs", "hol_light")
+    accepted = os.path.join(hol_light, "hol_trace", "accepted", "proofs")
     bind = {}
-    for path in sorted(glob.glob(os.path.join(ACCEPTED_PROOFS, "*", "*.defs"))):
+    for path in sorted(glob.glob(os.path.join(accepted, "*", "*.defs"))):
         arch = os.path.basename(os.path.dirname(path))
         func = os.path.basename(path)[: -len(".defs")]
-        symbol = symbol_of(arch, func)
+        symbol = symbol_of(hol_light, arch, func)
         if symbol in bind:
             raise Failed(f"two proofs are about the symbol {symbol}")
         bind[symbol] = {"arch": arch, "function": func, "sha256": defs_hashes(path)}
@@ -366,8 +371,9 @@ def check(paths, show_all, force_all, quiet, require_match):
 
 def main(args):
     try:
-        if args == ["gen"]:
-            print(yaml.safe_dump(gen_bind(), sort_keys=False), end="")
+        if args[:1] == ["gen"] and args[1:] in ([], ["--root", *args[2:3]]):
+            root = args[2] if len(args) == 3 else ROOT
+            print(yaml.safe_dump(gen_bind(root), sort_keys=False), end="")
             return 0
         flags = {"--show-all", "--force-all", "--quiet", "--require-match"}
         paths = [a for a in args if a not in flags]
