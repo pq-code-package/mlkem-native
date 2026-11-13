@@ -167,6 +167,12 @@ extern "C"
  *
  * @spec{Implements @[FIPS203, Algorithm 16, ML-KEM.KeyGen_Internal].}
  *
+ * @note If MLK_CONFIG_KEYGEN_PCT is enabled, the keypair is written to
+ *       the output buffers before the PCT is run, and zeroized if the PCT
+ *       fails. A keypair failing the PCT is thus temporarily present in
+ *       the output buffers. If this is a concern, pass buffers that are
+ *       not accessible to untrusted parties, and copy out upon success.
+ *
  * @param[out] pk      Output public key, an array of
  *                     MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
  * @param[out] sk      Output private key, an array of
@@ -202,6 +208,12 @@ int MLK_API_NAMESPACE(keypair_derand)(
  * Generate a public/private keypair for the ML-KEM key encapsulation mechanism.
  *
  * @spec{Implements @[FIPS203, Algorithm 19, ML-KEM.KeyGen].}
+ *
+ * @note If MLK_CONFIG_KEYGEN_PCT is enabled, the keypair is written to
+ *       the output buffers before the PCT is run, and zeroized if the PCT
+ *       fails. A keypair failing the PCT is thus temporarily present in
+ *       the output buffers. If this is a concern, pass buffers that are
+ *       not accessible to untrusted parties, and copy out upon success.
  *
  * @param[out] pk      Output public key, an array of
  *                     MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.

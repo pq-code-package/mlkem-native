@@ -451,10 +451,13 @@ int mlk_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   mlk_memcpy(tmp, sk + MLKEM_INDCCA_SECRETKEYBYTES - MLKEM_SYMBYTES,
              MLKEM_SYMBYTES);
   mlk_memcpy(tmp + MLKEM_SYMBYTES, ct, MLKEM_INDCCA_CIPHERTEXTBYTES);
-  mlk_hash_j(ss, tmp, MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES);
+  mlk_hash_j(buf, tmp, MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES);
 
-  /* Copy true key to return buffer if fail is 0 */
-  mlk_ct_cmov_zero(ss, kr, MLKEM_SYMBYTES, fail);
+  /* Replace rejection key by true key if fail is 0 */
+  mlk_ct_cmov_zero(buf, kr, MLKEM_SYMBYTES, fail);
+
+  /* Write the output buffer only once */
+  mlk_memcpy(ss, buf, MLKEM_SYMBYTES);
 
 cleanup:
   /* Specification: Partially implements
