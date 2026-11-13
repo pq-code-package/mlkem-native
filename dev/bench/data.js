@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794570078925,
+  "lastUpdate": 1794570082707,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -25963,6 +25963,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 61386,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "882e300b8209fe7c31b07a118c828bced05ef83e",
+          "message": "tests: Don't check binaries by default\n\n`scripts/tests` builds with CHECK_BINARY=1, so check-binary compares the\nkernels in every library and binary it builds with the bytes that the\nHOL Light proofs are about. clang's assembler, which zig also uses,\nencodes some commutative AVX2 instructions in x86_64 kernels with their\noperands swapped, so the clang and zig jobs in CI fail that check until\nthe assembly is changed to match.\n\nMake `--check-binary` opt-in: `scripts/tests` now builds with\nCHECK_BINARY=1 only when it is given. BUILDING.md, the HOLTrace README\nand SOUNDNESS.md's reassembly risk no longer say that tests or CI check\nmlkem-native's own builds by default.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-13T08:28:14Z",
+          "tree_id": "fb29da6192e115df7f2e54d029da8b282730bd05",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/882e300b8209fe7c31b07a118c828bced05ef83e"
+        },
+        "date": 1794569885375,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 17723,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 20573,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 27097,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 29979,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 32752,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 42019,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 43834,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 48806,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 61380,
             "unit": "cycles"
           }
         ]
