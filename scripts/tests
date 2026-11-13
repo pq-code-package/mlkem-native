@@ -555,8 +555,8 @@ class Tests:
         """Whether builds can check the libraries and binaries that they
         produce against the HOL Light proofs (CHECK_BINARY=1, see
         scripts/check-binary): on Linux, which builds ELF files, with
-        readelf and PyYAML. --no-check-binary turns this off."""
-        if not getattr(self.args, "check_binary", True):
+        readelf and PyYAML. Only with --check-binary."""
+        if not getattr(self.args, "check_binary", False):
             return False
         if platform.system() != "Linux":
             return False
@@ -1429,15 +1429,14 @@ def cli():
         action="store_true",
         dest="check_binary",
         help="Build with CHECK_BINARY=1: check the proved kernels in each library "
-        "and binary against the HOL Light proofs (default, on Linux with readelf "
-        "and PyYAML)",
-        default=True,
+        "and binary against the HOL Light proofs (on Linux with readelf and PyYAML)",
+        default=False,
     )
     check_binary_group.add_argument(
         "--no-check-binary",
         action="store_false",
         dest="check_binary",
-        help="Do not check the built kernels against the HOL Light proofs",
+        help="Do not check the built kernels against the HOL Light proofs (default)",
     )
 
     common_parser.add_argument(

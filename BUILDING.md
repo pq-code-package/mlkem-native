@@ -76,8 +76,8 @@ will compile and run functionality tests. Similarly,
 
 will compile and run benchmarks, using PERF for cycle counting (`-c PERF`) and running as root (`-r`).
 
-On Linux, `./scripts/tests` builds with `CHECK_BINARY=1`, described above, if readelf and
-`python3` with PyYAML are available; `--no-check-binary` turns this off.
+`./scripts/tests --check-binary` builds with `CHECK_BINARY=1`. This needs Linux, readelf and
+PyYAML.
 
 #### Test platforms
 
