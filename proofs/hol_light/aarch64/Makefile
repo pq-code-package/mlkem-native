@@ -114,12 +114,12 @@ PROOF_LOGS = $(OBJ:.o=.correct)
 
 # Build precompiled binary for dumping bytecodes
 proofs/dump_bytecode.native: proofs/dump_bytecode.ml $(OBJ)
-	./proofs/build-proof.sh $(BASE)/$< "$(HOLLIGHT)" "$@"
+	../scripts/build-proof.sh $(BASE)/$< "$(HOLLIGHT)" "$@"
 
 # Build precompiled native binaries of HOL Light proofs
 
 .SECONDEXPANSION:
-%.native: proofs/$$(*F).ml %.o ; ./proofs/build-proof.sh $(BASE)/$< "$(HOLLIGHT)" "$@"
+%.native: proofs/$$(*F).ml %.o ; ../scripts/build-proof.sh $(BASE)/$< "$(HOLLIGHT)" "$@"
 
 # Run them and print the standard output+error at *.correct
 # The pipe hides the proof's exit status, so also require the completion

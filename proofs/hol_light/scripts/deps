@@ -154,7 +154,6 @@ EVERY_PROOF = (
     "nix/",
     ".github/actions/setup-nix/",
     ".github/actions/setup-shell/",
-    HL + "aarch64/proofs/build-proof.sh",  # used for both architectures
     "scripts/check-binary",  # checks the proofs' object files
     ".github/workflows/hol_trace.yml",
     ".github/actions/hol-trace/",

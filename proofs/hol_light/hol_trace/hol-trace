@@ -32,9 +32,7 @@ TRACES = os.path.join(HERE, "traces")
 ACCEPTED = os.path.join(HERE, "accepted")
 S2N_ARCH = {"aarch64": "arm", "x86_64": "x86"}
 # Compiles an OCaml file against a HOL Light build into a native binary.
-# Each architecture has a copy; they differ only in a trailing slash, so
-# every command here uses this one.
-BUILD_PROOF = os.path.join(PROOF_DIR, "aarch64", "proofs", "build-proof.sh")
+BUILD_PROOF = os.path.join(PROOF_DIR, "scripts", "build-proof.sh")
 
 sys.path.insert(0, HERE)
 # Proof code run by `gen` can write untracked files in the checkout, such
