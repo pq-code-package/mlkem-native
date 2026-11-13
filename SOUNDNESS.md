@@ -408,7 +408,7 @@ bytes the proofs are about. Assemblers do emit different code (for example, some
 assemblers swap the operands of AVX2 `VPADD` to shorten the encoding).
 
 Building with `make CHECK_BINARY=1` (see [BUILDING.md](BUILDING.md)) compares the backend
-kernels in a build with the proved bytes.
+kernels in a build with the proved bytes, and CI runs it on mlkem-native's own builds.
 Consumers should run `scripts/check-binary` on their own binaries. Kernels are found by
 symbol name, so stripped binaries cannot be checked.
 
