@@ -79,8 +79,8 @@ functions in binaries have exactly these bytes.
    SHA-256 of its byte list; `check-binary FILE ...` takes any ELF object,
    linked binary or archive, and compares every function whose symbol
    it names. It needs no trace. Building with `make CHECK_BINARY=1`,
-   as `scripts/tests` does, runs it on every library and binary built;
-   see [BUILDING.md](../../../BUILDING.md).
+   as `scripts/tests --check-binary` does, runs it on every library and
+   binary built; see [BUILDING.md](../../../BUILDING.md).
 
 `hol-trace check` is replay followed by compare. The accepted files are
 written by `hol-trace outline`, through `scripts/autogen
