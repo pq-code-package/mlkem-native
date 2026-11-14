@@ -147,7 +147,9 @@ All AArch64 and x86_64 assembly routines used in mlkem-native are covered.
   * AArch64 modular reduction: [mlkem_poly_reduce_aarch64_asm.S](aarch64/mlkem/mlkem_poly_reduce_aarch64_asm.S)
   * AArch64 'multiplication cache' computation: [mlkem_poly_mulcache_compute_aarch64_asm.S](aarch64/mlkem/mlkem_poly_mulcache_compute_aarch64_asm.S)
   * AArch64 rejection sampling: [mlkem_rej_uniform_aarch64_asm.S](aarch64/mlkem/mlkem_rej_uniform_aarch64_asm.S)
-  * AArch64 polynomial compression: [mlkem_poly_tobytes_aarch64_asm.S](aarch64/mlkem/mlkem_poly_tobytes_aarch64_asm.S)
+  * AArch64 polynomial compression: [mlkem_poly_tobytes_aarch64_asm.S](aarch64/mlkem/mlkem_poly_tobytes_aarch64_asm.S) [mlkem_poly_compress_d4_aarch64_asm.S](aarch64/mlkem/mlkem_poly_compress_d4_aarch64_asm.S) [mlkem_poly_compress_d5_aarch64_asm.S](aarch64/mlkem/mlkem_poly_compress_d5_aarch64_asm.S) [mlkem_poly_compress_d10_aarch64_asm.S](aarch64/mlkem/mlkem_poly_compress_d10_aarch64_asm.S) [mlkem_poly_compress_d11_aarch64_asm.S](aarch64/mlkem/mlkem_poly_compress_d11_aarch64_asm.S)
+  * AArch64 polynomial decompression: [mlkem_poly_decompress_d4_aarch64_asm.S](aarch64/mlkem/mlkem_poly_decompress_d4_aarch64_asm.S) [mlkem_poly_decompress_d5_aarch64_asm.S](aarch64/mlkem/mlkem_poly_decompress_d5_aarch64_asm.S) [mlkem_poly_decompress_d10_aarch64_asm.S](aarch64/mlkem/mlkem_poly_decompress_d10_aarch64_asm.S) [mlkem_poly_decompress_d11_aarch64_asm.S](aarch64/mlkem/mlkem_poly_decompress_d11_aarch64_asm.S)
+  * AArch64 polynomial deserialization: [mlkem_poly_frombytes_aarch64_asm.S](aarch64/mlkem/mlkem_poly_frombytes_aarch64_asm.S)
 - FIPS202:
   * Keccak-F1600 using lazy rotations[^HYBRID]: [keccak_f1600_x1_scalar_aarch64_asm.S](aarch64/mlkem/keccak_f1600_x1_scalar_aarch64_asm.S)
   * Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x1_v84a_aarch64_asm.S](aarch64/mlkem/keccak_f1600_x1_v84a_aarch64_asm.S)

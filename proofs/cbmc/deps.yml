@@ -5202,6 +5202,81 @@ poly_compress_d10_native/1024:
   - proofs/cbmc/mlkem_native_config_cbmc.h
   - proofs/cbmc/poly_compress_d10_native/Makefile
   - proofs/cbmc/poly_compress_d10_native/poly_compress_d10_native_harness.c
+poly_compress_d10_native_aarch64/512:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_compress_d10_native_aarch64/Makefile
+  - proofs/cbmc/poly_compress_d10_native_aarch64/poly_compress_d10_native_aarch64_harness.c
+poly_compress_d10_native_aarch64/768:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_compress_d10_native_aarch64/Makefile
+  - proofs/cbmc/poly_compress_d10_native_aarch64/poly_compress_d10_native_aarch64_harness.c
+poly_compress_d10_native_aarch64/1024:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_compress_d10_native_aarch64/Makefile
+  - proofs/cbmc/poly_compress_d10_native_aarch64/poly_compress_d10_native_aarch64_harness.c
 poly_compress_d10_native_x86_64/512:
   files:
   - mlkem/src/capability.h
@@ -5487,6 +5562,81 @@ poly_compress_d11_native/1024:
   - proofs/cbmc/mlkem_native_config_cbmc.h
   - proofs/cbmc/poly_compress_d11_native/Makefile
   - proofs/cbmc/poly_compress_d11_native/poly_compress_d11_native_harness.c
+poly_compress_d11_native_aarch64/512:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_compress_d11_native_aarch64/Makefile
+  - proofs/cbmc/poly_compress_d11_native_aarch64/poly_compress_d11_native_aarch64_harness.c
+poly_compress_d11_native_aarch64/768:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_compress_d11_native_aarch64/Makefile
+  - proofs/cbmc/poly_compress_d11_native_aarch64/poly_compress_d11_native_aarch64_harness.c
+poly_compress_d11_native_aarch64/1024:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_compress_d11_native_aarch64/Makefile
+  - proofs/cbmc/poly_compress_d11_native_aarch64/poly_compress_d11_native_aarch64_harness.c
 poly_compress_d11_native_x86_64/512:
   files:
   - mlkem/src/capability.h
@@ -5772,6 +5922,81 @@ poly_compress_d4_native/1024:
   - proofs/cbmc/mlkem_native_config_cbmc.h
   - proofs/cbmc/poly_compress_d4_native/Makefile
   - proofs/cbmc/poly_compress_d4_native/poly_compress_d4_native_harness.c
+poly_compress_d4_native_aarch64/512:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_compress_d4_native_aarch64/Makefile
+  - proofs/cbmc/poly_compress_d4_native_aarch64/poly_compress_d4_native_aarch64_harness.c
+poly_compress_d4_native_aarch64/768:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_compress_d4_native_aarch64/Makefile
+  - proofs/cbmc/poly_compress_d4_native_aarch64/poly_compress_d4_native_aarch64_harness.c
+poly_compress_d4_native_aarch64/1024:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_compress_d4_native_aarch64/Makefile
+  - proofs/cbmc/poly_compress_d4_native_aarch64/poly_compress_d4_native_aarch64_harness.c
 poly_compress_d4_native_x86_64/512:
   files:
   - mlkem/src/capability.h
@@ -6057,6 +6282,84 @@ poly_compress_d5_native/1024:
   - proofs/cbmc/mlkem_native_config_cbmc.h
   - proofs/cbmc/poly_compress_d5_native/Makefile
   - proofs/cbmc/poly_compress_d5_native/poly_compress_d5_native_harness.c
+poly_compress_d5_native_aarch64/512:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/aarch64/src/compress_d5_table.c
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_compress_d5_native_aarch64/Makefile
+  - proofs/cbmc/poly_compress_d5_native_aarch64/poly_compress_d5_native_aarch64_harness.c
+poly_compress_d5_native_aarch64/768:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/aarch64/src/compress_d5_table.c
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_compress_d5_native_aarch64/Makefile
+  - proofs/cbmc/poly_compress_d5_native_aarch64/poly_compress_d5_native_aarch64_harness.c
+poly_compress_d5_native_aarch64/1024:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/aarch64/src/compress_d5_table.c
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_compress_d5_native_aarch64/Makefile
+  - proofs/cbmc/poly_compress_d5_native_aarch64/poly_compress_d5_native_aarch64_harness.c
 poly_compress_d5_native_x86_64/512:
   files:
   - mlkem/src/capability.h
@@ -6480,6 +6783,84 @@ poly_decompress_d10_native/1024:
   - proofs/cbmc/mlkem_native_config_cbmc.h
   - proofs/cbmc/poly_decompress_d10_native/Makefile
   - proofs/cbmc/poly_decompress_d10_native/poly_decompress_d10_native_harness.c
+poly_decompress_d10_native_aarch64/512:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/aarch64/src/decompress_d10_table.c
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_decompress_d10_native_aarch64/Makefile
+  - proofs/cbmc/poly_decompress_d10_native_aarch64/poly_decompress_d10_native_aarch64_harness.c
+poly_decompress_d10_native_aarch64/768:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/aarch64/src/decompress_d10_table.c
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_decompress_d10_native_aarch64/Makefile
+  - proofs/cbmc/poly_decompress_d10_native_aarch64/poly_decompress_d10_native_aarch64_harness.c
+poly_decompress_d10_native_aarch64/1024:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/aarch64/src/decompress_d10_table.c
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_decompress_d10_native_aarch64/Makefile
+  - proofs/cbmc/poly_decompress_d10_native_aarch64/poly_decompress_d10_native_aarch64_harness.c
 poly_decompress_d10_native_x86_64/512:
   files:
   - mlkem/src/capability.h
@@ -6765,6 +7146,84 @@ poly_decompress_d11_native/1024:
   - proofs/cbmc/mlkem_native_config_cbmc.h
   - proofs/cbmc/poly_decompress_d11_native/Makefile
   - proofs/cbmc/poly_decompress_d11_native/poly_decompress_d11_native_harness.c
+poly_decompress_d11_native_aarch64/512:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/aarch64/src/decompress_d11_table.c
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_decompress_d11_native_aarch64/Makefile
+  - proofs/cbmc/poly_decompress_d11_native_aarch64/poly_decompress_d11_native_aarch64_harness.c
+poly_decompress_d11_native_aarch64/768:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/aarch64/src/decompress_d11_table.c
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_decompress_d11_native_aarch64/Makefile
+  - proofs/cbmc/poly_decompress_d11_native_aarch64/poly_decompress_d11_native_aarch64_harness.c
+poly_decompress_d11_native_aarch64/1024:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/aarch64/src/decompress_d11_table.c
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_decompress_d11_native_aarch64/Makefile
+  - proofs/cbmc/poly_decompress_d11_native_aarch64/poly_decompress_d11_native_aarch64_harness.c
 poly_decompress_d11_native_x86_64/512:
   files:
   - mlkem/src/capability.h
@@ -7050,6 +7509,84 @@ poly_decompress_d4_native/1024:
   - proofs/cbmc/mlkem_native_config_cbmc.h
   - proofs/cbmc/poly_decompress_d4_native/Makefile
   - proofs/cbmc/poly_decompress_d4_native/poly_decompress_d4_native_harness.c
+poly_decompress_d4_native_aarch64/512:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/aarch64/src/decompress_d4_table.c
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_decompress_d4_native_aarch64/Makefile
+  - proofs/cbmc/poly_decompress_d4_native_aarch64/poly_decompress_d4_native_aarch64_harness.c
+poly_decompress_d4_native_aarch64/768:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/aarch64/src/decompress_d4_table.c
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_decompress_d4_native_aarch64/Makefile
+  - proofs/cbmc/poly_decompress_d4_native_aarch64/poly_decompress_d4_native_aarch64_harness.c
+poly_decompress_d4_native_aarch64/1024:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/aarch64/src/decompress_d4_table.c
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_decompress_d4_native_aarch64/Makefile
+  - proofs/cbmc/poly_decompress_d4_native_aarch64/poly_decompress_d4_native_aarch64_harness.c
 poly_decompress_d4_native_x86_64/512:
   files:
   - mlkem/src/capability.h
@@ -7335,6 +7872,84 @@ poly_decompress_d5_native/1024:
   - proofs/cbmc/mlkem_native_config_cbmc.h
   - proofs/cbmc/poly_decompress_d5_native/Makefile
   - proofs/cbmc/poly_decompress_d5_native/poly_decompress_d5_native_harness.c
+poly_decompress_d5_native_aarch64/512:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/aarch64/src/decompress_d5_table.c
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_decompress_d5_native_aarch64/Makefile
+  - proofs/cbmc/poly_decompress_d5_native_aarch64/poly_decompress_d5_native_aarch64_harness.c
+poly_decompress_d5_native_aarch64/768:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/aarch64/src/decompress_d5_table.c
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_decompress_d5_native_aarch64/Makefile
+  - proofs/cbmc/poly_decompress_d5_native_aarch64/poly_decompress_d5_native_aarch64_harness.c
+poly_decompress_d5_native_aarch64/1024:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/aarch64/src/decompress_d5_table.c
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_decompress_d5_native_aarch64/Makefile
+  - proofs/cbmc/poly_decompress_d5_native_aarch64/poly_decompress_d5_native_aarch64_harness.c
 poly_decompress_d5_native_x86_64/512:
   files:
   - mlkem/src/capability.h
@@ -7758,6 +8373,81 @@ poly_frombytes_native/1024:
   - proofs/cbmc/mlkem_native_config_cbmc.h
   - proofs/cbmc/poly_frombytes_native/Makefile
   - proofs/cbmc/poly_frombytes_native/poly_frombytes_native_harness.c
+poly_frombytes_native_aarch64/512:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_frombytes_native_aarch64/Makefile
+  - proofs/cbmc/poly_frombytes_native_aarch64/poly_frombytes_native_aarch64_harness.c
+poly_frombytes_native_aarch64/768:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_frombytes_native_aarch64/Makefile
+  - proofs/cbmc/poly_frombytes_native_aarch64/poly_frombytes_native_aarch64_harness.c
+poly_frombytes_native_aarch64/1024:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/compress.c
+  - mlkem/src/compress.h
+  - mlkem/src/context.h
+  - mlkem/src/debug.h
+  - mlkem/src/native/aarch64/meta.h
+  - mlkem/src/native/aarch64/src/arith_native_aarch64.h
+  - mlkem/src/native/api.h
+  - mlkem/src/params.h
+  - mlkem/src/poly.h
+  - mlkem/src/sys.h
+  - mlkem/src/verify.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+  - proofs/cbmc/poly_frombytes_native_aarch64/Makefile
+  - proofs/cbmc/poly_frombytes_native_aarch64/poly_frombytes_native_aarch64_harness.c
 poly_frombytes_native_x86_64/512:
   files:
   - mlkem/src/capability.h

@@ -58,6 +58,15 @@ OBJ = mlkem/mlkem_ntt_aarch64_asm.o \
       mlkem/mlkem_poly_mulcache_compute_aarch64_asm.o \
       mlkem/mlkem_poly_reduce_aarch64_asm.o \
       mlkem/mlkem_poly_tobytes_aarch64_asm.o \
+      mlkem/mlkem_poly_frombytes_aarch64_asm.o \
+      mlkem/mlkem_poly_compress_d4_aarch64_asm.o \
+      mlkem/mlkem_poly_compress_d5_aarch64_asm.o \
+      mlkem/mlkem_poly_compress_d10_aarch64_asm.o \
+      mlkem/mlkem_poly_compress_d11_aarch64_asm.o \
+      mlkem/mlkem_poly_decompress_d4_aarch64_asm.o \
+      mlkem/mlkem_poly_decompress_d5_aarch64_asm.o \
+      mlkem/mlkem_poly_decompress_d10_aarch64_asm.o \
+      mlkem/mlkem_poly_decompress_d11_aarch64_asm.o \
       mlkem/mlkem_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.o \
       mlkem/mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.o \
       mlkem/mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.o \

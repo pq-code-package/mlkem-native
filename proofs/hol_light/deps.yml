@@ -85,6 +85,114 @@ aarch64/mlkem_ntt_aarch64_asm:
   - arm/proofs/base.ml
   - arm/proofs/consttime.ml
   - common/misc.ml
+aarch64/mlkem_poly_compress_d10_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mlkem/mlkem_poly_compress_d10_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/mlkem_poly_compress_d10_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_utils.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mlkem_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mlkem_poly_compress_d11_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mlkem/mlkem_poly_compress_d11_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/mlkem_poly_compress_d11_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_utils.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mlkem_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mlkem_poly_compress_d4_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mlkem/mlkem_poly_compress_d4_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/mlkem_poly_compress_d4_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_utils.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mlkem_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mlkem_poly_compress_d5_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mlkem/mlkem_poly_compress_d5_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/mlkem_compress_d5_table.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_poly_compress_d5_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_utils.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mlkem_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mlkem_poly_decompress_d10_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mlkem/mlkem_poly_decompress_d10_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/mlkem_decompress_common.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_decompress_d10_table.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_poly_decompress_d10_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_utils.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mlkem_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mlkem_poly_decompress_d11_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mlkem/mlkem_poly_decompress_d11_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/mlkem_decompress_common.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_decompress_d11_table.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_poly_decompress_d11_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_utils.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mlkem_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mlkem_poly_decompress_d4_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mlkem/mlkem_poly_decompress_d4_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/mlkem_decompress_common.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_decompress_d4_table.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_poly_decompress_d4_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_utils.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mlkem_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mlkem_poly_decompress_d5_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mlkem/mlkem_poly_decompress_d5_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/mlkem_decompress_common.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_decompress_d5_table.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_poly_decompress_d5_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_utils.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mlkem_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mlkem_poly_frombytes_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mlkem/mlkem_poly_frombytes_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/mlkem_poly_frombytes_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mlkem_utils.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mlkem_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
 aarch64/mlkem_poly_mulcache_compute_aarch64_asm:
   files:
   - proofs/hol_light/aarch64/mlkem/mlkem_poly_mulcache_compute_aarch64_asm.S

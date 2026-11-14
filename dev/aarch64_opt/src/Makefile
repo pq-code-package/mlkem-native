@@ -35,6 +35,15 @@ COMMON_H=../../../mlkem/src/common.h
 all: mlkem_ntt_aarch64_asm.S \
      mlkem_intt_aarch64_asm.S \
      mlkem_poly_tobytes_aarch64_asm.S \
+     mlkem_poly_frombytes_aarch64_asm.S \
+     mlkem_poly_compress_d4_aarch64_asm.S \
+     mlkem_poly_compress_d5_aarch64_asm.S \
+     mlkem_poly_compress_d10_aarch64_asm.S \
+     mlkem_poly_compress_d11_aarch64_asm.S \
+     mlkem_poly_decompress_d4_aarch64_asm.S \
+     mlkem_poly_decompress_d5_aarch64_asm.S \
+     mlkem_poly_decompress_d10_aarch64_asm.S \
+     mlkem_poly_decompress_d11_aarch64_asm.S \
      mlkem_poly_tomont_aarch64_asm.S \
      mlkem_poly_reduce_aarch64_asm.S \
      mlkem_poly_mulcache_compute_aarch64_asm.S \
@@ -81,6 +90,35 @@ mlkem_poly_tobytes_aarch64_asm.S: ../../aarch64_clean/src/mlkem_poly_tobytes_aar
         #
         # Unroll twice since kernel is small
 	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l mlk_poly_tobytes_loop_start $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG) -c sw_pipelining.unroll=2 -c sw_pipelining.minimize_overlapping -ctimeout=60
+
+# SLOTHY is not run on the following kernels yet: the Makefile copies them
+# unmodified from the "clean" directory.
+mlkem_poly_frombytes_aarch64_asm.S: ../../aarch64_clean/src/mlkem_poly_frombytes_aarch64_asm.S $(COMMON_H)
+	cp $< $@
+
+mlkem_poly_compress_d4_aarch64_asm.S: ../../aarch64_clean/src/mlkem_poly_compress_d4_aarch64_asm.S $(COMMON_H)
+	cp $< $@
+
+mlkem_poly_compress_d5_aarch64_asm.S: ../../aarch64_clean/src/mlkem_poly_compress_d5_aarch64_asm.S $(COMMON_H)
+	cp $< $@
+
+mlkem_poly_compress_d10_aarch64_asm.S: ../../aarch64_clean/src/mlkem_poly_compress_d10_aarch64_asm.S $(COMMON_H)
+	cp $< $@
+
+mlkem_poly_compress_d11_aarch64_asm.S: ../../aarch64_clean/src/mlkem_poly_compress_d11_aarch64_asm.S $(COMMON_H)
+	cp $< $@
+
+mlkem_poly_decompress_d4_aarch64_asm.S: ../../aarch64_clean/src/mlkem_poly_decompress_d4_aarch64_asm.S $(COMMON_H)
+	cp $< $@
+
+mlkem_poly_decompress_d5_aarch64_asm.S: ../../aarch64_clean/src/mlkem_poly_decompress_d5_aarch64_asm.S $(COMMON_H)
+	cp $< $@
+
+mlkem_poly_decompress_d10_aarch64_asm.S: ../../aarch64_clean/src/mlkem_poly_decompress_d10_aarch64_asm.S $(COMMON_H)
+	cp $< $@
+
+mlkem_poly_decompress_d11_aarch64_asm.S: ../../aarch64_clean/src/mlkem_poly_decompress_d11_aarch64_asm.S $(COMMON_H)
+	cp $< $@
 
 # At the moment, SLOTHY can't process mlkem_rej_uniform_aarch64_asm.S
 mlkem_rej_uniform_aarch64_asm.S: ../../aarch64_clean/src/mlkem_rej_uniform_aarch64_asm.S $(COMMON_H)

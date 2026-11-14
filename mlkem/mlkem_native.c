@@ -77,8 +77,13 @@
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
 #if defined(MLK_SYS_AARCH64)
 #include "src/native/aarch64/src/aarch64_zetas.c"
+#include "src/native/aarch64/src/compress_d5_table.c"
+#include "src/native/aarch64/src/decompress_d10_table.c"
+#include "src/native/aarch64/src/decompress_d11_table.c"
+#include "src/native/aarch64/src/decompress_d4_table.c"
+#include "src/native/aarch64/src/decompress_d5_table.c"
 #include "src/native/aarch64/src/rej_uniform_table.c"
-#endif
+#endif /* MLK_SYS_AARCH64 */
 #if defined(MLK_SYS_X86_64)
 #include "src/native/x86_64/src/compress_consts.c"
 #include "src/native/x86_64/src/consts.c"
@@ -500,6 +505,15 @@
 #undef MLK_USE_NATIVE_INTT
 #undef MLK_USE_NATIVE_NTT
 #undef MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED
+#undef MLK_USE_NATIVE_POLY_COMPRESS_D10
+#undef MLK_USE_NATIVE_POLY_COMPRESS_D11
+#undef MLK_USE_NATIVE_POLY_COMPRESS_D4
+#undef MLK_USE_NATIVE_POLY_COMPRESS_D5
+#undef MLK_USE_NATIVE_POLY_DECOMPRESS_D10
+#undef MLK_USE_NATIVE_POLY_DECOMPRESS_D11
+#undef MLK_USE_NATIVE_POLY_DECOMPRESS_D4
+#undef MLK_USE_NATIVE_POLY_DECOMPRESS_D5
+#undef MLK_USE_NATIVE_POLY_FROMBYTES
 #undef MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE
 #undef MLK_USE_NATIVE_POLY_REDUCE
 #undef MLK_USE_NATIVE_POLY_TOBYTES
@@ -507,6 +521,11 @@
 #undef MLK_USE_NATIVE_REJ_UNIFORM
 /* mlkem/src/native/aarch64/src/arith_native_aarch64.h */
 #undef MLK_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H
+#undef mlk_aarch64_compress_d5_table
+#undef mlk_aarch64_decompress_d10_table
+#undef mlk_aarch64_decompress_d11_table
+#undef mlk_aarch64_decompress_d4_table
+#undef mlk_aarch64_decompress_d5_table
 #undef mlk_aarch64_invntt_zetas_layer12345
 #undef mlk_aarch64_invntt_zetas_layer67
 #undef mlk_aarch64_ntt_zetas_layer12345
@@ -515,6 +534,15 @@
 #undef mlk_aarch64_zetas_mulcache_twisted_native
 #undef mlk_intt_aarch64_asm
 #undef mlk_ntt_aarch64_asm
+#undef mlk_poly_compress_d10_aarch64_asm
+#undef mlk_poly_compress_d11_aarch64_asm
+#undef mlk_poly_compress_d4_aarch64_asm
+#undef mlk_poly_compress_d5_aarch64_asm
+#undef mlk_poly_decompress_d10_aarch64_asm
+#undef mlk_poly_decompress_d11_aarch64_asm
+#undef mlk_poly_decompress_d4_aarch64_asm
+#undef mlk_poly_decompress_d5_aarch64_asm
+#undef mlk_poly_frombytes_aarch64_asm
 #undef mlk_poly_mulcache_compute_aarch64_asm
 #undef mlk_poly_reduce_aarch64_asm
 #undef mlk_poly_tobytes_aarch64_asm
