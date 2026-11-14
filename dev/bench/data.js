@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794674018340,
+  "lastUpdate": 1794674029671,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -29967,6 +29967,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 120251,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "948be12f5da2211d2e1dccc0df87f0e8521244f2",
+          "message": "kem: Don't write rejection key to output buffer in decaps\n\nmlk_kem_dec() wrote the implicit rejection key to the caller's shared\nsecret buffer and then conditionally overwrote it with the true key.\nFor a valid ciphertext, the output buffer thus temporarily held a value\nthat is never output, and observing whether it changed revealed whether\nthe ciphertext was rejected.\n\nSelect the shared secret in a local buffer instead, and write the\noutput buffer once.\n\nAlso document that, with MLK_CONFIG_KEYGEN_PCT, key generation writes\nthe keypair to the output buffers before running the PCT.\n\nResolves #1909\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-14T15:14:18Z",
+          "tree_id": "046a90d5b7a028bdfffa84561bd1a974386ff72d",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/948be12f5da2211d2e1dccc0df87f0e8521244f2"
+        },
+        "date": 1794674029205,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 37093,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 44486,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 57254,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 59929,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 68096,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 85200,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 88234,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 98760,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 120176,
             "unit": "cycles"
           }
         ]
