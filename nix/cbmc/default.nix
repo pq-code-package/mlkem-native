@@ -27,9 +27,9 @@ buildEnv {
       litani = callPackage ./litani.nix { }; # 1.29.0
       cbmc-viewer = callPackage ./cbmc-viewer.nix { }; # 3.12
       inherit
-        bitwuzla# 0.9.0
-        cvc5# 1.3.4 (from nixpkgs-26.05)
+        bitwuzla# 0.9.1
+        cvc5# 1.4.2
         ninja# 1.13.2
-        z3; # 5.3.2 (from nixos-unstable, passed in via flake.nix)
+        z3; # 5.3.3
     };
 }
