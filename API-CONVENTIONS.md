@@ -20,6 +20,8 @@ All pointers are assumed to be valid and non-NULL, and every buffer is assumed t
 
 Every buffer in the ML-KEM API has a fixed size determined by the parameter set. There are no pointer/length pairs, and therefore no empty buffers for which a NULL pointer would be admissible.
 
+These fixed-size buffer preconditions represent the type and length checks required by FIPS 203, Sections 7.2 and 7.3. C passes array parameters as pointers, so mlkem-native cannot determine the size of the caller's allocation and does not perform those checks at runtime. The encapsulation and decapsulation functions do perform the key-content checks documented for each function.
+
 Buffers passed to the same function must not overlap.
 
 ## Output buffers on error

@@ -132,7 +132,10 @@ __contract__(
 /**
  * Generate a public/private keypair for the ML-KEM key encapsulation mechanism.
  *
- * @spec{Implements @[FIPS203, Algorithm 16, ML-KEM.KeyGen_Internal].}
+ * @spec{Implements @[FIPS203, Algorithm 16, ML-KEM.KeyGen_Internal]. When
+ * `MLK_CONFIG_KEYGEN_PCT` is enabled, also performs the encapsulation-key
+ * modulus check, decapsulation-key hash check, and pairwise consistency test
+ * described in steps 2-4 of @[FIPS203, Section 7.1, Key pair check].}
  *
  * @param[out] pk      Output public key (an already allocated array of
  *                     MLKEM_INDCCA_PUBLICKEYBYTES bytes).
@@ -177,7 +180,10 @@ __contract__(
 /**
  * Generate a public/private keypair for the ML-KEM key encapsulation mechanism.
  *
- * @spec{Implements @[FIPS203, Algorithm 19, ML-KEM.KeyGen].}
+ * @spec{Implements @[FIPS203, Algorithm 19, ML-KEM.KeyGen]. When
+ * `MLK_CONFIG_KEYGEN_PCT` is enabled, also performs the encapsulation-key
+ * modulus check, decapsulation-key hash check, and pairwise consistency test
+ * described in steps 2-4 of @[FIPS203, Section 7.1, Key pair check].}
  *
  * @param[out] pk      Output public key (an already allocated array of
  *                     MLKEM_INDCCA_PUBLICKEYBYTES bytes).
@@ -218,7 +224,9 @@ __contract__(
 /**
  * Generate ciphertext and shared secret for a given public key.
  *
- * @spec{Implements @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal].}
+ * @spec{Implements @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal] and
+ * performs the encapsulation-key modulus check from
+ * @[FIPS203, Section 7.2, Encapsulation key check] before using the key.}
  *
  * @param[out] ct      Output ciphertext (an already allocated array of
  *                     MLKEM_INDCCA_CIPHERTEXTBYTES bytes).
@@ -266,7 +274,9 @@ __contract__(
 /**
  * Generate ciphertext and shared secret for a given public key.
  *
- * @spec{Implements @[FIPS203, Algorithm 20, ML-KEM.Encaps].}
+ * @spec{Implements @[FIPS203, Algorithm 20, ML-KEM.Encaps] and performs the
+ * encapsulation-key modulus check from
+ * @[FIPS203, Section 7.2, Encapsulation key check] before using the key.}
  *
  * @param[out] ct      Output ciphertext (an already allocated array of
  *                     MLKEM_INDCCA_CIPHERTEXTBYTES bytes).
@@ -312,7 +322,9 @@ __contract__(
 /**
  * Generate shared secret for a given ciphertext and private key.
  *
- * @spec{Implements @[FIPS203, Algorithm 21, ML-KEM.Decaps].}
+ * @spec{Implements @[FIPS203, Algorithm 21, ML-KEM.Decaps] and performs the
+ * decapsulation-key hash check from
+ * @[FIPS203, Section 7.3, Decapsulation key check] before using the key.}
  *
  * @param[out] ss      Output shared secret (an already allocated array of
  *                     MLKEM_SSBYTES bytes).
