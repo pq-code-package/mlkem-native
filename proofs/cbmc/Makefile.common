@@ -300,7 +300,8 @@ PROOF_INCLUDE := $(CBMC_DM_$(CBMC_DM)_INCLUDE)
 BACKEND_OPTION := $(CBMC_PROFILE_$(CBMC_SOLVER)_BACKEND)
 PROVER_NAME := $(CBMC_PROFILE_$(CBMC_SOLVER)_PROVER_NAME)
 SMT_FORMAT := $(CBMC_PROFILE_$(CBMC_SOLVER)_SMT_FORMAT)
-CBMCFLAGS += $(CBMC_PROFILE_$(CBMC_SOLVER)_FLAGS)
+CBMC_PROFILE_FLAGS := $(CBMC_PROFILE_$(CBMC_SOLVER)_FLAGS)
+CBMCFLAGS += $(CBMC_PROFILE_FLAGS)
 CBMCFLAGS += $(CBMC_CONFIG_FLAGS)
 endif # CBMC_SKIP_CONFIG_RESOLUTION
 
@@ -388,6 +389,13 @@ CBMC_FLAG_FLUSH ?= --flush
 # very slow. See https://github.com/diffblue/cbmc/issues/8389
 # For now, we disable these checks when generating coverage info.
 COVERFLAGS ?= --no-standard-checks --malloc-may-fail --malloc-fail-null
+
+# Coverage queries solver models to find a path to each instrumented location.
+# SMT solvers can return non-constant model values for these queries, after
+# which CBMC writes an all-failed coverage file but exits successfully. Use
+# CBMC's default SAT backend rather than the safety-check solver profile.
+COVERAGE_CBMCFLAGS = $(filter-out $(CBMC_PROFILE_FLAGS),$(CBMCFLAGS))
+COVERAGE_BACKEND_OPTION ?=
 
 # CBMC flags used for property checking
 
@@ -1119,7 +1127,7 @@ $(LOGDIR)/coverage.xml: $(HARNESS_GOTO).goto
 	$(LITANI) add-job \
 	  $(POOL) \
 	  --command \
-	    '$(CBMC) $(CBMC_VERBOSITY) $(BACKEND_OPTION) $(CBMCFLAGS) $(COVERFLAGS) --cover location --xml-ui $<' \
+	    '$(CBMC) $(CBMC_VERBOSITY) $(COVERAGE_BACKEND_OPTION) $(COVERAGE_CBMCFLAGS) $(COVERFLAGS) --cover location --xml-ui $<' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --ci-stage test \
@@ -1133,9 +1141,20 @@ $(LOGDIR)/coverage.xml: $(HARNESS_GOTO).goto
 	  --description "$(PROOF_UID): calculating coverage"
 
 COVERAGE ?= $(LOGDIR)/coverage.xml
+COVERAGE_CHECK ?= $(if $(strip $(COVERAGE)),$(LOGDIR)/coverage.validated)
 VIEWER_COVERAGE_FLAG ?= --coverage $(COVERAGE)
 
-$(REPORTDIR): $(LOGDIR)/result.xml $(LOGDIR)/property.xml $(COVERAGE)
+$(LOGDIR)/coverage.validated: $(LOGDIR)/coverage.xml
+	$(LITANI) add-job \
+	  --command \
+	    'if grep -q "SMT2 solver returned" $<; then echo "CBMC did not produce complete coverage results" >&2; exit 1; fi; touch $@' \
+	  --inputs $^ \
+	  --outputs $@ \
+	  --ci-stage test \
+	  --pipeline-name "$(PROOF_UID)__$(CBMC_DM)__$(CBMC_SOLVER)" \
+	  --description "$(PROOF_UID): validating coverage"
+
+$(REPORTDIR): $(LOGDIR)/result.xml $(LOGDIR)/property.xml $(COVERAGE) $(COVERAGE_CHECK)
 	$(LITANI) add-job \
 	  --command " $(VIEWER) \
 	    --result $(LOGDIR)/result.xml \
