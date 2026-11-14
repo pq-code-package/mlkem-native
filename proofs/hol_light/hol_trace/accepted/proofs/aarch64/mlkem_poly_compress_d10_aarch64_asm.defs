@@ -1,0 +1,65 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_poly_compress_d10_aarch64_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mlkem_poly_compress_d10_mc: 1472 bytes
+# sha256 a45d6a9f658831372e35eb53b9f71a9037bb3b4056c248cfdef38b5fdfded25d
+definition mlkem_poly_compress_d10_mc
+  |- mlkem_poly_compress_d10_mc
+     = #x[18 e4 00 6f 03 da 8d d2 e3 eb a4 f2 79 0c 04 4e 03 20 80 d2 43 60 a0 f2 83 00 c1 f2 23 41
+          e1 f2 64 81 81 d2 84 00 a1 f2 24 41 c1 f2 64 81 e1 f2 7a 0c 08 4e 90 0c 08 4e 5a 3b d0 4e
+          20 00 c0 3d 21 04 c0 3d 22 08 c0 3d 23 0c c0 3d 24 10 c0 3d 25 14 c0 3d 26 18 c0 3d 27 1c
+          c0 3d 10 68 58 4e 00 28 58 4e 00 b4 b9 6e 10 b6 b9 6e 00 56 2a 6f 10 68 98 4e 00 56 54 6f
+          00 00 1a 4e 30 68 58 4e 21 28 58 4e 21 b4 b9 6e 10 b6 b9 6e 01 56 2a 6f 30 68 98 4e 01 56
+          54 6f 21 00 1a 4e 50 68 58 4e 42 28 58 4e 42 b4 b9 6e 10 b6 b9 6e 02 56 2a 6f 50 68 98 4e
+          02 56 54 6f 42 00 1a 4e 70 68 58 4e 63 28 58 4e 63 b4 b9 6e 10 b6 b9 6e 03 56 2a 6f 70 68
+          98 4e 03 56 54 6f 63 00 1a 4e 90 68 58 4e 84 28 58 4e 84 b4 b9 6e 10 b6 b9 6e 04 56 2a 6f
+          90 68 98 4e 04 56 54 6f 84 00 1a 4e b0 68 58 4e a5 28 58 4e a5 b4 b9 6e 10 b6 b9 6e 05 56
+          2a 6f b0 68 98 4e 05 56 54 6f a5 00 1a 4e d0 68 58 4e c6 28 58 4e c6 b4 b9 6e 10 b6 b9 6e
+          06 56 2a 6f d0 68 98 4e 06 56 54 6f c6 00 1a 4e f0 68 58 4e e7 28 58 4e e7 b4 b9 6e 10 b6
+          b9 6e 07 56 2a 6f f0 68 98 4e 07 56 54 6f e7 00 1a 4e d1 50 07 6e 00 70 9f 4c 00 18 00 d1
+          01 70 9f 4c 00 18 00 d1 02 70 9f 4c 00 18 00 d1 03 70 9f 4c 00 18 00 d1 04 70 9f 4c 00 18
+          00 d1 05 70 9f 4c 00 18 00 d1 06 70 9f 4c 00 30 00 d1 11 70 9f 4c 20 20 c0 3d 21 24 c0 3d
+          22 28 c0 3d 23 2c c0 3d 24 30 c0 3d 25 34 c0 3d 26 38 c0 3d 27 3c c0 3d 10 68 58 4e 00 28
+          58 4e 00 b4 b9 6e 10 b6 b9 6e 00 56 2a 6f 10 68 98 4e 00 56 54 6f 00 00 1a 4e 30 68 58 4e
+          21 28 58 4e 21 b4 b9 6e 10 b6 b9 6e 01 56 2a 6f 30 68 98 4e 01 56 54 6f 21 00 1a 4e 50 68
+          58 4e 42 28 58 4e 42 b4 b9 6e 10 b6 b9 6e 02 56 2a 6f 50 68 98 4e 02 56 54 6f 42 00 1a 4e
+          70 68 58 4e 63 28 58 4e 63 b4 b9 6e 10 b6 b9 6e 03 56 2a 6f 70 68 98 4e 03 56 54 6f 63 00
+          1a 4e 90 68 58 4e 84 28 58 4e 84 b4 b9 6e 10 b6 b9 6e 04 56 2a 6f 90 68 98 4e 04 56 54 6f
+          84 00 1a 4e b0 68 58 4e a5 28 58 4e a5 b4 b9 6e 10 b6 b9 6e 05 56 2a 6f b0 68 98 4e 05 56
+          54 6f a5 00 1a 4e d0 68 58 4e c6 28 58 4e c6 b4 b9 6e 10 b6 b9 6e 06 56 2a 6f d0 68 98 4e
+          06 56 54 6f c6 00 1a 4e f0 68 58 4e e7 28 58 4e e7 b4 b9 6e 10 b6 b9 6e 07 56 2a 6f f0 68
+          98 4e 07 56 54 6f e7 00 1a 4e d1 50 07 6e 00 70 9f 4c 00 18 00 d1 01 70 9f 4c 00 18 00 d1
+          02 70 9f 4c 00 18 00 d1 03 70 9f 4c 00 18 00 d1 04 70 9f 4c 00 18 00 d1 05 70 9f 4c 00 18
+          00 d1 06 70 9f 4c 00 30 00 d1 11 70 9f 4c 20 40 c0 3d 21 44 c0 3d 22 48 c0 3d 23 4c c0 3d
+          24 50 c0 3d 25 54 c0 3d 26 58 c0 3d 27 5c c0 3d 10 68 58 4e 00 28 58 4e 00 b4 b9 6e 10 b6
+          b9 6e 00 56 2a 6f 10 68 98 4e 00 56 54 6f 00 00 1a 4e 30 68 58 4e 21 28 58 4e 21 b4 b9 6e
+          10 b6 b9 6e 01 56 2a 6f 30 68 98 4e 01 56 54 6f 21 00 1a 4e 50 68 58 4e 42 28 58 4e 42 b4
+          b9 6e 10 b6 b9 6e 02 56 2a 6f 50 68 98 4e 02 56 54 6f 42 00 1a 4e 70 68 58 4e 63 28 58 4e
+          63 b4 b9 6e 10 b6 b9 6e 03 56 2a 6f 70 68 98 4e 03 56 54 6f 63 00 1a 4e 90 68 58 4e 84 28
+          58 4e 84 b4 b9 6e 10 b6 b9 6e 04 56 2a 6f 90 68 98 4e 04 56 54 6f 84 00 1a 4e b0 68 58 4e
+          a5 28 58 4e a5 b4 b9 6e 10 b6 b9 6e 05 56 2a 6f b0 68 98 4e 05 56 54 6f a5 00 1a 4e d0 68
+          58 4e c6 28 58 4e c6 b4 b9 6e 10 b6 b9 6e 06 56 2a 6f d0 68 98 4e 06 56 54 6f c6 00 1a 4e
+          f0 68 58 4e e7 28 58 4e e7 b4 b9 6e 10 b6 b9 6e 07 56 2a 6f f0 68 98 4e 07 56 54 6f e7 00
+          1a 4e d1 50 07 6e 00 70 9f 4c 00 18 00 d1 01 70 9f 4c 00 18 00 d1 02 70 9f 4c 00 18 00 d1
+          03 70 9f 4c 00 18 00 d1 04 70 9f 4c 00 18 00 d1 05 70 9f 4c 00 18 00 d1 06 70 9f 4c 00 30
+          00 d1 11 70 9f 4c 20 60 c0 3d 21 64 c0 3d 22 68 c0 3d 23 6c c0 3d 24 70 c0 3d 25 74 c0 3d
+          26 78 c0 3d 27 7c c0 3d 10 68 58 4e 00 28 58 4e 00 b4 b9 6e 10 b6 b9 6e 00 56 2a 6f 10 68
+          98 4e 00 56 54 6f 00 00 1a 4e 30 68 58 4e 21 28 58 4e 21 b4 b9 6e 10 b6 b9 6e 01 56 2a 6f
+          30 68 98 4e 01 56 54 6f 21 00 1a 4e 50 68 58 4e 42 28 58 4e 42 b4 b9 6e 10 b6 b9 6e 02 56
+          2a 6f 50 68 98 4e 02 56 54 6f 42 00 1a 4e 70 68 58 4e 63 28 58 4e 63 b4 b9 6e 10 b6 b9 6e
+          03 56 2a 6f 70 68 98 4e 03 56 54 6f 63 00 1a 4e 90 68 58 4e 84 28 58 4e 84 b4 b9 6e 10 b6
+          b9 6e 04 56 2a 6f 90 68 98 4e 04 56 54 6f 84 00 1a 4e b0 68 58 4e a5 28 58 4e a5 b4 b9 6e
+          10 b6 b9 6e 05 56 2a 6f b0 68 98 4e 05 56 54 6f a5 00 1a 4e d0 68 58 4e c6 28 58 4e c6 b4
+          b9 6e 10 b6 b9 6e 06 56 2a 6f d0 68 98 4e 06 56 54 6f c6 00 1a 4e f0 68 58 4e e7 28 58 4e
+          e7 b4 b9 6e 10 b6 b9 6e 07 56 2a 6f f0 68 98 4e 07 56 54 6f e7 00 1a 4e d1 50 07 6e 00 70
+          9f 4c 00 18 00 d1 01 70 9f 4c 00 18 00 d1 02 70 9f 4c 00 18 00 d1 03 70 9f 4c 00 18 00 d1
+          04 70 9f 4c 00 18 00 d1 05 70 9f 4c 00 18 00 d1 06 70 9f 4c 00 30 00 d1 11 70 9f 4c c0 03
+          5f d6]

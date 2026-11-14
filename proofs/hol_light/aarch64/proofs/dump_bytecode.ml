@@ -58,6 +58,42 @@ print_string "=== bytecode start: aarch64/mlkem/mlkem_poly_tobytes_aarch64_asm.o
 print_literal_from_elf "aarch64/mlkem/mlkem_poly_tobytes_aarch64_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
+print_string "=== bytecode start: aarch64/mlkem/mlkem_poly_frombytes_aarch64_asm.o =====\n";;
+print_literal_from_elf "aarch64/mlkem/mlkem_poly_frombytes_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mlkem/mlkem_poly_compress_d4_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mlkem/mlkem_poly_compress_d4_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mlkem/mlkem_poly_compress_d5_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mlkem/mlkem_poly_compress_d5_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mlkem/mlkem_poly_compress_d10_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mlkem/mlkem_poly_compress_d10_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mlkem/mlkem_poly_compress_d11_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mlkem/mlkem_poly_compress_d11_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mlkem/mlkem_poly_decompress_d4_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mlkem/mlkem_poly_decompress_d4_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mlkem/mlkem_poly_decompress_d5_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mlkem/mlkem_poly_decompress_d5_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mlkem/mlkem_poly_decompress_d10_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mlkem/mlkem_poly_decompress_d10_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mlkem/mlkem_poly_decompress_d11_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mlkem/mlkem_poly_decompress_d11_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
 print_string "=== bytecode start: aarch64/mlkem/mlkem_poly_tomont_aarch64_asm.o ========\n";;
 print_literal_from_elf "aarch64/mlkem/mlkem_poly_tomont_aarch64_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;

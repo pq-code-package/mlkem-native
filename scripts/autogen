@@ -1003,6 +1003,12 @@ def _fmt_indexed_rows(data):
         yield ",".join(map(str, row)) + f" /* {i} */,"
 
 
+def _fmt_labelled_rows(data, labels):
+    """Format rows of bytes in hex, each followed by a comment."""
+    for label, row in zip(labels, data):
+        yield ", ".join(f"0x{b:02x}" for b in row) + f", /* {label} */"
+
+
 def gen_aarch64_hol_light_zeta_file():
     def gen():
         yield from gen_hol_light_header()
@@ -1175,6 +1181,438 @@ def gen_aarch64_rej_uniform_table():
     update_file("dev/aarch64_opt/src/rej_uniform_table.c", "\n".join(gen()))
 
     update_file("dev/aarch64_clean/src/rej_uniform_table.c", "\n".join(gen()))
+
+
+def gen_aarch64_decompress_d4_table_rows():
+    # TBL tables for Decompress_4(x) = round(x * MLKEM_Q / 16), x = 0..15,
+    # used by poly_decompress_d4_aarch64_asm: the first row holds the low
+    # bytes, the second row the high bytes of the 16-bit results.
+    vals = [(x * modulus + 8) >> 4 for x in range(16)]
+    yield [v & 0xFF for v in vals]
+    yield [v >> 8 for v in vals]
+
+
+AARCH64_DECOMPRESS_D4_GUARD = [
+    "#if defined(MLK_ARITH_BACKEND_AARCH64) && \\",
+    "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \\",
+    "    !defined(MLK_CONFIG_NO_DECAPS_API) && \\",
+    "    (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 2 || \\",
+    "     MLKEM_K == 3)",
+]
+
+
+def gen_aarch64_hol_light_decompress_d4_table():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Constant table used in the AArch64 decompression from 4 bits."
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let mlkem_decompress_d4_table = (REWRITE_RULE[MAP] o define)"
+        yield "  `mlkem_decompress_d4_table:byte list = MAP word ["
+        data = [i for row in gen_aarch64_decompress_d4_table_rows() for i in row]
+        yield from print_hol_light_array(data, as_int=False, entries_per_line=16, pad=3)
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/aarch64/proofs/mlkem_decompress_d4_table.ml",
+        "\n".join(gen()),
+    )
+
+
+def gen_aarch64_decompress_d4_table():
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield from AARCH64_DECOMPRESS_D4_GUARD
+        yield ""
+        yield '#include "arith_native_aarch64.h"'
+        yield ""
+        yield "/*"
+        yield " * Lookup tables for Decompress_4, used by"
+        yield " * poly_decompress_d4_aarch64_asm: row 0 holds the low bytes and"
+        yield " * row 1 the high bytes of Decompress_4(x) for x = 0, ..., 15."
+        yield " * See autogen for details."
+        yield " */"
+        yield from emit_c_array(
+            "const uint8_t",
+            "mlk_aarch64_decompress_d4_table",
+            gen_aarch64_decompress_d4_table_rows(),
+            formatter=lambda rows: _fmt_labelled_rows(
+                rows, ["low bytes", "high bytes"]
+            ),
+        )
+        yield ""
+        yield "#else"
+        yield ""
+        yield "MLK_EMPTY_CU(aarch64_decompress_d4_table)"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file("dev/aarch64_opt/src/decompress_d4_table.c", "\n".join(gen()))
+
+    update_file("dev/aarch64_clean/src/decompress_d4_table.c", "\n".join(gen()))
+
+
+def gen_aarch64_decompress_d5_table_rows():
+    # Constant vectors of poly_decompress_d5_aarch64_asm, one row of 16 bytes
+    # each. Coefficient j of a 5-byte group starts at bit s_j = 5*j % 8 of
+    # byte b_j = 5*j // 8.
+    def halfwords(vals):
+        return [b for v in vals for b in [v & 0xFF, v >> 8]]
+
+    idx0 = [b for j in range(8) for b in [5 * j // 8, 5 * j // 8 + 1]]
+    # TBL indices for groups starting at bytes 0, 5, 10 and 11
+    for off in [0, 5, 10, 11]:
+        yield [i + off for i in idx0]
+    # USHL shift amounts 7 - s_j, moving coefficient j to bit 7
+    yield halfwords([7 - (5 * j) % 8 for j in range(8)])
+    # AND mask 0x1f << 7
+    yield halfwords([0x1F << 7] * 8)
+    # SQRDMULH multiplier 3329 << 3
+    yield halfwords([modulus << 3] * 8)
+
+
+AARCH64_DECOMPRESS_D5_GUARD = [
+    "#if defined(MLK_ARITH_BACKEND_AARCH64) && \\",
+    "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \\",
+    "    !defined(MLK_CONFIG_NO_DECAPS_API) && \\",
+    "    (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4)",
+]
+
+
+def gen_aarch64_hol_light_decompress_d5_table():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Constant table used in the AArch64 decompression from 5 bits."
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let mlkem_decompress_d5_table = (REWRITE_RULE[MAP] o define)"
+        yield "  `mlkem_decompress_d5_table:byte list = MAP word ["
+        data = [i for row in gen_aarch64_decompress_d5_table_rows() for i in row]
+        yield from print_hol_light_array(data, as_int=False, entries_per_line=16, pad=3)
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/aarch64/proofs/mlkem_decompress_d5_table.ml",
+        "\n".join(gen()),
+    )
+
+
+def gen_aarch64_decompress_d5_table():
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield from AARCH64_DECOMPRESS_D5_GUARD
+        yield ""
+        yield '#include "arith_native_aarch64.h"'
+        yield ""
+        yield "/*"
+        yield " * Constant vectors used by poly_decompress_d5_aarch64_asm:"
+        yield " * TBL indices for groups starting at bytes 0, 5, 10 and 11 (rows"
+        yield " * 0..3), USHL shift amounts (row 4), AND mask (row 5) and"
+        yield " * SQRDMULH multiplier (row 6). See autogen for details."
+        yield " */"
+        yield from emit_c_array(
+            "const uint8_t",
+            "mlk_aarch64_decompress_d5_table",
+            gen_aarch64_decompress_d5_table_rows(),
+            formatter=lambda rows: _fmt_labelled_rows(
+                rows,
+                [
+                    "idx0",
+                    "idx5",
+                    "idx10",
+                    "idx11",
+                    "shifts (16-bit lanes)",
+                    "mask (16-bit lanes)",
+                    "mult (16-bit lanes)",
+                ],
+            ),
+        )
+        yield ""
+        yield "#else"
+        yield ""
+        yield "MLK_EMPTY_CU(aarch64_decompress_d5_table)"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file("dev/aarch64_opt/src/decompress_d5_table.c", "\n".join(gen()))
+
+    update_file("dev/aarch64_clean/src/decompress_d5_table.c", "\n".join(gen()))
+
+
+def gen_aarch64_decompress_d10_table_rows():
+    # Constant vectors of poly_decompress_d10_aarch64_asm, one row of 16 bytes
+    # each. Coefficient 4*g+k (k = 0..3) of a 10-byte pair of groups starts
+    # at bit 2*k of byte 5*g+k.
+    def halfwords(vals):
+        return [b for v in vals for b in [v & 0xFF, (v >> 8) & 0xFF]]
+
+    idx0 = [b for g in range(2) for k in range(4) for b in [5 * g + k, 5 * g + k + 1]]
+    # TBL indices for groups starting at bytes 0 and 6
+    for off in [0, 6]:
+        yield [i + off for i in idx0]
+    # USHL shift amounts 2 - 2*k, moving coefficient 4*g+k to bit 2; negative
+    # amounts shift right
+    yield halfwords([2 - 2 * k for g in range(2) for k in range(4)])
+    # AND mask 0x3ff << 2
+    yield halfwords([0x3FF << 2] * 8)
+    # SQRDMULH multiplier 3329 << 3
+    yield halfwords([modulus << 3] * 8)
+
+
+# Same condition as for poly_decompress_d4
+AARCH64_DECOMPRESS_D10_GUARD = AARCH64_DECOMPRESS_D4_GUARD
+
+
+def gen_aarch64_hol_light_decompress_d10_table():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Constant table used in the AArch64 decompression from 10 bits."
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let mlkem_decompress_d10_table = (REWRITE_RULE[MAP] o define)"
+        yield "  `mlkem_decompress_d10_table:byte list = MAP word ["
+        data = [i for row in gen_aarch64_decompress_d10_table_rows() for i in row]
+        yield from print_hol_light_array(data, as_int=False, entries_per_line=16, pad=3)
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/aarch64/proofs/mlkem_decompress_d10_table.ml",
+        "\n".join(gen()),
+    )
+
+
+def gen_aarch64_decompress_d10_table():
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield from AARCH64_DECOMPRESS_D10_GUARD
+        yield ""
+        yield '#include "arith_native_aarch64.h"'
+        yield ""
+        yield "/*"
+        yield " * Constant vectors used by poly_decompress_d10_aarch64_asm:"
+        yield " * TBL indices for groups starting at bytes 0 and 6 (rows 0, 1),"
+        yield " * USHL shift amounts (row 2), AND mask (row 3) and SQRDMULH"
+        yield " * multiplier (row 4). See autogen for details."
+        yield " */"
+        yield from emit_c_array(
+            "const uint8_t",
+            "mlk_aarch64_decompress_d10_table",
+            gen_aarch64_decompress_d10_table_rows(),
+            formatter=lambda rows: _fmt_labelled_rows(
+                rows,
+                [
+                    "idx0",
+                    "idx6",
+                    "shifts (16-bit lanes)",
+                    "mask (16-bit lanes)",
+                    "mult (16-bit lanes)",
+                ],
+            ),
+        )
+        yield ""
+        yield "#else"
+        yield ""
+        yield "MLK_EMPTY_CU(aarch64_decompress_d10_table)"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file("dev/aarch64_opt/src/decompress_d10_table.c", "\n".join(gen()))
+
+    update_file("dev/aarch64_clean/src/decompress_d10_table.c", "\n".join(gen()))
+
+
+def gen_aarch64_decompress_d11_table_rows():
+    # Constant vectors of poly_decompress_d11_aarch64_asm, one row of 16 bytes
+    # each. Coefficient k of an 11-byte group starts at bit o_k = 11*k % 8 of
+    # byte b_k = 11*k // 8.
+    def halfwords(vals):
+        return [b for v in vals for b in [v & 0xFF, (v >> 8) & 0xFF]]
+
+    b = [11 * k // 8 for k in range(8)]
+    o = [11 * k % 8 for k in range(8)]
+    # Bit A_k of lane k to which the code moves the lowest bit of
+    # coefficient k: 1 if the coefficient lies in bytes b_k and b_k + 1;
+    # otherwise SLI by 12 inserts byte b_k + 2 at bit 12, which forces
+    # A_k = 12 - (8 * (b_k + 2) - 11 * k).
+    A = [1 if o[k] + 11 <= 16 else 12 - (8 * (b[k] + 2) - 11 * k) for k in range(8)]
+    idx_lo = [i for k in range(8) for i in [b[k], b[k] + 1]]
+    idx_hi = [i + 2 for i in idx_lo]
+    # TBL indices: idx_lo, idx_hi, and both shifted by 5 for the group loaded
+    # from 5 bytes before its start
+    yield idx_lo
+    yield idx_hi
+    yield [i + 5 for i in idx_lo]
+    yield [i + 5 for i in idx_hi]
+    # USHL shift amounts A_k - o_k; negative amounts shift right
+    yield halfwords([A[k] - o[k] for k in range(8)])
+    # AND mask 0x7ff << A_k
+    yield halfwords([0x7FF << A[k] for k in range(8)])
+    # SQRDMULH multiplier 3329 << (4 - A_k)
+    yield halfwords([modulus << (4 - A[k]) for k in range(8)])
+
+
+# Same condition as for poly_decompress_d5
+AARCH64_DECOMPRESS_D11_GUARD = AARCH64_DECOMPRESS_D5_GUARD
+
+
+def gen_aarch64_hol_light_decompress_d11_table():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Constant table used in the AArch64 decompression from 11 bits."
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let mlkem_decompress_d11_table = (REWRITE_RULE[MAP] o define)"
+        yield "  `mlkem_decompress_d11_table:byte list = MAP word ["
+        data = [i for row in gen_aarch64_decompress_d11_table_rows() for i in row]
+        yield from print_hol_light_array(data, as_int=False, entries_per_line=16, pad=3)
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/aarch64/proofs/mlkem_decompress_d11_table.ml",
+        "\n".join(gen()),
+    )
+
+
+def gen_aarch64_decompress_d11_table():
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield from AARCH64_DECOMPRESS_D11_GUARD
+        yield ""
+        yield '#include "arith_native_aarch64.h"'
+        yield ""
+        yield "/*"
+        yield " * Constant vectors used by poly_decompress_d11_aarch64_asm:"
+        yield " * TBL indices idx_lo, idx_hi, idx_lo + 5 and idx_hi + 5 (rows"
+        yield " * 0..3), USHL shift amounts (row 4), AND mask (row 5) and"
+        yield " * SQRDMULH multiplier (row 6). See autogen for details."
+        yield " */"
+        yield from emit_c_array(
+            "const uint8_t",
+            "mlk_aarch64_decompress_d11_table",
+            gen_aarch64_decompress_d11_table_rows(),
+            formatter=lambda rows: _fmt_labelled_rows(
+                rows,
+                [
+                    "idx_lo",
+                    "idx_hi",
+                    "idx_lo5",
+                    "idx_hi5",
+                    "shifts (16-bit lanes)",
+                    "mask (16-bit lanes)",
+                    "mult (16-bit lanes)",
+                ],
+            ),
+        )
+        yield ""
+        yield "#else"
+        yield ""
+        yield "MLK_EMPTY_CU(aarch64_decompress_d11_table)"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file("dev/aarch64_opt/src/decompress_d11_table.c", "\n".join(gen()))
+
+    update_file("dev/aarch64_clean/src/decompress_d11_table.c", "\n".join(gen()))
+
+
+def gen_aarch64_compress_d5_table_rows():
+    # Constant vectors of poly_compress_d5_aarch64_asm, one row of 16 bytes
+    # each.
+    # SQRDMULH multiplier round(2^20 / MLKEM_Q) in 16-bit lanes
+    mult = (2**20 + modulus // 2) // modulus
+    yield [b for _ in range(8) for b in [mult & 0xFF, mult >> 8]]
+    # TBL indices: move bytes 0..4 and 8..12 of a vector to bytes 0..9 and
+    # repeat bytes 4..9 in bytes 10..15
+    yield [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 4, 8, 9, 10, 11, 12]
+
+
+AARCH64_COMPRESS_D5_GUARD = [
+    "#if defined(MLK_ARITH_BACKEND_AARCH64) && \\",
+    "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \\",
+    "    (!defined(MLK_CONFIG_NO_ENCAPS_API) || \\",
+    "     !defined(MLK_CONFIG_NO_DECAPS_API)) && \\",
+    "    (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4)",
+]
+
+
+def gen_aarch64_hol_light_compress_d5_table():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Constant table used in the AArch64 compression to 5 bits."
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let mlkem_compress_d5_table = (REWRITE_RULE[MAP] o define)"
+        yield "  `mlkem_compress_d5_table:byte list = MAP word ["
+        data = [i for row in gen_aarch64_compress_d5_table_rows() for i in row]
+        yield from print_hol_light_array(data, as_int=False, entries_per_line=16, pad=3)
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/aarch64/proofs/mlkem_compress_d5_table.ml",
+        "\n".join(gen()),
+    )
+
+
+def gen_aarch64_compress_d5_table():
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield from AARCH64_COMPRESS_D5_GUARD
+        yield ""
+        yield '#include "arith_native_aarch64.h"'
+        yield ""
+        yield "/*"
+        yield " * Constant vectors used by poly_compress_d5_aarch64_asm:"
+        yield " * SQRDMULH multiplier (row 0) and TBL indices (row 1)."
+        yield " * See autogen for details."
+        yield " */"
+        yield from emit_c_array(
+            "const uint8_t",
+            "mlk_aarch64_compress_d5_table",
+            gen_aarch64_compress_d5_table_rows(),
+            formatter=lambda rows: _fmt_labelled_rows(
+                rows, ["mult (16-bit lanes)", "idx"]
+            ),
+        )
+        yield ""
+        yield "#else"
+        yield ""
+        yield "MLK_EMPTY_CU(aarch64_compress_d5_table)"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file("dev/aarch64_opt/src/compress_d5_table.c", "\n".join(gen()))
+
+    update_file("dev/aarch64_clean/src/compress_d5_table.c", "\n".join(gen()))
 
 
 def gen_avx2_hol_light_rej_uniform_table():
@@ -3400,6 +3838,60 @@ def hol_light_asm_joblist():
             "aarch64",
         ),
         (
+            "mlkem_poly_frombytes_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_compress_d4_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_compress_d5_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_compress_d10_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_compress_d11_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_decompress_d4_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_decompress_d5_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_decompress_d10_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_decompress_d11_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
             "mlkem_poly_reduce_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
@@ -5598,6 +6090,15 @@ def _main():
         "ntt_aarch64_asm",
         "intt_aarch64_asm",
         "poly_tobytes_aarch64_asm",
+        "poly_frombytes_aarch64_asm",
+        "poly_compress_d4_aarch64_asm",
+        "poly_compress_d5_aarch64_asm",
+        "poly_compress_d10_aarch64_asm",
+        "poly_compress_d11_aarch64_asm",
+        "poly_decompress_d4_aarch64_asm",
+        "poly_decompress_d5_aarch64_asm",
+        "poly_decompress_d10_aarch64_asm",
+        "poly_decompress_d11_aarch64_asm",
         "poly_tomont_aarch64_asm",
         "poly_reduce_aarch64_asm",
         "poly_mulcache_compute_aarch64_asm",
@@ -5717,8 +6218,18 @@ def _main():
         gen_c_zeta_file()
         gen_aarch64_hol_light_zeta_file()
         gen_aarch64_hol_light_rej_uniform_table()
+        gen_aarch64_hol_light_decompress_d4_table()
+        gen_aarch64_hol_light_decompress_d5_table()
+        gen_aarch64_hol_light_decompress_d10_table()
+        gen_aarch64_hol_light_decompress_d11_table()
+        gen_aarch64_hol_light_compress_d5_table()
         gen_aarch64_zeta_file()
         gen_aarch64_rej_uniform_table()
+        gen_aarch64_decompress_d4_table()
+        gen_aarch64_decompress_d5_table()
+        gen_aarch64_decompress_d10_table()
+        gen_aarch64_decompress_d11_table()
+        gen_aarch64_compress_d5_table()
         gen_avx2_hol_light_zeta_file()
         gen_avx2_hol_light_rej_uniform_table()
         gen_avx2_zeta_file()

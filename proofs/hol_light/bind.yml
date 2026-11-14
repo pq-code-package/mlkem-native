@@ -89,54 +89,99 @@ nttunpack_avx2_asm:
   sha256:
     mlkem_unpack_mc: 5cf7f561b2dafcaa3b67cae5f4c87e36bcf6aef69bd89fd19dab1f256382fe55
     mlkem_unpack_tmc: 70b823a371944d1c66f34309eee9280e6cd2e7e85fc8bc319a5d0db2324f1f9d
+poly_compress_d10_aarch64_asm:
+  arch: aarch64
+  function: mlkem_poly_compress_d10_aarch64_asm
+  sha256:
+    mlkem_poly_compress_d10_mc: a45d6a9f658831372e35eb53b9f71a9037bb3b4056c248cfdef38b5fdfded25d
 poly_compress_d10_avx2_asm:
   arch: x86_64
   function: mlkem_poly_compress_d10_avx2_asm
   sha256:
     mlkem_poly_compress_d10_mc: 52d06fd1df1e04a70137ca051058343fb300a7439db803510a4b5924f52e9220
     mlkem_poly_compress_d10_tmc: 56491b37a1762718401577c6ed55698310cdd33e71fdda3349e55e35a8d176e7
+poly_compress_d11_aarch64_asm:
+  arch: aarch64
+  function: mlkem_poly_compress_d11_aarch64_asm
+  sha256:
+    mlkem_poly_compress_d11_mc: a50b24a64a5c20b0af41db6c562ec62668a9a00fb34bfea8a3d8dd3c0e305148
 poly_compress_d11_avx2_asm:
   arch: x86_64
   function: mlkem_poly_compress_d11_avx2_asm
   sha256:
     mlkem_poly_compress_d11_mc: 3f6adf0dea215987d8ad4b0ddf35bb957493ae74ea1a6bec1b313794bbfd62fa
     mlkem_poly_compress_d11_tmc: 4c064cdbee8e7a0af08fcef46c80c5d30820d1cf3488cc6a00bebc1e7ca10dee
+poly_compress_d4_aarch64_asm:
+  arch: aarch64
+  function: mlkem_poly_compress_d4_aarch64_asm
+  sha256:
+    mlkem_poly_compress_d4_mc: 43417e58f662b70e4e19c7a2f77ce7f26d644c7e4baa31499a108b14eacce034
 poly_compress_d4_avx2_asm:
   arch: x86_64
   function: mlkem_poly_compress_d4_avx2_asm
   sha256:
     mlkem_poly_compress_d4_mc: 3772c93bb75889ae0c82782fe8e8c123d6f1f5309c61cc3846879994699ea88c
     mlkem_poly_compress_d4_tmc: ecb67f5f448cd8afbbc42b1041c59c9c079652f6a7ec64d4e988609b9aa05c74
+poly_compress_d5_aarch64_asm:
+  arch: aarch64
+  function: mlkem_poly_compress_d5_aarch64_asm
+  sha256:
+    mlkem_poly_compress_d5_mc: 29990f0e35861089f9580a815540a9042b7448f885b782d589b385f6508b717e
 poly_compress_d5_avx2_asm:
   arch: x86_64
   function: mlkem_poly_compress_d5_avx2_asm
   sha256:
     mlkem_poly_compress_d5_mc: f7970a8c94b9f0c8c2981a4e0f438e48f3a456cb017a17c96b9cba638ae807e3
     mlkem_poly_compress_d5_tmc: 344065fae058191bc007bebdcab919ea058f4fe21c20f752ef56e21a3f519b14
+poly_decompress_d10_aarch64_asm:
+  arch: aarch64
+  function: mlkem_poly_decompress_d10_aarch64_asm
+  sha256:
+    mlkem_poly_decompress_d10_mc: 7120564e88a7cac7bcfc686690ea7fd570567f9fedcf9c651af17cbf56310a86
 poly_decompress_d10_avx2_asm:
   arch: x86_64
   function: mlkem_poly_decompress_d10_avx2_asm
   sha256:
     mlkem_poly_decompress_d10_mc: e6af36ea7320ca35703720cb6f4c32ff6641d01c192c4b0a5ae37fc3f4d3508d
     mlkem_poly_decompress_d10_tmc: 8571f2b585f362f2c3a5affb90a9848c0e5d99749fcffe65a31f9c02eac4c670
+poly_decompress_d11_aarch64_asm:
+  arch: aarch64
+  function: mlkem_poly_decompress_d11_aarch64_asm
+  sha256:
+    mlkem_poly_decompress_d11_mc: 8ba0874a6586cadc94c3aa9c12bdb2d51ef08750c1000cdd7ccbb44f6d3e7d43
 poly_decompress_d11_avx2_asm:
   arch: x86_64
   function: mlkem_poly_decompress_d11_avx2_asm
   sha256:
     mlkem_poly_decompress_d11_mc: 4e59e8cdc37654b9660efb5f7905122348576b9c47771937896525f8fbe33e8c
     mlkem_poly_decompress_d11_tmc: 728eb5231bbb21ce7ec93d0372a03fb485d14ed1f0a23ad4abdd6270d3d9b04d
+poly_decompress_d4_aarch64_asm:
+  arch: aarch64
+  function: mlkem_poly_decompress_d4_aarch64_asm
+  sha256:
+    mlkem_poly_decompress_d4_mc: 98c89e22e6eb6169ff35575f784f06dda4840eb9a27d9df440d5078687e252d3
 poly_decompress_d4_avx2_asm:
   arch: x86_64
   function: mlkem_poly_decompress_d4_avx2_asm
   sha256:
     mlkem_poly_decompress_d4_mc: b26307bd717671fc8a91bc801167c6221e7106c25fb977903c796c2adc70a48d
     mlkem_poly_decompress_d4_tmc: 923ea4092c98b1fb062b5e8dedb6380ea7156a0eb3b3d600313efa7bd3c1edae
+poly_decompress_d5_aarch64_asm:
+  arch: aarch64
+  function: mlkem_poly_decompress_d5_aarch64_asm
+  sha256:
+    mlkem_poly_decompress_d5_mc: 7b6153b7055ff75cd17d9da8e9a0dfc2c95a4997e81c6686c85da37061825d55
 poly_decompress_d5_avx2_asm:
   arch: x86_64
   function: mlkem_poly_decompress_d5_avx2_asm
   sha256:
     mlkem_poly_decompress_d5_mc: bb56abb86cd693483c91fd5435b54df30f18c0553f12212417a56df12c435e98
     mlkem_poly_decompress_d5_tmc: 4d63b2fa3a9f020aabee97088da75adfeb3ec2f8fee2e1232986e5b4427bb8ed
+poly_frombytes_aarch64_asm:
+  arch: aarch64
+  function: mlkem_poly_frombytes_aarch64_asm
+  sha256:
+    mlkem_poly_frombytes_mc: 4c79cd31016331a52f58e7b5a60b88016359c9e7c7436f4e57aa1c45fcb76b59
 poly_mulcache_compute_aarch64_asm:
   arch: aarch64
   function: mlkem_poly_mulcache_compute_aarch64_asm

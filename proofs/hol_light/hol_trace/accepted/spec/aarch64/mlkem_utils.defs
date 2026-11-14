@@ -6,4 +6,4 @@
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 # pin: hol_light https://github.com/jrh13/hol-light/commit/9b510bc76da4cecf6e509be44d327c9236ec273f
 # pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/bf75b6c61dae86bbb383785987bc316e20b7ebbf
-# source: proofs/hol_light/aarch64/proofs/mlkem_utils.ml 9458bd16108f8703b82c2d688711e1a9a737d14da7b1e56d2871acaf1d3aaf5b
+# source: proofs/hol_light/aarch64/proofs/mlkem_utils.ml b5e86d03aefffcc470efe5dfffe0d970b71a40b129cc837bcc84dba3b5b6c5d3

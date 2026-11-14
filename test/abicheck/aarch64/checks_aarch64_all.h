@@ -36,6 +36,15 @@ int check_keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm(void);
 #if defined(MLK_SYS_AARCH64_NEON)
 int check_intt_aarch64_asm(void);
 int check_ntt_aarch64_asm(void);
+int check_poly_compress_d10_aarch64_asm(void);
+int check_poly_compress_d11_aarch64_asm(void);
+int check_poly_compress_d4_aarch64_asm(void);
+int check_poly_compress_d5_aarch64_asm(void);
+int check_poly_decompress_d10_aarch64_asm(void);
+int check_poly_decompress_d11_aarch64_asm(void);
+int check_poly_decompress_d4_aarch64_asm(void);
+int check_poly_decompress_d5_aarch64_asm(void);
+int check_poly_frombytes_aarch64_asm(void);
 int check_poly_mulcache_compute_aarch64_asm(void);
 int check_poly_reduce_aarch64_asm(void);
 int check_poly_tobytes_aarch64_asm(void);
@@ -70,6 +79,15 @@ static const abicheck_entry_t all_checks[] = {
 #if defined(MLK_SYS_AARCH64_NEON)
     {"intt_aarch64_asm", check_intt_aarch64_asm},
     {"ntt_aarch64_asm", check_ntt_aarch64_asm},
+    {"poly_compress_d10_aarch64_asm", check_poly_compress_d10_aarch64_asm},
+    {"poly_compress_d11_aarch64_asm", check_poly_compress_d11_aarch64_asm},
+    {"poly_compress_d4_aarch64_asm", check_poly_compress_d4_aarch64_asm},
+    {"poly_compress_d5_aarch64_asm", check_poly_compress_d5_aarch64_asm},
+    {"poly_decompress_d10_aarch64_asm", check_poly_decompress_d10_aarch64_asm},
+    {"poly_decompress_d11_aarch64_asm", check_poly_decompress_d11_aarch64_asm},
+    {"poly_decompress_d4_aarch64_asm", check_poly_decompress_d4_aarch64_asm},
+    {"poly_decompress_d5_aarch64_asm", check_poly_decompress_d5_aarch64_asm},
+    {"poly_frombytes_aarch64_asm", check_poly_frombytes_aarch64_asm},
     {"poly_mulcache_compute_aarch64_asm",
      check_poly_mulcache_compute_aarch64_asm},
     {"poly_reduce_aarch64_asm", check_poly_reduce_aarch64_asm},
