@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794652061003,
+  "lastUpdate": 1794653618414,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -4510,6 +4510,75 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/pq-code-package/mlkem-native/commit/882e300b8209fe7c31b07a118c828bced05ef83e"
         },
         "date": 1794572588830,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 398857,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 513294,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 714034,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 669876,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 782851,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 1054085,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 899202,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 1051577,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 1399144,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "4d3f8fbb1c4b0db3ce46b1ae9830ad2ab2b79b30",
+          "message": "CBMC: Use contracts of callees instead of inlining them\n\nSome proofs did not list all callees with a contract in\nUSE_FUNCTION_CONTRACTS. CBMC then inlines the callee, and a contract\ntoo weak for its call site goes unnoticed.\n\nUse the callee contracts in the affected proofs:\n\n- poly_compress_d{4,5,10,11}_c: mlk_scalar_compress_d{4,5,10,11}\n- poly_decompress_d{4,5,10,11}_c: mlk_scalar_decompress_d{4,5,10,11}\n- poly_tomsg: mlk_scalar_compress_d1\n- ct_cmask_nonzero_u16: mlk_value_barrier_i32\n- ct_cmask_nonzero_u8: mlk_ct_cmask_nonzero_u16\n- keccakf1600x4_permute_native_x4: mlk_keccakf1600_permute\n\nThe proof of mlk_fqmul() intentionally keeps inlining\nmlk_montgomery_reduce().\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-14T08:47:39Z",
+          "tree_id": "0e97627bdc7d8aa07cac5ae6fc275c8243a1c51b",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/4d3f8fbb1c4b0db3ce46b1ae9830ad2ab2b79b30"
+        },
+        "date": 1794653616414,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
