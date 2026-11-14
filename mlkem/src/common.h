@@ -224,11 +224,19 @@
 /* Allocation macros for large local structures
  *
  * MLK_ALLOC(v, T, N) declares T *v and attempts to point it to an T[N]
+ *                    Additionally, if non-NULL, the value of v must respect
+ *                    MLK_DEFAULT_ALIGN alignment
  * MLK_FREE(v, T, N) zeroizes and frees the allocation
  *
  * Default implementation uses stack allocation.
  * Can be overridden by setting the config option MLK_CONFIG_CUSTOM_ALLOC_FREE
  * and defining MLK_CUSTOM_ALLOC and MLK_CUSTOM_FREE.
+ *
+ * Note that the standard LibC malloc() function should NOT be used
+ * to implement MLK_CUSTOM_ALLOC, since it does not guarantee alignment.
+ * Instead, POSIX's posix_memalign() or Windows' _aligned_malloc() should
+ * be used. See test/configs/custom_heap_alloc_config.h for examples
+ * of how to define MLK_CUSTOM_ALLOC.
  */
 #if defined(MLK_CONFIG_CUSTOM_ALLOC_FREE) != \
     (defined(MLK_CUSTOM_ALLOC) && defined(MLK_CUSTOM_FREE))
