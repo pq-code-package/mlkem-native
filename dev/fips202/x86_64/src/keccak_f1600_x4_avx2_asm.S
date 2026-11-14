@@ -254,7 +254,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2_asm)
    vpsllq $0x1, %ymm12, %ymm3
    vpor   %ymm4, %ymm3, %ymm3 // ROL(C1, 1)
    vpsllq $0x1, %ymm11, %ymm4
-   vpxor  %ymm14, %ymm1, %ymm1 // C4 = A(4,0) xor A[4,1] xor A[4,2] xor A[4,3] xor A[4,4] (A[4] xor A[9] xor A[14] xor A[19] xor A[24])
+   vpxor  %ymm1, %ymm14, %ymm1 // C4 = A(4,0) xor A[4,1] xor A[4,2] xor A[4,3] xor A[4,4] (A[4] xor A[9] xor A[14] xor A[19] xor A[24])
 
    // C0 = %ymm0
    // C1 = %ymm12
@@ -267,22 +267,22 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2_asm)
    vpxor  %ymm1, %ymm3, %ymm3 // D0 = C(4) xor ROL(C(1), 1)
    vpsllq $0x1, %ymm10, %ymm5
    vpxor  %ymm0, %ymm4, %ymm4 // D1 = C(0) xor ROL(C(2), 1)
-   vpor   %ymm14, %ymm5, %ymm5 // ROL(C3, 1)
+   vpor   %ymm5, %ymm14, %ymm5 // ROL(C3, 1)
    vpxor  %ymm6, %ymm4, %ymm6 // A'(1,0) (A'[1]) = A[1,0] (A[1]) xor D[1]
-   vpxor  %ymm12, %ymm5, %ymm5 // D2 = C(1) xor ROL(C(3), 1)
+   vpxor  %ymm5, %ymm12, %ymm5 // D2 = C(1) xor ROL(C(3), 1)
    vpsrlq $0x3f, %ymm1, %ymm12
    vpsllq $0x1, %ymm1, %ymm1
    vpxor  %ymm7, %ymm5, %ymm7 // A'(2,4) (A'[22]) = A[2,4] (A[22]) xor D[2]
-   vpxor  %ymm9, %ymm5, %ymm9 // A'(2,1) (A'[7]) = A[2,1] (A[7]) xor D[2]
-   vpor   %ymm12, %ymm1, %ymm1 // ROL(C4, 1)
+   vpxor  %ymm5, %ymm9, %ymm9 // A'(2,1) (A'[7]) = A[2,1] (A[7]) xor D[2]
+   vpor   %ymm1, %ymm12, %ymm1 // ROL(C4, 1)
    vpxor  0x0(%rsp), %ymm3, %ymm12 // A'(0,0) (A'[0]) = A[0,0] (A[0]) xor D[0]
-   vpxor  %ymm11, %ymm1, %ymm1 // D3 = C(2) xor ROL(C(4), 1)
+   vpxor  %ymm1, %ymm11, %ymm1 // D3 = C(2) xor ROL(C(4), 1)
    vpsrlq $0x3f, %ymm0, %ymm11
    vpsllq $0x1, %ymm0, %ymm0
-   vpxor  %ymm13, %ymm1, %ymm13 // A'(3,3) (A'[18]) = A[3,3] (A[18]) xor D[3]
-   vpxor  %ymm8, %ymm1, %ymm8 // A'(3,0) (A'[3]) = A[3,0] (A[3]) xor D[3]
-   vpor   %ymm11, %ymm0, %ymm0 // ROL(C0, 1)
-   vpxor  %ymm10, %ymm0, %ymm0 // D4 = C(3) xor ROL(C(0), 1)
+   vpxor  %ymm1, %ymm13, %ymm13 // A'(3,3) (A'[18]) = A[3,3] (A[18]) xor D[3]
+   vpxor  %ymm1, %ymm8, %ymm8 // A'(3,0) (A'[3]) = A[3,0] (A[3]) xor D[3]
+   vpor   %ymm0, %ymm11, %ymm0 // ROL(C0, 1)
+   vpxor  %ymm0, %ymm10, %ymm0 // D4 = C(3) xor ROL(C(0), 1)
 
    // D0 = %ymm3
    // D1 = %ymm4
@@ -301,7 +301,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2_asm)
    vpsllq $0x2c, %ymm10, %ymm10
    vpor   %ymm11, %ymm10, %ymm10 // B(1,0) (B[1]) = ROL(A'[1,1] (A'[6]), 44)
 
-   vpxor  %ymm15, %ymm5, %ymm11 // A'12 = A'(2,2) = A[2,2] (A[12]) xor D[2]
+   vpxor  %ymm5, %ymm15, %ymm11 // A'12 = A'(2,2) = A[2,2] (A[12]) xor D[2]
    vpbroadcastq (%rsi), %ymm15 // Load Round Constant (RC)
    vpsrlq $0x15, %ymm11, %ymm14
    vpsllq $0x2b, %ymm11, %ymm11
@@ -322,7 +322,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2_asm)
    vpsrlq $0x32, %ymm2, %ymm14
    vpsllq $0xe, %ymm2, %ymm2
    vmovdqu %ymm15, 0x20(%rsp) // store A''(1,0) (A''[1]) -> on stack
-   vpor   %ymm14, %ymm2, %ymm2 // B(4,0) (B[4]) = ROL(A'[4,4] (A'[24]), 14)
+   vpor   %ymm2, %ymm14, %ymm2 // B(4,0) (B[4]) = ROL(A'[4,4] (A'[24]), 14)
 
    // **** B0-B(4) Register Allocation Map ****
    // B0  (B(0,0))    %ymm12   (A'[0,0] (A'[0]) unchanged, no rotation)
@@ -348,7 +348,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2_asm)
    vpxor  0xe0(%rsp), %ymm0, %ymm2 // A'(9) = A'[4,1] = A[4,1] (A[9]) xor D[4]
    vpsrlq $0x2c, %ymm2, %ymm10
    vpsllq $0x14, %ymm2, %ymm2
-   vpor   %ymm10, %ymm2, %ymm2 // B(1,1) (B[6]) = ROL(A'[4,1] (A'[9]), 20)
+   vpor   %ymm2, %ymm10, %ymm2 // B(1,1) (B[6]) = ROL(A'[4,1] (A'[9]), 20)
 
    vpxor  0x100(%rsp), %ymm3, %ymm10 // A'(10) = A'[0,2] = A[0,2] (A[10]) xor D[0]
    vpsrlq $0x3d, %ymm10, %ymm11
@@ -370,7 +370,7 @@ MLK_ASM_FN_SYMBOL(keccak_f1600_x4_avx2_asm)
 
    vpsrlq $0x3, %ymm7, %ymm12
    vpsllq $0x3d, %ymm7, %ymm7
-   vpor   %ymm12, %ymm7, %ymm7 // B(4,1) (B[9]) = ROL(A'[2,4] (A'[22]), 61)
+   vpor   %ymm7, %ymm12, %ymm7 // B(4,1) (B[9]) = ROL(A'[2,4] (A'[22]), 61)
 
    // **** B5-B(9) Register Allocation Map ****
    // B5  (B(0,1))    %ymm8    ROL(A'[3,0] (A'[3]), 28)

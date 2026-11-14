@@ -134,8 +134,7 @@ let mlkem_frombytes_mc =
                            (* VPSRLW (%_% ymm15) (%_% ymm5) (Imm8 (word 8)) *)
   0xc4; 0xc1; 0x75; 0x71; 0xf1; 0x08;
                            (* VPSLLW (%_% ymm1) (%_% ymm9) (Imm8 (word 8)) *)
-  0xc4; 0x41; 0x75; 0xeb; 0xff;
-                           (* VPOR (%_% ymm15) (%_% ymm1) (%_% ymm15) *)
+  0xc5; 0x05; 0xeb; 0xf9;  (* VPOR (%_% ymm15) (%_% ymm15) (%_% ymm1) *)
   0xc5; 0x05; 0xdb; 0xf8;  (* VPAND (%_% ymm15) (%_% ymm15) (%_% ymm0) *)
   0xc4; 0xc1; 0x75; 0x71; 0xd1; 0x04;
                            (* VPSRLW (%_% ymm1) (%_% ymm9) (Imm8 (word 4)) *)
@@ -265,8 +264,7 @@ let mlkem_frombytes_mc =
                            (* VPSRLW (%_% ymm15) (%_% ymm5) (Imm8 (word 8)) *)
   0xc4; 0xc1; 0x75; 0x71; 0xf1; 0x08;
                            (* VPSLLW (%_% ymm1) (%_% ymm9) (Imm8 (word 8)) *)
-  0xc4; 0x41; 0x75; 0xeb; 0xff;
-                           (* VPOR (%_% ymm15) (%_% ymm1) (%_% ymm15) *)
+  0xc5; 0x05; 0xeb; 0xf9;  (* VPOR (%_% ymm15) (%_% ymm15) (%_% ymm1) *)
   0xc5; 0x05; 0xdb; 0xf8;  (* VPAND (%_% ymm15) (%_% ymm15) (%_% ymm0) *)
   0xc4; 0xc1; 0x75; 0x71; 0xd1; 0x04;
                            (* VPSRLW (%_% ymm1) (%_% ymm9) (Imm8 (word 4)) *)

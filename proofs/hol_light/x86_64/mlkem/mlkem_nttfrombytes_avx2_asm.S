@@ -121,7 +121,7 @@ mlk_nttfrombytes_avx2_asm:
         vpand %ymm0, %ymm14, %ymm14
         vpsrlw $0x8, %ymm5, %ymm15
         vpsllw $0x8, %ymm9, %ymm1
-        vpor %ymm15, %ymm1, %ymm15
+        vpor %ymm1, %ymm15, %ymm15
         vpand %ymm0, %ymm15, %ymm15
         vpsrlw $0x4, %ymm9, %ymm1
         vpand %ymm0, %ymm1, %ymm1
@@ -193,7 +193,7 @@ mlk_nttfrombytes_avx2_asm:
         vpand %ymm0, %ymm14, %ymm14
         vpsrlw $0x8, %ymm5, %ymm15
         vpsllw $0x8, %ymm9, %ymm1
-        vpor %ymm15, %ymm1, %ymm15
+        vpor %ymm1, %ymm15, %ymm15
         vpand %ymm0, %ymm15, %ymm15
         vpsrlw $0x4, %ymm9, %ymm1
         vpand %ymm0, %ymm1, %ymm1

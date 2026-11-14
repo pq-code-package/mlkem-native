@@ -67,14 +67,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa (%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -94,14 +94,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x20(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -121,14 +121,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x40(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -148,14 +148,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x60(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -175,14 +175,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x80(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -202,14 +202,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0xa0(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -229,14 +229,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0xc0(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -256,14 +256,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0xe0(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -283,14 +283,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x100(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -314,14 +314,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x120(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -345,14 +345,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x140(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -376,14 +376,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x160(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -407,14 +407,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x180(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -438,14 +438,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x1a0(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -469,14 +469,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x1c0(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -500,14 +500,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x1e0(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -531,14 +531,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x200(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -562,14 +562,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x220(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -593,14 +593,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x240(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -624,14 +624,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x260(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -655,14 +655,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x280(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -686,14 +686,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x2a0(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -717,14 +717,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x2c0(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -748,14 +748,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x2e0(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -779,14 +779,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x300(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -810,14 +810,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x320(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -841,14 +841,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x340(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -872,14 +872,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x360(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -903,14 +903,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x380(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -934,14 +934,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x3a0(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -965,14 +965,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x3c0(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
@@ -996,14 +996,14 @@ MLK_ASM_FN_SYMBOL(polyvec_basemul_acc_montgomery_cached_k4_avx2_asm)
         vmovdqa 0x3e0(%rcx), %ymm6
         vpmullw %ymm2, %ymm1, %ymm13
         vpmullw %ymm3, %ymm1, %ymm14
-        vpmullw %ymm13, %ymm4, %ymm7
-        vpmullw %ymm13, %ymm5, %ymm9
-        vpmullw %ymm14, %ymm6, %ymm8
-        vpmullw %ymm14, %ymm4, %ymm10
+        vpmullw %ymm4, %ymm13, %ymm7
+        vpmullw %ymm5, %ymm13, %ymm9
+        vpmullw %ymm6, %ymm14, %ymm8
+        vpmullw %ymm4, %ymm14, %ymm10
         vpmulhw %ymm7, %ymm0, %ymm7
-        vpmulhw %ymm9, %ymm0, %ymm9
-        vpmulhw %ymm8, %ymm0, %ymm8
-        vpmulhw %ymm10, %ymm0, %ymm10
+        vpmulhw %ymm0, %ymm9, %ymm9
+        vpmulhw %ymm0, %ymm8, %ymm8
+        vpmulhw %ymm0, %ymm10, %ymm10
         vpmulhw %ymm2, %ymm4, %ymm11
         vpmulhw %ymm2, %ymm5, %ymm12
         vpmulhw %ymm3, %ymm6, %ymm13
