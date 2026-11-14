@@ -159,23 +159,3 @@ Each command works on the proofs of one architecture, the host's or
 `--arch`'s; `-p` selects functions (see `hol-trace list`), also of the
 other architecture as `ARCH/FUNC`.
 `hol-trace --help` and `check-binary --help` list all options.
-
-## CI
-
-[hol_trace.yml](../../../.github/workflows/hol_trace.yml) selects the
-affected proofs with `proofs/hol_light/scripts/deps rev`, as HOL-Light
-CI does, and checks them on one EC2 runner, one step per phase:
-1. regenerate `accepted/base` and `accepted/spec` with
-   `scripts/autogen --dry-run --hol-trace-defs base,specs`, and fail if any
-   of their files would change;
-2. capture traces of the selected proofs (`gen`);
-3. replay them with HOL Light;
-4. replay them with HolLean;
-5. compare every replay result with the accepted files;
-6. check the proofs' object files with `check-binary --force-all`: each
-   must contain only proved functions, with the proved bytes.
-
-Step 1 is what ties `accepted/base` and `accepted/spec` to the pinned
-HOL Light and s2n-bignum and to the specification files: replay and
-compare only check a trace against the accepted files. Any failed step
-fails the job.

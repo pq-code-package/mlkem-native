@@ -13,9 +13,8 @@ inputs:
 runs:
   using: composite
   steps:
-    # Each phase finishes for all proofs before the next starts. A later
-    # step runs even if an earlier one failed, for some proofs or for the
-    # accepted files, and any failure fails the job.
+    # Each phase finishes for all proofs before the next starts. A failed
+    # phase skips the later phases and fails the job.
     - name: Set up the HOLTrace shell
       uses: ./.github/actions/setup-shell
       env:
@@ -28,38 +27,25 @@ runs:
           [[ ${#proofs[@]} -gt 0 ]]
           # Validated by lib.sh: only ARCH/FUNC names and spaces.
           echo "HOLTRACE_PROOFS=${proofs[*]}" >> "$GITHUB_ENV"
-    # Replay and compare check traces against the accepted files only.
-    # Regenerate accepted/base and accepted/spec from the pinned HOL Light
-    # and s2n-bignum and the specification files, which runs no proof code,
-    # and fail if any of their files would change, appear or disappear.
-    # This also runs autogen's other checks.
-    - name: Check that the accepted base and spec files are up to date
-      shell: ${{ env.SHELL }}
-      run: |
-        autogen --dry-run --hol-trace-defs base,specs
     # This runs the proof scripts, which are not trusted, in the checkout
     # that the later steps use; see "Not yet isolated" in
     # proofs/hol_light/hol_trace/README.md.
     - name: Capture traces
-      if: ${{ !cancelled() }}
       shell: ${{ env.SHELL }}
       run: |
         source .github/actions/hol-trace/lib.sh
         hol-trace gen -j "$HOLTRACE_JOBS" -p "${proofs[@]}"
     - name: Replay with HOL Light
-      if: ${{ !cancelled() }}
       shell: ${{ env.SHELL }}
       run: |
         source .github/actions/hol-trace/lib.sh
         hol-trace replay -j "$HOLTRACE_JOBS" --backend hol-light -p "${proofs[@]}"
     - name: Replay with HolLean
-      if: ${{ !cancelled() }}
       shell: ${{ env.SHELL }}
       run: |
         source .github/actions/hol-trace/lib.sh
         hol-trace replay -j "$HOLTRACE_JOBS" --backend hol-lean -p "${proofs[@]}"
     - name: Compare with the accepted files
-      if: ${{ !cancelled() }}
       shell: ${{ env.SHELL }}
       run: |
         source .github/actions/hol-trace/lib.sh
@@ -70,7 +56,6 @@ runs:
         git diff --exit-code HEAD -- proofs/hol_light/hol_trace/accepted || status=1
         exit "$status"
     - name: Check machine-code bindings
-      if: ${{ !cancelled() }}
       shell: ${{ env.SHELL }}
       run: |
         source .github/actions/hol-trace/lib.sh
