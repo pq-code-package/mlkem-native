@@ -55,10 +55,33 @@ jobs:
           echo "Selected proofs: $proofs"
           echo "proofs=$proofs" >> "$GITHUB_OUTPUT"
 
-  hol_trace_proofs:
-    name: HOLTrace proofs
+  # Replay and compare check traces against the accepted files only.
+  # Regenerate accepted/base and accepted/spec from the pinned HOL Light
+  # and s2n-bignum and the specification files, which runs no proof code,
+  # and fail before starting EC2 if any file is stale.
+  check_accepted_files:
+    name: Check accepted base and spec files
     needs: [ check_modified_files ]
     if: needs.check_modified_files.outputs.proofs != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-shell
+        with:
+          nix-shell: hol_trace-cross
+          nix-cache: true
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            autogen --dry-run --hol-trace-defs base,specs
+
+  hol_trace_proofs:
+    name: HOLTrace proofs
+    needs: [ check_modified_files, check_accepted_files ]
+    if: >-
+      needs.check_modified_files.outputs.proofs != '' &&
+      needs.check_accepted_files.result == 'success'
     permissions:
       contents: read
       id-token: write
