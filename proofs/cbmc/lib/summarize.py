@@ -97,6 +97,7 @@ def _split_pipeline_name(pipeline_name):
 # property was actually refuted -- the solver simply could not decide.
 # We surface this as a distinct "Inconclusive" outcome.
 _SOLVER_UNKNOWN_MARKER = 'SMT2 solver returned "unknown"'
+_SUPPORT_PIPELINES = {"aggregate_coverage", "print_tool_versions"}
 
 
 def _is_solver_inconclusive(stdout_file):
@@ -159,7 +160,7 @@ def _get_proof_records(
     exploratory_configs = set(exploratory_configs or ())
     records = []
     for proof_pipeline in run_dict["pipelines"]:
-        if proof_pipeline["name"] == "print_tool_versions":
+        if proof_pipeline["name"] in _SUPPORT_PIPELINES:
             continue
 
         name, dm, solver, status, duration, has_timeout = _parse_proof_pipeline(
@@ -359,12 +360,19 @@ def print_proof_results(
     has_timeout = any(s == "Timeout" for s in proof_statuses)
     has_real_failure = any(s == "Fail" for s in proof_statuses)
     has_inconclusive = any(s == "Inconclusive" for s in proof_statuses)
-    has_tool_version_failure = any(
-        pipeline["name"] == "print_tool_versions" and pipeline["status"] == "fail"
+    failed_support_pipelines = [
+        pipeline["name"]
         for pipeline in run_dict["pipelines"]
-    )
+        if pipeline["name"] in _SUPPORT_PIPELINES and pipeline["status"] == "fail"
+    ]
+    has_support_pipeline_failure = bool(failed_support_pipelines)
 
-    if has_timeout or has_real_failure or has_inconclusive or has_tool_version_failure:
+    if (
+        has_timeout
+        or has_real_failure
+        or has_inconclusive
+        or has_support_pipeline_failure
+    ):
         logging.error("Not all CBMC jobs passed.")
         if has_timeout:
             logging.error("Some proofs timed out.")
@@ -373,8 +381,8 @@ def print_proof_results(
                 "Some (proof, DM, solver-profile) configurations were inconclusive "
                 "(solver returned 'unknown')."
             )
-        if has_tool_version_failure:
-            logging.error("Printing tool versions failed.")
+        for pipeline in failed_support_pipelines:
+            logging.error("Support pipeline %s failed.", pipeline)
         logging.error(msg)
         sys.exit(1)
     logging.info(msg)
