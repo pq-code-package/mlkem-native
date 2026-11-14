@@ -23,5 +23,5 @@ in
     pkgs.pkgsCross.avr.buildPackages.gcc
     pkgs.avrdude
     simavr-patched
-  ] ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [ pkgs.git ];
+  ] ++ pkgs.lib.optionals (pkgs.stdenv.hostPlatform.isDarwin) [ pkgs.git ];
 }
