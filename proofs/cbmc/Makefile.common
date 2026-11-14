@@ -189,6 +189,16 @@ CBMC_DM_LP64_INCLUDE := $(CBMC_ROOT)/cbmc/include/LP64
 CBMC_DM_ILP32_GOTO_CC_FLAG := --32
 CBMC_DM_ILP32_CBMC_FLAG := --ILP32
 CBMC_DM_ILP32_INCLUDE := $(CBMC_ROOT)/cbmc/include/ILP32
+# `goto-instrument --add-library` preprocesses CBMC's models of C library
+# functions, such as memcpy() and memset(), with gcc and the host's libc
+# headers. `--32` narrows int, long, and pointers but keeps the host
+# architecture. On an x86_64 host, gcc therefore runs with
+# `-m32 -D__x86_64__`, and glibc includes <gnu/stubs-x32.h>, which the
+# nix toolchain does not provide. goto-instrument prints an error but
+# exits successfully without the models, so every proof that calls
+# memcpy() or memset() fails. Put the ILP32 headers first on gcc's search
+# path, so the models see the same declarations as the proof code.
+CBMC_DM_ILP32_LIBRARY_ENV := env CPATH=$(CBMC_DM_ILP32_INCLUDE)
 
 # Solver profile IDs name the executable and all solver-specific options.
 CBMC_SOLVER_PROFILES_ALL := z3 z3_smt_only bitwuzla cvc5_arrays_exp cvc5_mbqi_enum cvc5_enum_inst cadical
@@ -296,6 +306,7 @@ endif
 GOTO_CC_DM_FLAG := $(CBMC_DM_$(CBMC_DM)_GOTO_CC_FLAG)
 CBMC_DM_FLAG := $(CBMC_DM_$(CBMC_DM)_CBMC_FLAG)
 PROOF_INCLUDE := $(CBMC_DM_$(CBMC_DM)_INCLUDE)
+LIBRARY_ENV := $(CBMC_DM_$(CBMC_DM)_LIBRARY_ENV)
 
 BACKEND_OPTION := $(CBMC_PROFILE_$(CBMC_SOLVER)_BACKEND)
 PROVER_NAME := $(CBMC_PROFILE_$(CBMC_SOLVER)_PROVER_NAME)
@@ -888,7 +899,7 @@ $(HARNESS_GOTO)0400.goto: $(HARNESS_GOTO)0300.goto
 ifneq ($(strip $(USE_DYNAMIC_FRAMES)),)
 	$(LITANI) add-job \
 	  --command \
-	    '$(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(ADD_LIBRARY_FLAG) $(CBMC_OPT_CONFIG_LIBRARY) $^ $@' \
+	    '$(LIBRARY_ENV) $(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(ADD_LIBRARY_FLAG) $(CBMC_OPT_CONFIG_LIBRARY) $^ $@' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/linking-library-models-log.txt \
