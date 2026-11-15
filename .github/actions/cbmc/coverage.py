@@ -19,6 +19,7 @@ MISSED = "missed"
 BOTH = "both"
 COVERED = {HIT, BOTH}
 VALID_STATUSES = {HIT, MISSED, BOTH}
+MAX_REPORTED_MISSES = 20
 
 
 def get_args():
@@ -38,6 +39,12 @@ def get_args():
         action="append",
         required=True,
         help="Variant expected for every parameter set",
+    )
+    parser.add_argument(
+        "--expected-data-model",
+        action="append",
+        required=True,
+        help="Data model measured separately for every parameter set",
     )
     return parser.parse_args()
 
@@ -63,11 +70,17 @@ def find_reports(root):
     reports = {}
     for metadata_path in root.rglob("metadata.json"):
         metadata = load_json(metadata_path)
-        if metadata.get("schema") != 1:
+        if metadata.get("schema") != 2:
             raise ValueError(f"Unsupported metadata schema in {metadata_path}")
-        key = metadata["parameter_set"], metadata["variant"]
+        key = (
+            metadata["parameter_set"],
+            metadata["data_model"],
+            metadata["variant"],
+        )
         if key in reports:
-            raise ValueError(f"Duplicate coverage report for {key[0]} ({key[1]})")
+            raise ValueError(
+                f"Duplicate coverage report for {key[0]} ({key[1]}, {key[2]})"
+            )
         coverage_path = metadata_path.parent / "json" / "viewer-coverage.json"
         if not coverage_path.is_file():
             raise FileNotFoundError(f"Missing coverage data: {coverage_path}")
@@ -98,6 +111,30 @@ def merge_coverage(paths):
                         raise ValueError(f"Invalid coverage status: {status}")
                     merged_lines[line] = status
     return coverage
+
+
+def coverage_universe(coverages):
+    universe = {}
+    for coverage in coverages:
+        for filename, functions in coverage.items():
+            universe_functions = universe.setdefault(filename, {})
+            for function, lines in functions.items():
+                universe_lines = universe_functions.setdefault(function, set())
+                universe_lines.update(lines)
+    return universe
+
+
+def complete_coverage(coverage, universe):
+    complete = {}
+    for filename, functions in universe.items():
+        complete_functions = complete.setdefault(filename, {})
+        coverage_functions = coverage.get(filename, {})
+        for function, lines in functions.items():
+            coverage_lines = coverage_functions.get(function, {})
+            complete_functions[function] = {
+                line: coverage_lines.get(line, MISSED) for line in lines
+            }
+    return complete
 
 
 def summarize(statuses):
@@ -180,36 +217,52 @@ def render_comment(results):
         COMMENT_TAG,
         "## CBMC proof coverage",
         "",
-        "Coverage reports are joined within each parameter set. Reports from "
-        "different parameter sets are not mixed.",
+        "Coverage variants are joined only within one parameter set and data "
+        "model. Each data model is measured against the parameter set's "
+        "combined source-line universe.",
         "",
-        "| Parameter set | Covered lines | Excluded | Result |",
-        "|---------------|--------------:|---------:|:------:|",
+        "| Parameter set | Data model | Covered lines | Excluded | Result |",
+        "|---------------|------------|--------------:|---------:|:------:|",
     ]
     for result in results:
         status = "✅" if not result["missed"] else "❌"
         lines.append(
-            f"| {result['label']} | {result['covered']}/{result['required']} | "
+            f"| {result['label']} | {result['data_model']} | "
+            f"{result['covered']}/{result['required']} | "
             f"{len(result['excluded'])} | {status} |"
         )
 
     excluded = [
-        (result["label"], item) for result in results for item in result["excluded"]
-    ]
-    missed = [
-        (result["label"], item) for result in results for item in result["missed"]
+        (result["label"], result["data_model"], item)
+        for result in results
+        for item in result["excluded"]
     ]
     if excluded:
         lines += ["", "<details>", "<summary>Excluded unreachable lines</summary>", ""]
-        for label, item in excluded:
+        for label, data_model, item in excluded:
             lines.append(
-                f"- {label}: `{item['file']}:{item['line']}` — {item['reason']}"
+                f"- {label} ({data_model}): "
+                f"`{item['file']}:{item['line']}` — {item['reason']}"
             )
         lines += ["", "</details>"]
-    if missed:
+
+    if any(result["missed"] for result in results):
         lines += ["", "### Uncovered lines", ""]
-        for label, item in missed:
-            lines.append(f"- {label}: `{item['file']}:{item['line']}`")
+        for result in results:
+            missed = result["missed"]
+            if not missed:
+                continue
+            label = f"{result['label']} ({result['data_model']})"
+            lines.append(f"<details><summary>{label}: {len(missed)} lines</summary>")
+            lines.append("")
+            for item in missed[:MAX_REPORTED_MISSES]:
+                lines.append(f"- `{item['file']}:{item['line']}`")
+            remaining = len(missed) - MAX_REPORTED_MISSES
+            if remaining > 0:
+                lines.append(
+                    f"- … and {remaining} more; see the `cbmc-coverage` artifact"
+                )
+            lines += ["", "</details>", ""]
     return "\n".join(lines)
 
 
@@ -255,52 +308,78 @@ def main():
     reports = find_reports(args.reports_dir)
     exceptions = load_exceptions(args.exceptions)
     expected_variants = set(args.expected_variant)
+    expected_data_models = set(args.expected_data_model)
     results = []
 
     for parameter_set, label in parameter_sets.items():
-        variants = {
-            variant
-            for report_parameter_set, variant in reports
+        data_models = {
+            data_model
+            for report_parameter_set, data_model, _ in reports
             if report_parameter_set == parameter_set
         }
-        if variants != expected_variants:
+        if data_models != expected_data_models:
             raise ValueError(
-                f"Coverage reports for {parameter_set}: expected variants "
-                f"{sorted(expected_variants)}, found {sorted(variants)}"
+                f"Coverage reports for {parameter_set}: expected data models "
+                f"{sorted(expected_data_models)}, found {sorted(data_models)}"
             )
-        paths = [reports[(parameter_set, variant)] for variant in sorted(variants)]
-        viewer_coverage = build_viewer_coverage(merge_coverage(paths))
-        write_json(
-            args.output_dir / parameter_set / "viewer-coverage.json",
-            viewer_coverage,
-        )
 
-        misses = missed_lines(viewer_coverage)
-        excluded_keys = misses & exceptions.keys()
-        unexpected = misses - exceptions.keys()
-        overall = viewer_coverage["viewer-coverage"]["overall_coverage"]
-        results.append(
-            {
-                "parameter_set": parameter_set,
-                "label": label,
-                "covered": overall["hit"],
-                "required": overall["total"] - len(excluded_keys),
-                "excluded": [
-                    {
-                        "file": filename,
-                        "line": int(line),
-                        "reason": exceptions[(filename, line)],
-                    }
-                    for filename, line in sorted(excluded_keys)
-                ],
-                "missed": [
-                    {"file": filename, "line": int(line)}
-                    for filename, line in sorted(unexpected)
-                ],
+        coverage_by_data_model = {}
+        for data_model in sorted(data_models):
+            variants = {
+                variant
+                for report_parameter_set, report_data_model, variant in reports
+                if report_parameter_set == parameter_set
+                and report_data_model == data_model
             }
-        )
+            if variants != expected_variants:
+                raise ValueError(
+                    f"Coverage reports for {parameter_set} ({data_model}): "
+                    f"expected variants {sorted(expected_variants)}, "
+                    f"found {sorted(variants)}"
+                )
+            paths = [
+                reports[(parameter_set, data_model, variant)]
+                for variant in sorted(variants)
+            ]
+            coverage_by_data_model[data_model] = merge_coverage(paths)
 
-    write_json(args.output_dir / "summary.json", {"schema": 1, "results": results})
+        universe = coverage_universe(coverage_by_data_model.values())
+        for data_model in sorted(data_models):
+            viewer_coverage = build_viewer_coverage(
+                complete_coverage(coverage_by_data_model[data_model], universe)
+            )
+            write_json(
+                args.output_dir / parameter_set / data_model / "viewer-coverage.json",
+                viewer_coverage,
+            )
+
+            misses = missed_lines(viewer_coverage)
+            excluded_keys = misses & exceptions.keys()
+            unexpected = misses - exceptions.keys()
+            overall = viewer_coverage["viewer-coverage"]["overall_coverage"]
+            results.append(
+                {
+                    "parameter_set": parameter_set,
+                    "label": label,
+                    "data_model": data_model,
+                    "covered": overall["hit"],
+                    "required": overall["total"] - len(excluded_keys),
+                    "excluded": [
+                        {
+                            "file": filename,
+                            "line": int(line),
+                            "reason": exceptions[(filename, line)],
+                        }
+                        for filename, line in sorted(excluded_keys)
+                    ],
+                    "missed": [
+                        {"file": filename, "line": int(line)}
+                        for filename, line in sorted(unexpected)
+                    ],
+                }
+            )
+
+    write_json(args.output_dir / "summary.json", {"schema": 2, "results": results})
     comment = render_comment(results)
     print(comment)
     summary_path = os.environ.get("GITHUB_STEP_SUMMARY")

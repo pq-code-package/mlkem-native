@@ -73,7 +73,9 @@ jobs:
             --parameter-set 2=ML-KEM-512 \
             --parameter-set 3=ML-KEM-768 \
             --parameter-set 4=ML-KEM-1024 \
-            --expected-variant default
+            --expected-variant default \
+            --expected-data-model ILP32 \
+            --expected-data-model LP64
       - name: Upload joined CBMC coverage
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

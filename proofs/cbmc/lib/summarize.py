@@ -100,6 +100,12 @@ _SOLVER_UNKNOWN_MARKER = 'SMT2 solver returned "unknown"'
 _SUPPORT_PIPELINES = {"aggregate_coverage", "print_tool_versions"}
 
 
+def _is_support_pipeline(pipeline_name):
+    return pipeline_name in _SUPPORT_PIPELINES or pipeline_name.startswith(
+        "aggregate_coverage_"
+    )
+
+
 def _is_solver_inconclusive(stdout_file):
     """Return True iff the cbmc safety-check job's stdout-file (result.xml)
     contains the cbmc message indicating the SMT backend returned `unknown`.
@@ -160,7 +166,7 @@ def _get_proof_records(
     exploratory_configs = set(exploratory_configs or ())
     records = []
     for proof_pipeline in run_dict["pipelines"]:
-        if proof_pipeline["name"] in _SUPPORT_PIPELINES:
+        if _is_support_pipeline(proof_pipeline["name"]):
             continue
 
         name, dm, solver, status, duration, has_timeout = _parse_proof_pipeline(
@@ -363,7 +369,7 @@ def print_proof_results(
     failed_support_pipelines = [
         pipeline["name"]
         for pipeline in run_dict["pipelines"]
-        if pipeline["name"] in _SUPPORT_PIPELINES and pipeline["status"] == "fail"
+        if _is_support_pipeline(pipeline["name"]) and pipeline["status"] == "fail"
     ]
     has_support_pipeline_failure = bool(failed_support_pipelines)
 

@@ -23,7 +23,7 @@ def get_args():
 def load_manifest(path):
     with path.open(encoding="utf-8") as handle:
         manifest = json.load(handle)
-    if manifest.get("schema") != 1:
+    if manifest.get("schema") != 2:
         raise ValueError(f"Unsupported coverage manifest schema in {path}")
     reports = manifest.get("reports")
     if not isinstance(reports, list) or not reports:
@@ -68,9 +68,10 @@ def main():
     subprocess.run(command, check=True)
 
     metadata = {
-        "schema": 1,
+        "schema": 2,
         "parameter_set": manifest["parameter_set"],
         "variant": manifest["variant"],
+        "data_model": manifest["data_model"],
         "configurations": len(manifest["reports"]),
     }
     with (args.reportdir / "metadata.json").open("w", encoding="utf-8") as handle:
