@@ -159,6 +159,16 @@ EVERY_PROOF = (
     ".github/workflows/hol_trace.yml",
     ".github/actions/hol-trace/",
 )
+# Nix packages that do not affect proof execution or trace checking.
+NO_PROOF = (
+    "nix/avr/",
+    "nix/cbmc/",
+    "nix/legacy/",
+    "nix/openocd/",
+    "nix/slothy/",
+    "nix/valgrind/",
+    "nix/zephyr/",
+)
 HT = HL + "hol_trace/"
 ACC = HT + "accepted/"
 S2N_LAYER = {"s2n_bignum_arm.defs": "aarch64", "s2n_bignum_x86.defs": "x86_64"}
@@ -171,6 +181,8 @@ def affected(path, deps, proofs):
         return set()  # documentation; the allowlist is read by `check` only
     if path == HL + "bind.yml":
         return set()  # derived from the accepted .defs, which select proofs
+    if path.startswith(NO_PROOF):
+        return set()
     if path.startswith(EVERY_PROOF):
         return set(proofs)
     # An accepted HOLTrace file selects what the file it comes from selects.
