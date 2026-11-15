@@ -40,8 +40,8 @@ theorem mlkem_rej_uniform_aarch64_asm MLKEM_REJ_UNIFORM_SUBROUTINE_MEMSAFE
        num_divides 24 (val buflen)
        /\ 8 * val buflen = 12 * LENGTH inlist
        /\ ALL (nonoverlapping (word_sub stackpointer (word 576 : int64), 576))
-            [(word pc : int64), 588; buf, val buflen; table, 4096]
-       /\ ALL (nonoverlapping (res, 512)) [(word pc : int64), 588;
+            [(word pc : int64), LENGTH mlkem_rej_uniform_mc; buf, val buflen; table, 4096]
+       /\ ALL (nonoverlapping (res, 512)) [(word pc : int64), LENGTH mlkem_rej_uniform_mc;
                                            word_sub stackpointer (word 576 : int64), 576]
        ==> ensures arm
              (\s:armstate.
