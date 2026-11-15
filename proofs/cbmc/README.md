@@ -99,6 +99,30 @@ tests cbmc --help
 The test wrapper accepts the same `--dm`, `--solver`, and `--explore`
 selectors.
 
+## CI dependency selection
+
+Pull-request CI runs only the proofs that the changed files can affect.
+`scripts/autogen` writes [deps.yml](deps.yml) with the C sources,
+transitive headers and Makefiles that each proof reads, for every
+security level and supported configuration. Its keys have the form
+`PROOF/SECURITY_LEVEL`, for example `barrett_reduce/512`.
+[scripts/deps](scripts/deps) reverses that map for CI.
+
+Changes to CBMC infrastructure or an unclassified file under
+`proofs/cbmc` select every proof. So does a deleted non-documentation
+path, because it is absent from the head dependency map, and a changed
+symlink or other non-regular file, because `deps.yml` lists resolved
+paths only. A proof that is missing from `deps.yml` is always selected. A change to `deps.yml` itself
+selects nothing: lint checks that it is current, so any change to a
+proof's inputs also changes a file that its entry lists.
+
+If a later push no longer affects any proof for a security level, CI
+replaces that level's earlier report comment with a note.
+
+The merge queue, manual workflow dispatch, and pushes to `release/**`
+branches still run every proof. This keeps the published runtime results
+complete.
+
 ## What is covered?
 
 Each proved function has an eponymous sub-directory of its own. Use [list_proofs.sh](list_proofs.sh) to see the list of functions covered.

@@ -28,7 +28,16 @@ ProofResult = namedtuple(
 
 def get_args():
     parser = argparse.ArgumentParser(description="CBMC proof results reporter")
-    parser.add_argument("--results-json", required=True)
+    results = parser.add_mutually_exclusive_group(required=True)
+    results.add_argument("--results-json")
+    results.add_argument(
+        "--no-affected-proofs",
+        action="store_true",
+        help=(
+            "the pull request affects no proof for this parameter set; "
+            "replace an existing report instead of leaving stale results"
+        ),
+    )
     parser.add_argument("--mlkem-k", required=True, choices=["2", "3", "4"])
     parser.add_argument("--min-runtime", type=int, default=20)
     parser.add_argument("--regression-threshold", type=float, default=1.5)
@@ -189,7 +198,7 @@ def is_default_result(result):
     return "dm" not in result and "solver" not in result
 
 
-def compute_total_runtime(data):
+def compute_total_runtime(data, selected_names=None):
     """Compute total runtime from successful default configurations."""
     if not data:
         return None
@@ -199,6 +208,7 @@ def compute_total_runtime(data):
         if r.get("status") not in ("failed", "omitted", "inconclusive")
         and "value" in r
         and is_default_result(r)
+        and (selected_names is None or r["name"] in selected_names)
     )
 
 
@@ -221,8 +231,9 @@ def build_comment(current, baseline, cfg):
     alerts.sort(key=sort_key)
 
     # Compute total runtimes and add as first row
-    cur_total = compute_total_runtime(current)
-    base_total = compute_total_runtime(baseline)
+    selected_names = {r["name"] for r in executed}
+    cur_total = compute_total_runtime(current, selected_names)
+    base_total = compute_total_runtime(baseline, selected_names)
     if base_total and base_total > 0:
         total_ratio = cur_total / base_total
         total_change = f"{(total_ratio - 1) * 100:+.1f}%"
@@ -273,8 +284,23 @@ def build_comment(current, baseline, cfg):
     return "\n".join(lines)
 
 
-def post_or_update_comment(pr_number, body, cfg):
-    """Post or update PR comment."""
+def build_no_proofs_comment(cfg):
+    """Build the PR comment for a parameter set without affected proofs."""
+    return "\n".join(
+        [
+            f"<!-- {COMMENT_TAG}(start): mlkem-{cfg.param_set} -->",
+            f"## CBMC Results (ML-KEM-{cfg.param_set})",
+            "",
+            f"This pull request no longer affects any ML-KEM-{cfg.param_set} "
+            "CBMC proof.",
+            "",
+            f"<!-- {COMMENT_TAG}(end): mlkem-{cfg.param_set} -->",
+        ]
+    )
+
+
+def post_or_update_comment(pr_number, body, cfg, create=True):
+    """Post or update PR comment. Without `create`, only update."""
     tag = f"<!-- {COMMENT_TAG}(start): mlkem-{cfg.param_set} -->"
     result = subprocess.run(
         [
@@ -292,6 +318,9 @@ def post_or_update_comment(pr_number, body, cfg):
         if result.returncode == 0 and result.stdout.strip()
         else None
     )
+    if not existing_id and not create:
+        print("No existing comment to update")
+        return
 
     with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
         f.write(body)
@@ -333,12 +362,21 @@ def post_or_update_comment(pr_number, body, cfg):
 def main():
     args = get_args()
     args.param_set = {"2": "512", "3": "768", "4": "1024"}[args.mlkem_k]
+    pr_number = get_pr_number()
+
+    if args.no_affected_proofs:
+        if pr_number:
+            post_or_update_comment(
+                pr_number, build_no_proofs_comment(args), args, create=False
+            )
+        else:
+            print("Not a PR, skipping")
+        return
 
     with open(args.results_json) as f:
         current = json.load(f)
     baseline = fetch_baseline(args)
 
-    pr_number = get_pr_number()
     if pr_number:
         post_or_update_comment(pr_number, build_comment(current, baseline, args), args)
     else:

@@ -4683,6 +4683,27 @@ def gen_hol_light_deps():
     update_file("proofs/hol_light/deps.yml", "\n".join(header) + "\n" + out)
 
 
+def gen_cbmc_deps():
+    """Write proofs/cbmc/deps.yml: the preprocessor inputs of each proof."""
+    out = subprocess.run(
+        ["proofs/cbmc/scripts/deps", "gen"],
+        check=True,
+        stdout=subprocess.PIPE,
+        text=True,
+    ).stdout
+    header = [
+        "# Copyright (c) The mlkem-native project authors",
+        "# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT",
+        "#",
+        "# WARNING: This file is auto-generated from scripts/autogen",
+        "#          in the mlkem-native repository.",
+        "#          Do not modify it directly.",
+        "#",
+        "# See proofs/cbmc/scripts/deps.",
+    ]
+    update_file("proofs/cbmc/deps.yml", "\n".join(header) + "\n" + out)
+
+
 def update_hol_light_bytecode(force_cross=()):
     """Update HOL Light proof files with bytecode from make dump_bytecode."""
     update_hol_light_bytecode_for_arch("aarch64", force_cross=force_cross)
@@ -5741,6 +5762,7 @@ def _main():
         ),
         ("Generate HOL Light proof dependencies", gen_hol_light_deps),
         ("Generate HOL Light machine-code bindings", gen_hol_light_bind),
+        ("Generate CBMC proof dependencies", gen_cbmc_deps),
         ("Generate monolithic source files", gen_monolithic),
         ("Generate undefs", gen_undefs),
         ("Generate test configs", gen_test_configs),

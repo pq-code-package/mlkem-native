@@ -399,6 +399,22 @@ gh_group_start "Check HOL-Light imports"
 check-hol-light-imports
 gh_group_end
 
+check-cbmc-dependencies()
+{
+  if python3 "$ROOT"/proofs/cbmc/scripts/deps check; then
+    info "Check CBMC dependencies"
+    gh_summary_success "Check CBMC dependencies"
+  else
+    error "Check CBMC dependencies"
+    gh_summary_failure "Check CBMC dependencies"
+    SUCCESS=false
+  fi
+}
+
+gh_group_start "Check CBMC dependencies"
+check-cbmc-dependencies
+gh_group_end
+
 check-doxygen()
 {
   if ! command -v doxygen >/dev/null; then
