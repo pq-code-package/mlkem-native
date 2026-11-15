@@ -80,6 +80,7 @@ jobs:
     name: HOLTrace proofs
     needs: [ check_modified_files, check_accepted_files ]
     if: >-
+      github.event_name == 'merge_group' &&
       needs.check_modified_files.outputs.proofs != '' &&
       needs.check_accepted_files.result == 'success'
     permissions:
