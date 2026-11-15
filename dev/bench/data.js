@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794677021580,
+  "lastUpdate": 1794741887486,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -55578,6 +55578,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 keypair",
             "value": 30331,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 34111,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 43668,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": true,
+          "id": "9345dfb9700475d5107ab54010a20a5852b3bff0",
+          "message": "CI: Check HOLTrace files before starting EC2\n\nHOLTrace checks accepted/base and accepted/spec before it records and\nreplays proofs. The check ran as the first step on the EC2 runner, and\n`if: !cancelled()` deliberately let capture and replay continue after\nit failed. A stale accepted file therefore still started the large\nrunner and allowed the proof phases to consume it.\n\nRun the base/spec autogen dry-run in a hosted Ubuntu job after proof\nselection. Make the EC2 workflow call depend on that job succeeding.\nAn autogen failure now skips EC2 provisioning.\n\nRemove the duplicate check from the EC2 action and use the default\nsuccess condition for every proof phase. A capture, replay, comparison\nor binding failure now skips the remaining expensive phases. Cleanup\nand log upload still run.\n\nRemove the HOLTrace README CI section.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-15T08:05:35Z",
+          "tree_id": "54e92ddad5f6a5c11a3f98d71df62e0beb6005bc",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/9345dfb9700475d5107ab54010a20a5852b3bff0"
+        },
+        "date": 1794741836873,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 12318,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 14758,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 19316,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 21256,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 23483,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 30029,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 30332,
             "unit": "cycles"
           },
           {
