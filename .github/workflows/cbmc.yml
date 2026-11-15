@@ -13,23 +13,112 @@ on:
   workflow_dispatch:
 
 jobs:
+  check_modified_files:
+    name: Determine changed files
+    runs-on: ubuntu-latest
+    if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
+    outputs:
+      matrix: ${{ steps.select.outputs.matrix }}
+      run_needed: ${{ steps.select.outputs.run_needed }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Get changed files
+        id: changed-files
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          /usr/bin/python3 - \
+            "$BASE_SHA" "$HEAD_SHA" "$GITHUB_OUTPUT" <<'PY'
+          import json
+          import subprocess
+          import sys
+
+          base, head, output = sys.argv[1:]
+          paths = subprocess.run(
+              ["git", "diff", "--name-only", "-z", "--no-renames", f"{base}...{head}"],
+              check=True,
+              capture_output=True,
+          ).stdout.split(b"\0")
+          changed = [
+              path.decode("utf-8", errors="surrogateescape")
+              for path in paths
+              if path
+          ]
+          with open(output, "a", encoding="utf-8") as f:
+              f.write(f"files={json.dumps(changed)}\n")
+          PY
+      - uses: ./.github/actions/setup-apt
+        with:
+          packages: python3-yaml
+      - name: Select proofs
+        id: select
+        shell: bash
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
+          ALL_PROOFS: ${{ github.event_name != 'pull_request' }}
+        run: |
+          all=()
+          if [[ "$ALL_PROOFS" == "true" ]]; then
+            all=(--all)
+          fi
+          selected=$(
+            /usr/bin/python3 proofs/cbmc/scripts/deps rev --json \
+              "${all[@]}" --files-json "${CHANGED_FILES:-[]}"
+          )
+          matrix=$(
+            jq -c '{
+              include: [
+                to_entries[]
+                | select(.value | length > 0)
+                | {
+                    k: (.key | tonumber),
+                    level: ({"2": 512, "3": 768, "4": 1024}[.key]),
+                    proofs: (.value | join(" "))
+                  }
+              ]
+            }' <<<"$selected"
+          )
+          echo "Selected proofs: $selected"
+          {
+            echo "selected=$selected"
+            echo "matrix=$matrix"
+            echo "run_needed=$(jq -r '.include | length > 0' <<<"$matrix")"
+          } >> "$GITHUB_OUTPUT"
+      # An earlier push to the pull request may have posted a report for a
+      # parameter set that the pull request no longer affects.
+      - name: Replace reports for unaffected parameter sets
+        if: github.event_name == 'pull_request'
+        # The reports are cosmetic; a failed edit must not skip the proofs.
+        continue-on-error: true
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
+          SELECTED: ${{ steps.select.outputs.selected }}
+        run: |
+          for k in 2 3 4; do
+            if jq -e --arg k "$k" '.[$k] | length == 0' <<<"$SELECTED" >/dev/null; then
+              /usr/bin/python3 .github/actions/cbmc/report.py \
+                --mlkem-k "$k" --no-affected-proofs
+            fi
+          done
+
   cbmc:
     name: CBMC (ML-KEM-${{ matrix.level }})
-    if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
+    needs: [ check_modified_files ]
+    if: needs.check_modified_files.outputs.run_needed == 'true'
     permissions:
       contents: 'read'
       id-token: 'write'
       pull-requests: 'write'
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - k: 2
-            level: 512
-          - k: 3
-            level: 768
-          - k: 4
-            level: 1024
+      matrix: ${{ fromJSON(needs.check_modified_files.outputs.matrix) }}
     uses: ./.github/workflows/ci_ec2_reusable.yml
     with:
       name: CBMC (MLKEM-${{ matrix.level }})
@@ -43,5 +132,6 @@ jobs:
       test: false
       cbmc: true
       cbmc_mlkem_k: ${{ matrix.k }}
+      cbmc_proofs: ${{ matrix.proofs }}
     secrets:
       AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}

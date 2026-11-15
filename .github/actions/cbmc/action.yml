@@ -20,6 +20,9 @@ inputs:
   mlkem_k:
     description: "Security level for ML-KEM (2,3,4)"
     default: "2"
+  proofs:
+    description: Space-separated CBMC proof directories, or empty for all proofs
+    default: ""
   gh_token:
     description: Github access token to use
     required: true
@@ -56,6 +59,7 @@ runs:
           ACTION_PATH: ${{ github.action_path }}
           GH_TOKEN: ${{ inputs.gh_token }}
           PARAMETER_SET: ${{ inputs.mlkem_k }}
+          CBMC_PROOFS: ${{ inputs.proofs }}
           RESULTS_DIR: ${{ runner.temp }}/cbmc-results
         run: |
           echo "::group::cbmc_$PARAMETER_SET"
@@ -65,10 +69,25 @@ runs:
             4) parameter_set_name=1024 ;;
             *) echo "::error::Unsupported MLKEM_K: $PARAMETER_SET"; exit 1 ;;
           esac
+          read -r -a proofs <<<"$CBMC_PROOFS"
+          proof_args=()
+          if [[ ${#proofs[@]} -gt 0 ]]; then
+            proof_args=(-p)
+          fi
+          for proof in "${proofs[@]}"; do
+            if ! [[ "$proof" =~ ^[a-zA-Z0-9_]+$ ]]; then
+              echo "::error::Invalid CBMC proof name: $proof"
+              exit 1
+            fi
+            proof_args+=("^${proof}$")
+          done
           # Write the results at their gh-pages path; see cbmc_publish.yml.
           result="$RESULTS_DIR/dev/cbmc/mlkem-$parameter_set_name.json"
           mkdir -p "$(dirname "$result")"
-          tests cbmc --mlkem-parameter-set "$PARAMETER_SET" --dm all --solver all --per-proof-timeout 1800 --output-result-json "$result" || cbmc_failed=true
+          tests cbmc --mlkem-parameter-set "$PARAMETER_SET" \
+            --dm all --solver all --per-proof-timeout 1800 \
+            --output-result-json "$result" "${proof_args[@]}" \
+            || cbmc_failed=true
           echo "::endgroup::"
           python3 "$ACTION_PATH/report.py" \
             --results-json "$result" \

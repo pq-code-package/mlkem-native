@@ -74,6 +74,10 @@ on:
       cbmc_mlkem_k:
         type: string
         default: 2
+      cbmc_proofs:
+        type: string
+        description: Space-separated CBMC proof directories, or empty for all proofs
+        default: ''
       hol_trace_proofs:
         type: string
         description: Space-separated HOLTrace proofs as ARCH/FUNC, or empty to skip
@@ -223,6 +227,7 @@ jobs:
           nix-shell: cbmc
           nix-verbose: ${{ inputs.verbose }}
           mlkem_k: ${{ inputs.cbmc_mlkem_k }}
+          proofs: ${{ inputs.cbmc_proofs }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
       - name: SLOTHY
         if: ${{ inputs.slothy }}
