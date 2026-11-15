@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794762862207,
+  "lastUpdate": 1794764420698,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -4924,6 +4924,75 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/pq-code-package/mlkem-native/commit/9345dfb9700475d5107ab54010a20a5852b3bff0"
         },
         "date": 1794745160317,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 398857,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 513294,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 714128,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 669876,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 782851,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 1054185,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 899202,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 1051577,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 1399275,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": true,
+          "id": "76b6587fd061b05a01d43928fe9c33a138aa23b1",
+          "message": "HOL-Light: Ignore unrelated Nix proof inputs\n\nThe reverse dependency selector treats every path under `nix/` as an\ninput to every HOL-Light proof. Changes to packages for AVR, CBMC,\nlegacy compiler shells, OpenOCD, SLOTHY, Valgrind, or Zephyr\ntherefore schedule every HOL-Light proof and every selected HOLTrace\ncheck.\n\nList those Nix subtrees before the broad `nix/` rule and select no\nproofs for them. Mixed change sets still union the selections from all\nother paths. Flake files and shared or HOL-related Nix inputs remain\ndependencies of every proof.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-15T13:42:38Z",
+          "tree_id": "d486e2246cad97e2750dd01a2e4aba461881add7",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/76b6587fd061b05a01d43928fe9c33a138aa23b1"
+        },
+        "date": 1794764418809,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
