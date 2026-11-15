@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794762130715,
+  "lastUpdate": 1794762149415,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -23613,6 +23613,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 93954,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": true,
+          "id": "76b6587fd061b05a01d43928fe9c33a138aa23b1",
+          "message": "HOL-Light: Ignore unrelated Nix proof inputs\n\nThe reverse dependency selector treats every path under `nix/` as an\ninput to every HOL-Light proof. Changes to packages for AVR, CBMC,\nlegacy compiler shells, OpenOCD, SLOTHY, Valgrind, or Zephyr\ntherefore schedule every HOL-Light proof and every selected HOLTrace\ncheck.\n\nList those Nix subtrees before the broad `nix/` rule and select no\nproofs for them. Mixed change sets still union the selections from all\nother paths. Flake files and shared or HOL-related Nix inputs remain\ndependencies of every proof.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-15T13:42:38Z",
+          "tree_id": "d486e2246cad97e2750dd01a2e4aba461881add7",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/76b6587fd061b05a01d43928fe9c33a138aa23b1"
+        },
+        "date": 1794762149107,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 28542,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 34184,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 43325,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 47224,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 53309,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 65482,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 70536,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 78301,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 93935,
             "unit": "cycles"
           }
         ]
