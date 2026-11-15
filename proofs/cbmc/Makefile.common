@@ -394,7 +394,7 @@ COVERFLAGS ?= --no-standard-checks --malloc-may-fail --malloc-fail-null
 # SMT solvers can return non-constant model values for these queries, after
 # which CBMC writes an all-failed coverage file but exits successfully. Use
 # CBMC's default SAT backend rather than the safety-check solver profile.
-COVERAGE_CBMCFLAGS = $(filter-out $(CBMC_PROFILE_FLAGS),$(CBMCFLAGS))
+COVERAGE_CBMCFLAGS ?= $(filter-out $(CBMC_PROFILE_FLAGS),$(CBMCFLAGS))
 COVERAGE_BACKEND_OPTION ?=
 
 # CBMC flags used for property checking
