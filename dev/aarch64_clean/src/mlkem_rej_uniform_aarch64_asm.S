@@ -68,6 +68,8 @@
 
     /* Temporary output on the stack */
     xtmp                        .req x7
+    xtmp0                       .req x7
+    xtmp1                       .req x11
     output_tmp                  .req x7
     output_tmp_base             .req x8
 
@@ -106,8 +108,12 @@
     /* Vector registers */
 
     buf0                        .req v0
+    buf0q                       .req q0
     buf1                        .req v1
+    buf1q                       .req q1
+    buf1d                       .req d1
     buf2                        .req v2
+    buf2q                       .req q2
 
     tmp0                        .req v4
     tmp1                        .req v5
@@ -128,10 +134,15 @@
     val3                        .req v19
     val3q                       .req q19
 
-    t0                          .req s20
-    t1                          .req s21
-    t2                          .req s22
-    t3                          .req s23
+    t0                          .req s0
+    t1                          .req s1
+    t0d                         .req d0
+
+    unpack0                     .req v20
+    unpack0d                    .req d20
+    unpack1                     .req v21
+    unpack2                     .req v22
+    unpack3                     .req v23
 
     table0                      .req v24
     table0q                     .req q24
@@ -142,6 +153,8 @@
     table3                      .req v27
     table3q                     .req q27
 
+    packed_bits_even            .req v28
+    packed_bits_odd             .req v29
     mlkem_q                     .req v30
     bits                        .req v31
 
@@ -164,8 +177,40 @@ MLK_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
     movk xtmp, 0x80, lsl 48
     mov bits.d[1], xtmp
 
+    // Expand [1, 4, 16, 64] and [2, 8, 32, 128] into 32-bit lanes whose
+    // four bytes hold the same value.
+    movi tmp0.16b, #1
+    shl packed_bits_even.4s, bits.4s, #16
+    ushr packed_bits_even.4s, packed_bits_even.4s, #16
+    ushr packed_bits_odd.4s, bits.4s, #16
+    mul packed_bits_even.4s, packed_bits_even.4s, tmp0.4s
+    mul packed_bits_odd.4s, packed_bits_odd.4s, tmp0.4s
+
     movz tmp, #MLKEM_Q
     dup  mlkem_q.8h, tmp
+
+    // Each 3-byte group b0,b1,b2 encodes two samples:
+    // x0 = b0 | ((b1 & 0x0f) << 8), x1 = (b1 >> 4) | (b2 << 4).
+    // TBL indices for the first sample, x0, from each group.
+    // [0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18, 19, 21, 22].
+    movz xtmp0, #0x0100
+    movk xtmp0, #0x0403, lsl #16
+    movk xtmp0, #0x0706, lsl #32
+    movk xtmp0, #0x0a09, lsl #48
+    movz xtmp1, #0x0d0c
+    movk xtmp1, #0x100f, lsl #16
+    movk xtmp1, #0x1312, lsl #32
+    movk xtmp1, #0x1615, lsl #48
+    fmov unpack0d, xtmp0
+    mov unpack0.d[1], xtmp1
+
+    // Increment the indices for the second sample, x1, or for the second
+    // 24 bytes.
+    movi tmp0.16b, #1
+    movi tmp1.16b, #8
+    add unpack1.16b, unpack0.16b, tmp0.16b
+    add unpack2.16b, unpack0.16b, tmp1.16b
+    add unpack3.16b, unpack2.16b, tmp0.16b
 
     mov output_tmp_base, sp
     mov output_tmp, output_tmp_base
@@ -197,21 +242,19 @@ mlk_rej_uniform_loop48:
         cmp     count, len
         b.hs    mlk_rej_uniform_memory_copy
 
-        // First, we unpack the byte stream into a stream of signed
-        // coefficients, interpreting each consecutive 3 bytes as two
-        // signed 12-bit coefficients, presented as 16-bit integers.
-        //
-        // We handle 16 such triples a time, and use ld3 for the required
-        // de-interleaving of the byte stream.
         sub     buflen, buflen, #48
-        ld3     {buf0.16b, buf1.16b, buf2.16b}, [buf], #48
 
-        // Unpack 16 triples of bytes into 16 pairs of 16-bit integers,
-        // represented as 4 vectors val0-val3.
-        zip1    tmp0.16b, buf0.16b, buf1.16b
-        zip2    tmp1.16b, buf0.16b, buf1.16b
-        zip1    tmp2.16b, buf1.16b, buf2.16b
-        zip2    tmp3.16b, buf1.16b, buf2.16b
+        // Load sixteen packed pairs of 12-bit samples. TBL de-interleaves
+        // the first and second samples from each 3-byte group into 16-bit
+        // lanes.
+        ldp     buf0q, buf1q, [buf]
+        ldr     buf2q, [buf, #32]
+        add     buf, buf, #48
+
+        tbl     tmp0.16b, {buf0.16b, buf1.16b}, unpack0.16b
+        tbl     tmp1.16b, {buf1.16b, buf2.16b}, unpack2.16b
+        tbl     tmp2.16b, {buf0.16b, buf1.16b}, unpack1.16b
+        tbl     tmp3.16b, {buf1.16b, buf2.16b}, unpack3.16b
 
         bic     tmp0.8h, #0xf0, lsl 8
         bic     tmp1.8h, #0xf0, lsl 8
@@ -223,16 +266,9 @@ mlk_rej_uniform_loop48:
         zip1    val2.8h, tmp1.8h, tmp3.8h
         zip2    val3.8h, tmp1.8h, tmp3.8h
 
-        // At this point, val0-val3 are the signed integers to do rejection
-        // sampling on. For each of them, do the following:
-        // - Check which coefficients are within range, and represent the set
-        //   of lane-indices of those coefficients as an 8-bit bitmap.
-        // - Move the respective lanes to the front of the vector. This is the
-        //   most complex part, and is done by interpreting the 8-bit bitmap as
-        //   an index into a lookup table giving the lane-table to be use for
-        //   the `tbl` instruction.
-        // - Write the vector to the output buffer, but merely increase the output
-        //   buffer pointer by the number of valid coefficients.
+        // Build an 8-bit validity bitmap for each vector, then use it to look
+        // up a TBL permutation that moves valid lanes to the front of the
+        // vector. Store each vector and advance the output by its valid count.
 
         // Set valid lanes to -1 (0b1...1)
         cmhi    sign0.8h, mlkem_q.8h, val0.8h
@@ -240,48 +276,54 @@ mlk_rej_uniform_loop48:
         cmhi    sign2.8h, mlkem_q.8h, val2.8h
         cmhi    sign3.8h, mlkem_q.8h, val3.8h
 
-        // If lane i is valid and has value -1, retain only i-th bit
-        and     sign0.16b, sign0.16b, bits.16b
-        and     sign1.16b, sign1.16b, bits.16b
-        and     sign2.16b, sign2.16b, bits.16b
-        and     sign3.16b, sign3.16b, bits.16b
+        // Let mV[i] be 0xff if lane i of valV is valid, and 0 otherwise.
+        // Each 16-bit CMHI result contains two copies of mV[i]. The byte
+        // transposes keep one copy and pair val0/val1 and val2/val3. The
+        // halfword transposes then put one mask from each vector in a
+        // 32-bit word:
+        //
+        // sign0.s[k] = {m0[2k],   m1[2k],   m2[2k],   m3[2k]}
+        // sign2.s[k] = {m0[2k+1], m1[2k+1], m2[2k+1], m3[2k+1]}
+        //
+        // for k = 0,...,3.
+        trn1    sign0.16b, sign0.16b, sign1.16b
+        trn1    sign1.16b, sign2.16b, sign3.16b
+        trn2    sign2.8h, sign0.8h, sign1.8h
+        trn1    sign0.8h, sign0.8h, sign1.8h
 
-        // Get 8-bit bitmap of valid lane indices by adding lanes
-        uaddlv  t0, sign0.8h
-        uaddlv  t1, sign1.8h
-        uaddlv  t2, sign2.8h
-        uaddlv  t3, sign3.8h
+        // In word k, map lanes 2k and 2k+1 to bits 2k and 2k+1 of each
+        // vector's byte, then combine the pair. Each byte is at most 255,
+        // so carries cannot cross byte boundaries.
+        and     sign0.16b, sign0.16b, packed_bits_even.16b
+        and     sign2.16b, sign2.16b, packed_bits_odd.16b
+        add     sign0.4s, sign0.4s, sign2.4s
 
-        fmov    rec_idx_0_w, t0
-        fmov    rec_idx_1_w, t1
-        fmov    rec_idx_2_w, t2
-        fmov    rec_idx_3_w, t3
+        // Sum the four words. Byte V of t0d is the validity bitmap for valV.
+        uaddlv  t0d, sign0.4s
+
+        fmov    rec_idx_3, t0d
+        ubfx    rec_idx_0, rec_idx_3, #0, #8
+        ubfx    rec_idx_1, rec_idx_3, #8, #8
+        ubfx    rec_idx_2, rec_idx_3, #16, #8
+        ubfx    rec_idx_3, rec_idx_3, #24, #8
 
         ldr     table0q, [table_idx, rec_idx_0, lsl #4]
         ldr     table1q, [table_idx, rec_idx_1, lsl #4]
         ldr     table2q, [table_idx, rec_idx_2, lsl #4]
         ldr     table3q, [table_idx, rec_idx_3, lsl #4]
 
-        // Compute number of valid coefficients. Recall that at this
-        // point, lane i has value 2^i (hence popcount 1) if its coefficient
-        // is valid, and 0 otherwise.
+        // Count the valid lanes in each pair and sum the four words. Byte V
+        // of t0d is the valid count for valV, between zero and eight.
         cnt     sign0.16b, sign0.16b
-        cnt     sign1.16b, sign1.16b
-        cnt     sign2.16b, sign2.16b
-        cnt     sign3.16b, sign3.16b
+        uaddlv  t0d, sign0.4s
 
-        // Extract number of valid coefficients
-        uaddlv  t0, sign0.8h
-        uaddlv  t1, sign1.8h
-        uaddlv  t2, sign2.8h
-        uaddlv  t3, sign3.8h
+        fmov    ctr3, t0d
+        ubfx    ctr0, ctr3, #0, #4
+        ubfx    ctr1, ctr3, #8, #4
+        ubfx    ctr2, ctr3, #16, #4
+        ubfx    ctr3, ctr3, #24, #4
 
-        fmov    ctr0_w, t0
-        fmov    ctr1_w, t1
-        fmov    ctr2_w, t2
-        fmov    ctr3_w, t3
-
-        // Move valid coefficients to the front
+        // Move valid coefficients to the front.
         tbl     val0.16b, {val0.16b}, table0.16b
         tbl     val1.16b, {val1.16b}, table1.16b
         tbl     val2.16b, {val2.16b}, table2.16b
@@ -315,10 +357,13 @@ mlk_rej_uniform_loop48_end:
     cmp buflen, #24
     b.lo mlk_rej_uniform_memory_copy
 
-        ld3     {buf0.8b, buf1.8b, buf2.8b}, [buf], #24
+        // Load eight packed pairs of 12-bit samples and de-interleave them.
+        ldr     buf0q, [buf]
+        ldr     buf1d, [buf, #16]
+        add     buf, buf, #24
 
-        zip1    tmp0.16b, buf0.16b, buf1.16b
-        zip1    tmp1.16b, buf1.16b, buf2.16b
+        tbl     tmp0.16b, {buf0.16b, buf1.16b}, unpack0.16b
+        tbl     tmp1.16b, {buf0.16b, buf1.16b}, unpack1.16b
 
         bic     tmp0.8h, #0xf0, lsl 8
         ushr    tmp1.8h, tmp1.8h, #4
@@ -403,6 +448,8 @@ mlk_rej_uniform_return:
     .unreq buf_consumed
     .unreq tmp
     .unreq xtmp
+    .unreq xtmp0
+    .unreq xtmp1
     .unreq final_copy_count
     .unreq initial_zero_count
     .unreq rec_idx_0
@@ -416,8 +463,12 @@ mlk_rej_uniform_return:
     .unreq ctr01
     .unreq ctr23
     .unreq buf0
+    .unreq buf0q
     .unreq buf1
+    .unreq buf1q
+    .unreq buf1d
     .unreq buf2
+    .unreq buf2q
     .unreq tmp0
     .unreq tmp1
     .unreq tmp2
@@ -436,8 +487,12 @@ mlk_rej_uniform_return:
     .unreq val3q
     .unreq t0
     .unreq t1
-    .unreq t2
-    .unreq t3
+    .unreq t0d
+    .unreq unpack0
+    .unreq unpack0d
+    .unreq unpack1
+    .unreq unpack2
+    .unreq unpack3
     .unreq table0
     .unreq table0q
     .unreq table1
@@ -446,6 +501,8 @@ mlk_rej_uniform_return:
     .unreq table2q
     .unreq table3
     .unreq table3q
+    .unreq packed_bits_even
+    .unreq packed_bits_odd
     .unreq mlkem_q
     .unreq bits
     .unreq rec_idx_0_w
