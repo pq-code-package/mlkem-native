@@ -1,0 +1,283 @@
+#!/usr/bin/env python3
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+"""Merge a partial CBMC result JSON into a published result JSON.
+
+The first argument is the complete JSON file stored on gh-pages. The second
+argument is a result JSON downloaded from the merge-queue run. The second file
+may contain only some proofs.
+
+For every proof named in the second file, this script replaces the runtime and
+failure records in the first file. Records for all other current proofs are
+retained. Records for proofs whose directories no longer exist in the source
+tree are removed. The first file is updated in place; if it does not exist,
+the merge starts from an empty baseline.
+
+New records receive the checked-out source commit in `source_commit`. Records
+retained from the first file keep their existing source commit. Records
+without a source commit predate provenance and are older than any new result.
+
+A delayed publisher finds records from a later commit. It leaves those proofs
+unchanged. Its older source tree lacks proofs added by later commits, so it
+also keeps records for proofs that it does not know, and it can re-add a
+proof that a later commit deleted. The next in-order publisher removes such
+records.
+
+If a proof's records come from a commit that is neither an ancestor nor a
+descendant of the checked-out commit, for example after `main` was rewritten,
+the new result replaces them and the script prints a warning.
+"""
+
+import argparse
+import json
+import subprocess
+from pathlib import Path
+
+
+def get_args():
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "published",
+        help="complete gh-pages result JSON to update in place",
+    )
+    parser.add_argument(
+        "current",
+        help="partial result JSON produced by the merge-queue run",
+    )
+    return parser.parse_args()
+
+
+def load_json(path):
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def run(source_root, *args):
+    return subprocess.run(
+        args,
+        cwd=source_root,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+
+
+def proof_names(source_root, mlkem_k):
+    directories = run(source_root, "proofs/cbmc/list_proofs.sh").split()
+    names = set()
+    for directory in directories:
+        name = run(
+            source_root / "proofs" / "cbmc" / directory,
+            "make",
+            "--no-print-directory",
+            f"MLKEM_K={mlkem_k}",
+            "echo-proof-uid",
+        ).strip()
+        if not name:
+            raise ValueError(f"CBMC proof has an empty PROOF_UID: {directory}")
+        if name in names:
+            raise ValueError(f"Duplicate CBMC PROOF_UID: {name}")
+        names.add(name)
+    return names
+
+
+def record_key(record, label):
+    try:
+        return record["name"], record["dm"], record["solver"]
+    except KeyError as err:
+        raise ValueError(f"{label} record has no {err.args[0]}: {record}") from err
+
+
+def validate_records(records, label):
+    keys = set()
+    for record in records:
+        key = record_key(record, label)
+        if key in keys:
+            raise ValueError(f"{label} contains duplicate record: {key}")
+        keys.add(key)
+    return keys
+
+
+def proof_source_commit(published, name):
+    records = [
+        record
+        for field in ("runtimes", "failures")
+        for record in published.get(field, [])
+        if record["name"] == name
+    ]
+    commits = {record.get("source_commit") for record in records}
+    if commits == {None} or not commits:
+        return None
+    commit = next(iter(commits))
+    if len(commits) != 1 or not isinstance(commit, str) or not commit:
+        warning(f"Replacing CBMC records with inconsistent source commits: {name}")
+        return None
+    return commit
+
+
+def warning(message):
+    print(f"::warning::{message}", flush=True)
+
+
+def is_ancestor(source_root, older, newer):
+    """Return whether `older` is an ancestor of `newer`.
+
+    git exits with 128 if either commit is missing from the source checkout,
+    for example because it is no longer on `main`. Such a commit is not an
+    ancestor of anything.
+    """
+    result = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", older, newer],
+        cwd=source_root,
+        check=False,
+        capture_output=True,
+    )
+    if result.returncode not in (0, 1, 128):
+        raise subprocess.CalledProcessError(result.returncode, result.args)
+    return result.returncode == 0
+
+
+def has_later_records(published, source_sha, source_root):
+    commits = {
+        record.get("source_commit")
+        for field in ("runtimes", "failures")
+        for record in published.get(field, [])
+    }
+    return any(
+        isinstance(commit, str)
+        and commit != source_sha
+        and is_ancestor(source_root, source_sha, commit)
+        for commit in commits
+    )
+
+
+def proofs_to_update(published, selected, source_sha, source_root):
+    update = set()
+    for name in selected:
+        previous = proof_source_commit(published, name)
+        if (
+            previous is None
+            or previous == source_sha
+            or is_ancestor(source_root, previous, source_sha)
+        ):
+            update.add(name)
+        elif not is_ancestor(source_root, source_sha, previous):
+            warning(
+                f"Replacing CBMC records for {name} from {previous}, which is "
+                f"unrelated to {source_sha}"
+            )
+            update.add(name)
+    return update
+
+
+def add_source_commit(records, source_sha):
+    return [record | {"source_commit": source_sha} for record in records]
+
+
+def merged_summary(runtimes, failures):
+    total = len(runtimes)
+    failed = sum(1 for failure in failures if failure["status"] != "Timeout")
+    timeout = sum(1 for failure in failures if failure["status"] == "Timeout")
+    omitted = sum(1 for runtime in runtimes if runtime.get("status") == "omitted")
+    inconclusive = sum(
+        1 for runtime in runtimes if runtime.get("status") == "inconclusive"
+    )
+    return {
+        "total": total,
+        "success": total - failed - timeout - omitted - inconclusive,
+        "failed": failed,
+        "timeout": timeout,
+        "omitted": omitted,
+        "inconclusive": inconclusive,
+    }
+
+
+def merge(published, current, known, source_sha, source_root):
+    current_runtimes = current.get("runtimes", [])
+    current_failures = current.get("failures", [])
+    runtime_keys = validate_records(current_runtimes, "Current CBMC runtimes")
+    failure_keys = validate_records(current_failures, "Current CBMC failures")
+    if not runtime_keys:
+        raise ValueError("Current CBMC result has no runtime records")
+    if not failure_keys <= runtime_keys:
+        raise ValueError("Current CBMC failures have no matching runtime record")
+
+    selected = {name for name, _, _ in runtime_keys}
+    unknown = selected - known
+    if unknown:
+        raise ValueError(f"Current CBMC result has unknown proofs: {sorted(unknown)}")
+
+    published_runtimes = published.get("runtimes", [])
+    published_failures = published.get("failures", [])
+    validate_records(published_runtimes, "Published CBMC runtimes")
+    validate_records(published_failures, "Published CBMC failures")
+
+    update = proofs_to_update(published, selected, source_sha, source_root)
+    delayed = has_later_records(published, source_sha, source_root)
+
+    def retain(record):
+        name = record["name"]
+        return name not in update and (delayed or name in known)
+
+    runtimes = [record for record in published_runtimes if retain(record)]
+    runtimes.extend(
+        add_source_commit(
+            [record for record in current_runtimes if record["name"] in update],
+            source_sha,
+        )
+    )
+    failures = [record for record in published_failures if retain(record)]
+    failures.extend(
+        add_source_commit(
+            [record for record in current_failures if record["name"] in update],
+            source_sha,
+        )
+    )
+
+    runtimes.sort(key=lambda record: record_key(record, "CBMC runtime"))
+    failures.sort(key=lambda record: record_key(record, "CBMC failure"))
+    validate_records(runtimes, "Merged CBMC runtimes")
+    validate_records(failures, "Merged CBMC failures")
+
+    result = dict(published)
+    result.update(current)
+    result["summary"] = merged_summary(runtimes, failures)
+    result["runtimes"] = runtimes
+    result["failures"] = failures
+    return result
+
+
+def main():
+    args = get_args()
+    source_root = Path(__file__).resolve().parents[3]
+    source_sha = run(source_root, "git", "rev-parse", "HEAD").strip()
+    current = load_json(args.current)
+    mlkem_k = str(current.get("mlkem_k", ""))
+    if mlkem_k not in ("2", "3", "4"):
+        raise ValueError(f"Current CBMC result has invalid MLKEM_K: {mlkem_k}")
+    if Path(args.published).exists():
+        published = load_json(args.published)
+    else:
+        warning(f"Creating missing CBMC baseline {args.published}")
+        published = {"mlkem_k": mlkem_k}
+    if str(published.get("mlkem_k", "")) != mlkem_k:
+        raise ValueError("Published and current CBMC parameter sets differ")
+
+    result = merge(
+        published,
+        current,
+        proof_names(source_root, mlkem_k),
+        source_sha,
+        source_root,
+    )
+    Path(args.published).parent.mkdir(parents=True, exist_ok=True)
+    with open(args.published, "w", encoding="utf-8") as f:
+        json.dump(result, f, indent=2)
+
+
+if __name__ == "__main__":
+    main()
