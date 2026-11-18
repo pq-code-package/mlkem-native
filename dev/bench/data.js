@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794983419106,
+  "lastUpdate": 1794983908738,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -56067,6 +56067,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 307561,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "39ef73d06bd0e9749e0009c92f848882cdb1fea8",
+          "message": "tests: Check binaries against HOL Light proofs by default\n\nscripts/tests can compare the kernels in each library and binary it\nbuilds with the bytes covered by the HOL Light proofs. This check was\nopt-in because clang and zig encoded some x86_64 instructions with\nswapped operands. The assembly now orders those operands so that GNU\nas and clang agree on the encoding.\n\nDefault check_binary to True in argument parsing and in\ncheck_binary_supported(). Keep the Linux, readelf and PyYAML\nrequirements and --no-check-binary as the opt-out. Update the build\nand proof documentation to describe the default.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-18T03:38:54Z",
+          "tree_id": "770e152b90ee3f130ddc8daf4daa522e8e9562ca",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/39ef73d06bd0e9749e0009c92f848882cdb1fea8"
+        },
+        "date": 1794983906475,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 93367,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 108009,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 135316,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 159026,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 171738,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 209838,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 238393,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 259763,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 307581,
             "unit": "cycles"
           }
         ]
