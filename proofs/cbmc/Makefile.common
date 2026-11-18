@@ -1310,7 +1310,7 @@ veryclean: clean
 
 .PHONY: echo-proof-uid
 echo-proof-uid:
-	@echo $(PROOF_UID)
+	@printf '%s\n' "$(PROOF_UID)"
 
 .PHONY: echo-supported-configs
 echo-supported-configs:

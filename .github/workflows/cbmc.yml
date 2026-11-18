@@ -27,19 +27,24 @@ jobs:
           fetch-depth: 0
       - name: Get changed files
         id: changed-files
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
         shell: bash
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          # A merge group also contains the pull requests ahead of it in the
+          # queue, and GitHub may land them all in one push. cbmc_publish then
+          # reads only this group's run, so compare with the target branch
+          # rather than with the group's parent commit (merge_group.base_sha).
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.merge_group.base_ref }}
+          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
         run: |
-          /usr/bin/python3 - \
-            "$BASE_SHA" "$HEAD_SHA" "$GITHUB_OUTPUT" <<'PY'
+          /usr/bin/python3 - "$BASE" "$HEAD_SHA" "$GITHUB_OUTPUT" <<'PY'
           import json
           import subprocess
           import sys
 
           base, head, output = sys.argv[1:]
+          if base.startswith("refs/heads/"):
+              base = "origin/" + base.removeprefix("refs/heads/")
           paths = subprocess.run(
               ["git", "diff", "--name-only", "-z", "--no-renames", f"{base}...{head}"],
               check=True,
@@ -61,7 +66,7 @@ jobs:
         shell: bash
         env:
           CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
-          ALL_PROOFS: ${{ github.event_name != 'pull_request' }}
+          ALL_PROOFS: ${{ github.event_name != 'pull_request' && github.event_name != 'merge_group' }}
         run: |
           all=()
           if [[ "$ALL_PROOFS" == "true" ]]; then

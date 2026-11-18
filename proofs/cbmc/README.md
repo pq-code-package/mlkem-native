@@ -101,10 +101,10 @@ selectors.
 
 ## CI dependency selection
 
-Pull-request CI runs only the proofs that the changed files can affect.
-`scripts/autogen` writes [deps.yml](deps.yml) with the C sources,
-transitive headers and Makefiles that each proof reads, for every
-security level and supported configuration. Its keys have the form
+Pull-request and merge-queue CI run only the proofs that the changed
+files can affect. `scripts/autogen` writes [deps.yml](deps.yml) with the
+C sources, transitive headers and Makefiles that each proof reads, for
+every security level and supported configuration. Its keys have the form
 `PROOF/SECURITY_LEVEL`, for example `barrett_reduce/512`.
 [scripts/deps](scripts/deps) reverses that map for CI.
 
@@ -112,16 +112,39 @@ Changes to CBMC infrastructure or an unclassified file under
 `proofs/cbmc` select every proof. So does a deleted non-documentation
 path, because it is absent from the head dependency map, and a changed
 symlink or other non-regular file, because `deps.yml` lists resolved
-paths only. A proof that is missing from `deps.yml` is always selected. A change to `deps.yml` itself
-selects nothing: lint checks that it is current, so any change to a
-proof's inputs also changes a file that its entry lists.
+paths only. A proof that is missing from `deps.yml` is always selected.
+A change to `deps.yml` itself selects nothing: lint checks that it is
+current, so any change to a proof's inputs also changes a file that its
+entry lists.
 
 If a later push no longer affects any proof for a security level, CI
 replaces that level's earlier report comment with a note.
 
-The merge queue, manual workflow dispatch, and pushes to `release/**`
-branches still run every proof. This keeps the published runtime results
-complete.
+The merge queue compares each merge group with its target branch, so a
+group's run covers every pull request that it would land. After the
+group lands on `main`, the publishing workflow merges the run's partial
+results into the complete gh-pages baseline. It replaces the records of
+the rerun proofs, keeps the others, removes proofs whose directories no
+longer exist, and recomputes the summary. Each record stores the commit
+at which it was measured in `source_commit`.
+
+A delayed publisher, for example a re-run of a failed job, leaves proofs
+with records from a later commit unchanged. It keeps records for proofs
+that its older source tree does not contain, and it can re-add a proof
+that a later commit deleted; the next in-order publisher removes those.
+Records without a `source_commit` predate provenance and count as older
+than any new result. Records from a commit that is neither an ancestor
+nor a descendant of the landed commit, for example after `main` was
+rewritten, are replaced with a warning.
+
+Publishing fails if the landed commit has no merge-queue run, or if it
+loses the gh-pages push race five times. Later publishers do not repair
+this: the affected proofs keep their old records until a later change
+reruns them. Re-run the failed publish job while the merge-queue
+artifacts still exist (7 days).
+
+Manual workflow dispatch and pushes to `release/**` branches still run
+every proof.
 
 ## What is covered?
 
