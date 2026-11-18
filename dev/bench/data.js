@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795027645423,
+  "lastUpdate": 1795027903582,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -59657,6 +59657,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 208052,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb",
+          "message": "CI: Merge partial CBMC results into complete baselines\n\nMerge queues previously ran every proof and uploaded three complete\nresult artifacts:\n\n- `cbmc-results-mlkem-k2` contained `dev/cbmc/mlkem-512.json`.\n- `cbmc-results-mlkem-k3` contained `dev/cbmc/mlkem-768.json`.\n- `cbmc-results-mlkem-k4` contained `dev/cbmc/mlkem-1024.json`.\n\nPublication copied these files directly onto gh-pages, where PR\nreports read them as the baseline.\n\nUse the changed-file selector from the preceding commit for merge\ngroups. Compare each group with its target branch, not with\n`merge_group.base_sha`. That SHA is the group's parent commit, which\nfor a queued pull request is the group ahead of it. GitHub can land\nseveral groups in one push, and the publisher then reads only the last\ngroup's run, so that run must cover every pull request it lands.\n\nKeep the artifact names and file layout. A parameter set without\nselected proofs now has no artifact, and the JSON in the others may\ncontain results for fewer proofs.\n\nMove publication from inline workflow shell into\n`.github/actions/cbmc/publish`, and check out the landed commit with\nfull history beside gh-pages. Add `merge PUBLISHED CURRENT`, which\nupdates the first JSON in place. Proof names in `CURRENT` identify the\nruntime and failure records to replace. Retain other current proofs,\nremove records for proof directories no longer present, and recompute\nthe summary. Add the landed commit to each new record as\n`source_commit`; retain it on old records.\n\nPublication must not get stuck, because the baseline only feeds the\nruntime comparisons in PR reports:\n\n- A delayed publisher, such as a re-run of a failed job, finds records\n  from a later commit. It leaves those proofs unchanged. It also keeps\n  records for proofs that its older tree lacks, so it cannot drop\n  proofs that later commits added. It may re-add a proof that a later\n  commit deleted; the next in-order publisher removes it again.\n- Records without `source_commit`, including the whole current\n  baseline, count as older than any new result. The first partial\n  result therefore merges like any other.\n- Records from a commit that is neither an ancestor nor a descendant\n  of the landed commit, for example after `main` was rewritten, are\n  replaced with a warning.\n- A missing baseline file is recreated from the current result.\n\nFetch the latest gh-pages snapshot before merging. If another publisher\nwins the push race, discard the local merge, fetch the new snapshot,\nrecompute, and try again, up to five attempts. Do not rebase a JSON\ndiff calculated from an older snapshot.\n\nQueue publish runs with `concurrency.queue: max`. The default keeps one\npending run and cancels older pending ones, which would lose that\ncommit's partial results. actionlint 1.7.12 does not know the `queue`\nkey yet, so ignore that error for `cbmc_publish.yml`.\n\nA publication can still fail for good: when the landed commit has no\nmerge-queue run, which previously only warned, or when it loses all\nfive push attempts. Later publishers do not repair this, because they\nrerun only their own affected proofs. Re-run the failed job while the\nmerge-queue artifacts still exist (7 days).\n\n`echo-proof-uid` passed `PROOF_UID` to the shell unquoted. For the two\nUIDs with parentheses, such as `mlk_keccakf1600_extract_bytes (big\nendian)`, the shell reported a syntax error and make failed, so `merge`\ncould not list the current proofs. Print the UID with `printf` and\ndouble quotes instead.\n\nUpdate the CBMC README for merge-queue selection and publishing, and\nformat and lint `merge` with ruff.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-18T16:32:06Z",
+          "tree_id": "e21a5445272fdb403c2ae394787840da994cb3d5",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+        },
+        "date": 1795027901690,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 59713,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 70676,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 89489,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 100907,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 112640,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 140060,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 154743,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 173761,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 208642,
             "unit": "cycles"
           }
         ]
