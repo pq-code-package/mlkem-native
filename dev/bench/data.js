@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794981278227,
+  "lastUpdate": 1794983153034,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -5062,6 +5062,75 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/pq-code-package/mlkem-native/commit/76b6587fd061b05a01d43928fe9c33a138aa23b1"
         },
         "date": 1794764418809,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 398857,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 513294,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 714128,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 669876,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 782851,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 1054185,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 899202,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 1051577,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 1399275,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "39ef73d06bd0e9749e0009c92f848882cdb1fea8",
+          "message": "tests: Check binaries against HOL Light proofs by default\n\nscripts/tests can compare the kernels in each library and binary it\nbuilds with the bytes covered by the HOL Light proofs. This check was\nopt-in because clang and zig encoded some x86_64 instructions with\nswapped operands. The assembly now orders those operands so that GNU\nas and clang agree on the encoding.\n\nDefault check_binary to True in argument parsing and in\ncheck_binary_supported(). Keep the Linux, readelf and PyYAML\nrequirements and --no-check-binary as the opt-out. Update the build\nand proof documentation to describe the default.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-18T03:38:54Z",
+          "tree_id": "770e152b90ee3f130ddc8daf4daa522e8e9562ca",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/39ef73d06bd0e9749e0009c92f848882cdb1fea8"
+        },
+        "date": 1794982315527,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
