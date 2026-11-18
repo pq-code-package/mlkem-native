@@ -35,7 +35,9 @@ TOOLCHAINS = {
 }
 
 LAYOUTS = ("multilevel", "multilevel-mono")
-OPTIMIZATIONS = (0, 2, 3)
+OPTIMIZATIONS = ("0", "2", "3", "s")
+ARTIFACTS_PER_TOOLCHAIN = len(LAYOUTS) * len(OPTIMIZATIONS)
+ARTIFACT_COUNT = len(TOOLCHAINS) * ARTIFACTS_PER_TOOLCHAIN
 PUBLIC_FUNCTIONS = (
     "check_pk",
     "check_sk",
@@ -100,8 +102,7 @@ def run(
             )
         if result.returncode != 0:
             raise BuildError(
-                f"{command[0]} failed with status {result.returncode}; "
-                f"see {log_file}"
+                f"{command[0]} failed with status {result.returncode}; see {log_file}"
             )
         return ""
 
@@ -198,9 +199,7 @@ def validate_elf(shared_object, debug_package, *, cwd):
             continue
         flags = "".join(fields[6:-1])
         if "W" in flags and "E" in flags:
-            raise BuildError(
-                f"{shared_object} has a writable-executable LOAD segment"
-            )
+            raise BuildError(f"{shared_object} has a writable-executable LOAD segment")
 
     sections = run(["readelf", "-SW", str(shared_object)], cwd=cwd)
     if ".debug_info" not in sections:
@@ -328,9 +327,7 @@ def build_layout(
         build_dir = os.path.relpath(objects_dir, example)
         environment = os.environ.copy()
         environment["CC"] = cc_name
-        environment["CFLAGS"] = " ".join(
-            (f"-O{optimization}", *split_debug_flags)
-        )
+        environment["CFLAGS"] = " ".join((f"-O{optimization}", *split_debug_flags))
         run(
             [
                 "make",
@@ -414,15 +411,10 @@ def build_layout(
     exports = global_dynamic_symbols(shared_object, cwd=root, defined=True)
     if exports != list(PUBLIC_SYMBOLS):
         raise BuildError(
-            f"{shared_object} exports {exports}, expected "
-            f"{list(PUBLIC_SYMBOLS)}"
+            f"{shared_object} exports {exports}, expected {list(PUBLIC_SYMBOLS)}"
         )
-    undefined_symbols = global_dynamic_symbols(
-        shared_object, cwd=root, defined=False
-    )
-    relocations = dynamic_relocations(
-        shared_object, undefined_symbols, cwd=root
-    )
+    undefined_symbols = global_dynamic_symbols(shared_object, cwd=root, defined=False)
+    relocations = dynamic_relocations(shared_object, undefined_symbols, cwd=root)
 
     compile_test_program(
         root=root,
@@ -487,7 +479,10 @@ def worker(root, stage, compiler_id, cc_name):
         json.dumps(metadata, indent=2) + "\n",
         encoding="utf-8",
     )
-    print(f"{compiler_id}: all six artifacts passed", flush=True)
+    print(
+        f"{compiler_id}: all {ARTIFACTS_PER_TOOLCHAIN} artifacts passed",
+        flush=True,
+    )
 
 
 def source_commit(root):
@@ -556,8 +551,8 @@ def build_manifest(root, stage):
             ],
             "primary_artifact": "libmlkem.so",
             "debug_artifact": "libmlkem.so.dwp",
-            "artifact_count": 48,
-            "debug_artifact_count": 48,
+            "artifact_count": ARTIFACT_COUNT,
+            "debug_artifact_count": ARTIFACT_COUNT,
         },
         "link": {
             "intermediate_archive_command": (
@@ -611,9 +606,7 @@ def build_manifest(root, stage):
                 "automatic_host_isa_flags": False,
             },
             "multilevel-mono": {
-                "source": (
-                    "examples/monolithic_build_multilevel/mlkem_native_all.c"
-                ),
+                "source": ("examples/monolithic_build_multilevel/mlkem_native_all.c"),
                 "description": (
                     "Compile the single multilevel translation unit, archive "
                     "it, and final-link the complete archive into a shared "
@@ -665,9 +658,10 @@ def validate_tree(tree, manifest):
         *tree.rglob("*.o"),
         *tree.rglob("*.dwo"),
     ]
-    if len(primary_files) != 48 or len(debug_files) != 48:
+    if len(primary_files) != ARTIFACT_COUNT or len(debug_files) != ARTIFACT_COUNT:
         raise BuildError(
-            f"expected 48 shared objects and 48 DWP files, found "
+            f"expected {ARTIFACT_COUNT} shared objects and "
+            f"{ARTIFACT_COUNT} DWP files, found "
             f"{len(primary_files)} and {len(debug_files)}"
         )
     if forbidden:
@@ -701,10 +695,7 @@ def write_checksums(stage):
             stage / "libmlkem.map",
         ]
     )
-    lines = [
-        f"{sha256(path)}  {path.relative_to(stage)}"
-        for path in files
-    ]
+    lines = [f"{sha256(path)}  {path.relative_to(stage)}" for path in files]
     (stage / "SHA256SUMS").write_text(
         "\n".join(lines) + "\n",
         encoding="utf-8",
@@ -789,7 +780,10 @@ def coordinator(root):
         )
         raise
 
-    print("Rebuilt binaries/ from scratch: 48 shared objects and 48 DWP files.")
+    print(
+        f"Rebuilt binaries/ from scratch: {ARTIFACT_COUNT} shared objects "
+        f"and {ARTIFACT_COUNT} DWP files."
+    )
 
 
 def parse_args():

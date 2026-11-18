@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT */
+
 {
   global:
     mlkem512_check_pk;
