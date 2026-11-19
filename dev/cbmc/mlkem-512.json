@@ -1,11 +1,11 @@
 {
   "mlkem_k": "2",
   "summary": {
-    "total": 2674,
-    "success": 386,
+    "total": 2800,
+    "success": 404,
     "failed": 0,
     "timeout": 0,
-    "omitted": 2288,
+    "omitted": 2396,
     "inconclusive": 0
   },
   "failures": [],
@@ -17,7 +17,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "intt_native_aarch64",
@@ -26,7 +26,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "intt_native_aarch64",
@@ -35,7 +35,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "intt_native_aarch64",
@@ -44,7 +44,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "intt_native_aarch64",
@@ -53,7 +53,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "intt_native_aarch64",
@@ -62,7 +62,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "intt_native_aarch64",
@@ -71,7 +71,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "intt_native_aarch64",
@@ -80,8 +80,8 @@
       "default": false,
       "exploratory": false,
       "unit": "seconds",
-      "value": 12,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "value": 8,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "intt_native_aarch64",
@@ -90,7 +90,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "intt_native_aarch64",
@@ -99,7 +99,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "intt_native_aarch64",
@@ -108,7 +108,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "intt_native_aarch64",
@@ -117,7 +117,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "intt_native_aarch64",
@@ -126,8 +126,8 @@
       "default": true,
       "exploratory": false,
       "unit": "seconds",
-      "value": 3,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "value": 4,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "intt_native_aarch64",
@@ -136,7 +136,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "intt_native_x86_64",
@@ -20245,7 +20245,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "ntt_native_aarch64",
@@ -20254,7 +20254,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "ntt_native_aarch64",
@@ -20263,7 +20263,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "ntt_native_aarch64",
@@ -20272,7 +20272,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "ntt_native_aarch64",
@@ -20281,7 +20281,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "ntt_native_aarch64",
@@ -20290,7 +20290,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "ntt_native_aarch64",
@@ -20299,7 +20299,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "ntt_native_aarch64",
@@ -20308,8 +20308,8 @@
       "default": false,
       "exploratory": false,
       "unit": "seconds",
-      "value": 19,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "value": 16,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "ntt_native_aarch64",
@@ -20318,7 +20318,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "ntt_native_aarch64",
@@ -20327,7 +20327,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "ntt_native_aarch64",
@@ -20336,7 +20336,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "ntt_native_aarch64",
@@ -20345,7 +20345,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "ntt_native_aarch64",
@@ -20354,8 +20354,8 @@
       "default": true,
       "exploratory": false,
       "unit": "seconds",
-      "value": 3,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "value": 1,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "ntt_native_aarch64",
@@ -20364,7 +20364,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "ntt_native_x86_64",
@@ -20623,6 +20623,134 @@
       "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
     },
     {
+      "name": "poly_compress_d10_native_aarch64",
+      "dm": "ILP32",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d10_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d10_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d10_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d10_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d10_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d10_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d10_native_aarch64",
+      "dm": "LP64",
+      "solver": "bitwuzla",
+      "default": true,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 2,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d10_native_aarch64",
+      "dm": "LP64",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d10_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d10_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d10_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d10_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 2,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d10_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
       "name": "poly_compress_d10_native_x86_64",
       "dm": "ILP32",
       "solver": "bitwuzla",
@@ -20751,6 +20879,134 @@
       "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
     },
     {
+      "name": "poly_compress_d11_native_aarch64",
+      "dm": "ILP32",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d11_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d11_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d11_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d11_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d11_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d11_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d11_native_aarch64",
+      "dm": "LP64",
+      "solver": "bitwuzla",
+      "default": true,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 1,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d11_native_aarch64",
+      "dm": "LP64",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d11_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d11_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d11_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d11_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 1,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d11_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
       "name": "poly_compress_d11_native_x86_64",
       "dm": "ILP32",
       "solver": "bitwuzla",
@@ -20879,6 +21135,134 @@
       "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
     },
     {
+      "name": "poly_compress_d4_native_aarch64",
+      "dm": "ILP32",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d4_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d4_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d4_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d4_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d4_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d4_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d4_native_aarch64",
+      "dm": "LP64",
+      "solver": "bitwuzla",
+      "default": true,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 2,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d4_native_aarch64",
+      "dm": "LP64",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d4_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d4_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d4_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d4_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 1,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d4_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
       "name": "poly_compress_d4_native_x86_64",
       "dm": "ILP32",
       "solver": "bitwuzla",
@@ -21007,6 +21391,134 @@
       "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
     },
     {
+      "name": "poly_compress_d5_native_aarch64",
+      "dm": "ILP32",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d5_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d5_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d5_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d5_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d5_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d5_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d5_native_aarch64",
+      "dm": "LP64",
+      "solver": "bitwuzla",
+      "default": true,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 3,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d5_native_aarch64",
+      "dm": "LP64",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d5_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d5_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d5_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d5_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 1,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_compress_d5_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
       "name": "poly_compress_d5_native_x86_64",
       "dm": "ILP32",
       "solver": "bitwuzla",
@@ -21135,6 +21647,134 @@
       "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
     },
     {
+      "name": "poly_decompress_d10_native_aarch64",
+      "dm": "ILP32",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d10_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d10_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d10_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d10_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d10_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d10_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d10_native_aarch64",
+      "dm": "LP64",
+      "solver": "bitwuzla",
+      "default": true,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 6,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d10_native_aarch64",
+      "dm": "LP64",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d10_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d10_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d10_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d10_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 1,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d10_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
       "name": "poly_decompress_d10_native_x86_64",
       "dm": "ILP32",
       "solver": "bitwuzla",
@@ -21261,6 +21901,134 @@
       "exploratory": false,
       "status": "omitted",
       "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "poly_decompress_d11_native_aarch64",
+      "dm": "ILP32",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d11_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d11_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d11_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d11_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d11_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d11_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d11_native_aarch64",
+      "dm": "LP64",
+      "solver": "bitwuzla",
+      "default": true,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 2,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d11_native_aarch64",
+      "dm": "LP64",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d11_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d11_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d11_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d11_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 2,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d11_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_decompress_d11_native_x86_64",
@@ -21389,6 +22157,134 @@
       "exploratory": false,
       "status": "omitted",
       "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "poly_decompress_d4_native_aarch64",
+      "dm": "ILP32",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d4_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d4_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d4_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d4_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d4_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d4_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d4_native_aarch64",
+      "dm": "LP64",
+      "solver": "bitwuzla",
+      "default": true,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 5,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d4_native_aarch64",
+      "dm": "LP64",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d4_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d4_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d4_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d4_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 2,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d4_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_decompress_d4_native_x86_64",
@@ -21519,6 +22415,134 @@
       "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
     },
     {
+      "name": "poly_decompress_d5_native_aarch64",
+      "dm": "ILP32",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d5_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d5_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d5_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d5_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d5_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d5_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d5_native_aarch64",
+      "dm": "LP64",
+      "solver": "bitwuzla",
+      "default": true,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 2,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d5_native_aarch64",
+      "dm": "LP64",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d5_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d5_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d5_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d5_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 3,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_decompress_d5_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
       "name": "poly_decompress_d5_native_x86_64",
       "dm": "ILP32",
       "solver": "bitwuzla",
@@ -21645,6 +22669,134 @@
       "exploratory": false,
       "status": "omitted",
       "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "poly_frombytes_native_aarch64",
+      "dm": "ILP32",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_frombytes_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_frombytes_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_frombytes_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_frombytes_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_frombytes_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_frombytes_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_frombytes_native_aarch64",
+      "dm": "LP64",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 4,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_frombytes_native_aarch64",
+      "dm": "LP64",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_frombytes_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_frombytes_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_frombytes_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_frombytes_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3",
+      "default": true,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 2,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "poly_frombytes_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_frombytes_native_x86_64",
@@ -21909,7 +23061,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_mulcache_compute_native_aarch64",
@@ -21918,7 +23070,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_mulcache_compute_native_aarch64",
@@ -21927,7 +23079,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_mulcache_compute_native_aarch64",
@@ -21936,7 +23088,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_mulcache_compute_native_aarch64",
@@ -21945,7 +23097,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_mulcache_compute_native_aarch64",
@@ -21954,7 +23106,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_mulcache_compute_native_aarch64",
@@ -21963,7 +23115,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_mulcache_compute_native_aarch64",
@@ -21972,8 +23124,8 @@
       "default": false,
       "exploratory": false,
       "unit": "seconds",
-      "value": 2,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "value": 3,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_mulcache_compute_native_aarch64",
@@ -21982,7 +23134,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_mulcache_compute_native_aarch64",
@@ -21991,7 +23143,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_mulcache_compute_native_aarch64",
@@ -22000,7 +23152,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_mulcache_compute_native_aarch64",
@@ -22009,7 +23161,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_mulcache_compute_native_aarch64",
@@ -22018,8 +23170,8 @@
       "default": true,
       "exploratory": false,
       "unit": "seconds",
-      "value": 3,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "value": 1,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_mulcache_compute_native_aarch64",
@@ -22028,7 +23180,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_mulcache_compute_native_x86_64",
@@ -22293,7 +23445,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_reduce_native_aarch64",
@@ -22302,7 +23454,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_reduce_native_aarch64",
@@ -22311,7 +23463,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_reduce_native_aarch64",
@@ -22320,7 +23472,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_reduce_native_aarch64",
@@ -22329,7 +23481,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_reduce_native_aarch64",
@@ -22338,7 +23490,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_reduce_native_aarch64",
@@ -22347,7 +23499,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_reduce_native_aarch64",
@@ -22356,8 +23508,8 @@
       "default": false,
       "exploratory": false,
       "unit": "seconds",
-      "value": 15,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "value": 10,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_reduce_native_aarch64",
@@ -22366,7 +23518,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_reduce_native_aarch64",
@@ -22375,7 +23527,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_reduce_native_aarch64",
@@ -22384,7 +23536,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_reduce_native_aarch64",
@@ -22393,7 +23545,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_reduce_native_aarch64",
@@ -22402,8 +23554,8 @@
       "default": true,
       "exploratory": false,
       "unit": "seconds",
-      "value": 3,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "value": 2,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_reduce_native_aarch64",
@@ -22412,7 +23564,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_reduce_native_x86_64",
@@ -22549,7 +23701,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tobytes_native_aarch64",
@@ -22558,7 +23710,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tobytes_native_aarch64",
@@ -22567,7 +23719,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tobytes_native_aarch64",
@@ -22576,7 +23728,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tobytes_native_aarch64",
@@ -22585,7 +23737,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tobytes_native_aarch64",
@@ -22594,7 +23746,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tobytes_native_aarch64",
@@ -22603,7 +23755,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tobytes_native_aarch64",
@@ -22612,8 +23764,8 @@
       "default": false,
       "exploratory": false,
       "unit": "seconds",
-      "value": 2,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "value": 3,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tobytes_native_aarch64",
@@ -22622,7 +23774,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tobytes_native_aarch64",
@@ -22631,7 +23783,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tobytes_native_aarch64",
@@ -22640,7 +23792,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tobytes_native_aarch64",
@@ -22649,7 +23801,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tobytes_native_aarch64",
@@ -22659,7 +23811,7 @@
       "exploratory": false,
       "unit": "seconds",
       "value": 3,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tobytes_native_aarch64",
@@ -22668,7 +23820,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tobytes_native_x86_64",
@@ -22805,7 +23957,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tomont_native_aarch64",
@@ -22814,7 +23966,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tomont_native_aarch64",
@@ -22823,7 +23975,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tomont_native_aarch64",
@@ -22832,7 +23984,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tomont_native_aarch64",
@@ -22841,7 +23993,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tomont_native_aarch64",
@@ -22850,7 +24002,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tomont_native_aarch64",
@@ -22859,7 +24011,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tomont_native_aarch64",
@@ -22868,8 +24020,8 @@
       "default": false,
       "exploratory": false,
       "unit": "seconds",
-      "value": 15,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "value": 12,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tomont_native_aarch64",
@@ -22878,7 +24030,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tomont_native_aarch64",
@@ -22887,7 +24039,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tomont_native_aarch64",
@@ -22896,7 +24048,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tomont_native_aarch64",
@@ -22905,7 +24057,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tomont_native_aarch64",
@@ -22914,8 +24066,8 @@
       "default": true,
       "exploratory": false,
       "unit": "seconds",
-      "value": 3,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "value": 2,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tomont_native_aarch64",
@@ -22924,7 +24076,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "poly_tomont_native_x86_64",
@@ -23061,7 +24213,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k2_native_aarch64",
@@ -23070,7 +24222,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k2_native_aarch64",
@@ -23079,7 +24231,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k2_native_aarch64",
@@ -23088,7 +24240,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k2_native_aarch64",
@@ -23097,7 +24249,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k2_native_aarch64",
@@ -23106,7 +24258,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k2_native_aarch64",
@@ -23115,7 +24267,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k2_native_aarch64",
@@ -23125,7 +24277,7 @@
       "exploratory": false,
       "unit": "seconds",
       "value": 2,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k2_native_aarch64",
@@ -23134,7 +24286,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k2_native_aarch64",
@@ -23143,7 +24295,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k2_native_aarch64",
@@ -23152,7 +24304,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k2_native_aarch64",
@@ -23161,7 +24313,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k2_native_aarch64",
@@ -23170,8 +24322,8 @@
       "default": true,
       "exploratory": false,
       "unit": "seconds",
-      "value": 1,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "value": 2,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k2_native_aarch64",
@@ -23180,7 +24332,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k2_native_x86_64",
@@ -23293,134 +24445,6 @@
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k2_native_x86_64",
-      "dm": "LP64",
-      "solver": "z3",
-      "default": true,
-      "exploratory": false,
-      "unit": "seconds",
-      "value": 3,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "polyvec_basemul_acc_montgomery_cached_k2_native_x86_64",
-      "dm": "LP64",
-      "solver": "z3_smt_only",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
-      "dm": "ILP32",
-      "solver": "bitwuzla",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
-      "dm": "ILP32",
-      "solver": "cadical",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
-      "dm": "ILP32",
-      "solver": "cvc5_arrays_exp",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
-      "dm": "ILP32",
-      "solver": "cvc5_enum_inst",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
-      "dm": "ILP32",
-      "solver": "cvc5_mbqi_enum",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
-      "dm": "ILP32",
-      "solver": "z3",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
-      "dm": "ILP32",
-      "solver": "z3_smt_only",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
-      "dm": "LP64",
-      "solver": "bitwuzla",
-      "default": false,
-      "exploratory": false,
-      "unit": "seconds",
-      "value": 1,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
-      "dm": "LP64",
-      "solver": "cadical",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
-      "dm": "LP64",
-      "solver": "cvc5_arrays_exp",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
-      "dm": "LP64",
-      "solver": "cvc5_enum_inst",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
-      "dm": "LP64",
-      "solver": "cvc5_mbqi_enum",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
       "dm": "LP64",
       "solver": "z3",
       "default": true,
@@ -23430,13 +24454,141 @@
       "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
     },
     {
-      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
+      "name": "polyvec_basemul_acc_montgomery_cached_k2_native_x86_64",
       "dm": "LP64",
       "solver": "z3_smt_only",
       "default": false,
       "exploratory": false,
       "status": "omitted",
       "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
+      "dm": "ILP32",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
+      "dm": "ILP32",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
+      "dm": "ILP32",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
+      "dm": "LP64",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 2,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
+      "dm": "LP64",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
+      "dm": "LP64",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3",
+      "default": true,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 2,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
+    },
+    {
+      "name": "polyvec_basemul_acc_montgomery_cached_k3_native_aarch64",
+      "dm": "LP64",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k3_native_x86_64",
@@ -23573,7 +24725,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k4_native_aarch64",
@@ -23582,7 +24734,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k4_native_aarch64",
@@ -23591,7 +24743,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k4_native_aarch64",
@@ -23600,7 +24752,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k4_native_aarch64",
@@ -23609,7 +24761,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k4_native_aarch64",
@@ -23618,7 +24770,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k4_native_aarch64",
@@ -23627,7 +24779,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k4_native_aarch64",
@@ -23637,7 +24789,7 @@
       "exploratory": false,
       "unit": "seconds",
       "value": 2,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k4_native_aarch64",
@@ -23646,7 +24798,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k4_native_aarch64",
@@ -23655,7 +24807,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k4_native_aarch64",
@@ -23664,7 +24816,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k4_native_aarch64",
@@ -23673,7 +24825,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k4_native_aarch64",
@@ -23682,8 +24834,8 @@
       "default": true,
       "exploratory": false,
       "unit": "seconds",
-      "value": 3,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "value": 1,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k4_native_aarch64",
@@ -23692,7 +24844,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "polyvec_basemul_acc_montgomery_cached_k4_native_x86_64",
@@ -24085,7 +25237,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "rej_uniform_native_aarch64",
@@ -24094,7 +25246,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "rej_uniform_native_aarch64",
@@ -24103,7 +25255,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "rej_uniform_native_aarch64",
@@ -24112,7 +25264,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "rej_uniform_native_aarch64",
@@ -24121,7 +25273,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "rej_uniform_native_aarch64",
@@ -24130,7 +25282,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "rej_uniform_native_aarch64",
@@ -24139,7 +25291,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "rej_uniform_native_aarch64",
@@ -24148,8 +25300,8 @@
       "default": false,
       "exploratory": false,
       "unit": "seconds",
-      "value": 3,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "value": 4,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "rej_uniform_native_aarch64",
@@ -24158,7 +25310,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "rej_uniform_native_aarch64",
@@ -24167,7 +25319,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "rej_uniform_native_aarch64",
@@ -24176,7 +25328,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "rej_uniform_native_aarch64",
@@ -24185,7 +25337,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "rej_uniform_native_aarch64",
@@ -24194,8 +25346,8 @@
       "default": true,
       "exploratory": false,
       "unit": "seconds",
-      "value": 46,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "value": 42,
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "rej_uniform_native_aarch64",
@@ -24204,7 +25356,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+      "source_commit": "ba17fd668ccc825e7ea36fea5b71b7a24819f6fd"
     },
     {
       "name": "rej_uniform_native_x86_64",
