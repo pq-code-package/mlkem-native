@@ -12,8 +12,8 @@ Usage:
                               print the proofs that a change to FILE can
                               affect, one per line or, with --json, as
                               {"ARCH": [FUNC, ...]}; --all: every proof
-  deps check                  check deps.yml against list_proofs.sh and
-                              the s2n-bignum allowlist (run by lint)
+  deps check                  validate deps.yml entries, paths and
+                              s2n-bignum imports (run by lint)
 
 `gen` follows each proof's loads with HOL Light's own loader
 (hol_deps.ml), so it sees what the compiled proof loads. deps.yml lists,
@@ -134,15 +134,55 @@ def check():
     with open(ALLOWLIST, encoding="utf-8") as f:
         allowed = {line.split("#", 1)[0].strip() for line in f} - {""}
     deps = read_deps()
+    if not isinstance(deps, dict) or not all(isinstance(p, str) for p in deps):
+        sys.exit("deps check: expected a mapping keyed by proof name")
+    expected = sorted(all_proofs())
     problems = [
-        f"{p} is missing; run scripts/autogen" for p in sorted(all_proofs() - set(deps))
+        f"{p} is missing; run scripts/autogen" for p in expected if p not in deps
     ]
     problems += [
-        f"{p} loads s2n_bignum/{e}, which {rel(ALLOWLIST)} does not list"
-        for p, d in sorted(deps.items())
-        for e in d["s2n_bignum"]
-        if e not in allowed
+        f"{p} is no longer a proof; run scripts/autogen"
+        for p in sorted(set(deps) - set(expected))
     ]
+    if list(deps) != sorted(deps):
+        problems.append("proof entries are not sorted; run scripts/autogen")
+    for proof, entry in deps.items():
+        if not isinstance(entry, dict) or set(entry) != {"files", "s2n_bignum"}:
+            problems.append(f"{proof} must have files and s2n_bignum lists")
+            continue
+        for field, paths in entry.items():
+            if not isinstance(paths, list) or not all(
+                isinstance(path, str) for path in paths
+            ):
+                problems.append(f"{proof} has an invalid {field} list")
+                continue
+            if paths != sorted(set(paths)):
+                problems.append(f"{proof} has an unsorted or duplicate {field} list")
+            if field == "s2n_bignum":
+                problems.extend(
+                    f"{proof} loads s2n_bignum/{path}, which {rel(ALLOWLIST)} does not list"
+                    for path in paths
+                    if path not in allowed
+                )
+                continue
+            for path in paths:
+                full_path = os.path.join(ROOT, path)
+                if (
+                    os.path.isabs(path)
+                    or os.path.normpath(path) != path
+                    or not within(full_path, ROOT)
+                ):
+                    problems.append(f"{proof} has a non-normal repository path: {path}")
+                elif not os.path.isfile(full_path):
+                    problems.append(f"{proof} lists a missing file: {path}")
+            if proof in expected:
+                arch, func = proof.split("/")
+                for required in (
+                    f"{HL}{arch}/proofs/{func}.ml",
+                    f"{HL}{arch}/mlkem/{func}.S",
+                ):
+                    if required not in paths:
+                        problems.append(f"{proof} does not list {required}")
     if problems:
         sys.exit("deps check:\n  " + "\n  ".join(problems))
 
