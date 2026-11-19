@@ -11,6 +11,8 @@ import math
 import os
 import pathlib
 import re
+import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -561,6 +563,88 @@ def add_tool_version_job():
         sys.exit(1)
 
 
+def coverage_identity():
+    return os.environ.get("MLKEM_K", "3"), "default"
+
+
+def add_coverage_job(litani, proof_root, configs_to_run):
+    parameter_set, variant = coverage_identity()
+    output_root = proof_root / "output" / "coverage"
+    variant_dir = output_root / parameter_set / variant
+    source_root = proof_root.parent.parent
+
+    shutil.rmtree(variant_dir, ignore_errors=True)
+    configs_by_data_model = {}
+    for config in configs_to_run:
+        configs_by_data_model.setdefault(config[1], []).append(config)
+
+    manifest_dir = output_root / "manifests"
+    manifest_dir.mkdir(parents=True, exist_ok=True)
+    aggregate = proof_root / "lib" / "aggregate_coverage.py"
+    for data_model, configs in sorted(configs_by_data_model.items()):
+        report_dir = variant_dir / data_model
+        manifest_path = manifest_dir / f"{parameter_set}-{variant}-{data_model}.json"
+        reports = []
+        report_dirs = []
+        for proof_dir, dm, solver, _ in configs:
+            proof_uid = read_proof_uid(proof_dir)
+            directory = pathlib.Path(proof_dir, "report", dm, solver).resolve()
+            report_dirs.append(directory)
+            reports.append(
+                {
+                    "proof": proof_uid,
+                    "data_model": dm,
+                    "solver": solver,
+                    "directory": str(directory),
+                }
+            )
+
+        manifest = {
+            "schema": 2,
+            "parameter_set": parameter_set,
+            "variant": variant,
+            "data_model": data_model,
+            "reports": reports,
+        }
+        with manifest_path.open("w", encoding="utf-8") as handle:
+            json.dump(manifest, handle, indent=2, sort_keys=True)
+            handle.write("\n")
+
+        command = shlex.join(
+            [
+                "python3",
+                str(aggregate),
+                "--manifest",
+                str(manifest_path),
+                "--reportdir",
+                str(report_dir),
+                "--srcdir",
+                str(source_root),
+            ]
+        )
+        cmd = [
+            str(litani),
+            "add-job",
+            "--command",
+            command,
+            "--inputs",
+            str(manifest_path),
+            *map(str, report_dirs),
+            "--outputs",
+            str(report_dir),
+            "--pipeline-name",
+            f"aggregate_coverage_{data_model}",
+            "--ci-stage",
+            "report",
+            "--description",
+            f"joining {data_model} coverage for parameter set {parameter_set}",
+        ]
+        proc = subprocess.run(cmd, check=False)
+        if proc.returncode:
+            logging.critical("Could not add aggregate coverage job")
+            sys.exit(1)
+
+
 async def main():  # pylint: disable=too-many-locals
     args = get_args()
     set_up_logging(args.verbose)
@@ -728,6 +812,8 @@ async def main():  # pylint: disable=too-many-locals
     await proof_queue.join()
 
     add_tool_version_job()
+    if not args.no_coverage:
+        add_coverage_job(litani, proof_root, configs_to_run)
 
     print_counter(counter)
     print("", file=sys.stderr)

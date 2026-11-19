@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "exceptions": [
+    {
+      "file": "mlkem/src/kem.c",
+      "line": 294,
+      "reason": "CBMC emits an unreachable join block after goto cleanup"
+    },
+    {
+      "file": "mlkem/src/kem.c",
+      "line": 382,
+      "reason": "CBMC emits an unreachable join block after goto cleanup"
+    }
+  ]
+}

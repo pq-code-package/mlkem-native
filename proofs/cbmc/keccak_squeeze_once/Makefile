@@ -42,6 +42,11 @@ FUNCTION_NAME = mlk_keccak_squeeze_once
 # This function is large enough to need...
 CBMC_OBJECT_BITS = 8
 
+# SAT bit-blasting of this contract-instrumented harness exhausts CI memory
+# before solving. Z3 handles the coverage query without changing the safety
+# proof configuration.
+COVERAGE_BACKEND_OPTION = --smt2
+
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
 # ("mlkem/src/poly.c") in PROJECT_SOURCES).
