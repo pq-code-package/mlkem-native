@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795081050868,
+  "lastUpdate": 1795081054833,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -42876,6 +42876,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 118234,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "c179cea863ac90024e11b03a3cfe4f2ccd2e9629",
+          "message": "AArch64: Reduce work in rej_uniform_aarch64_asm\n\nThe AArch64 rejection sampler used LD3 to load packed input and\ncomputed four lookup indices and four accepted-sample counts\nindependently. LD3 combines a load with a permutation, while the\nseparate reductions repeat the same work for each output vector.\n\nReplace LD3 with ordinary loads and TBL-based unpacking. Interleave the\nfour rejection masks into byte lanes, then use one UADDLV for the\nlookup indices and one CNT/UADDLV pair for the accepted-sample counts.\nML-KEM has eight 16-bit samples per vector, so split the lane weights\ninto even and odd masks before combining them. Each packed sum fits in\none byte and cannot carry into another vector's result.\n\nUpdate the generated assembly, HOL Light model, correctness and\nmemory-safety proofs, and HOLTrace accepted definitions. The proofs\nisolate each packed lookup index as a zero-extended byte before table\nselection and memory-bound reasoning.\n\nPorts https://github.com/pq-code-package/mldsa-native/pull/1549.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-19T08:05:42Z",
+          "tree_id": "2313a8b83652630577dfb8f26c72bc950006ba53",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/c179cea863ac90024e11b03a3cfe4f2ccd2e9629"
+        },
+        "date": 1795081053626,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 35985,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 42320,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 53590,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 60580,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 66516,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 81037,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 89281,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 98902,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 118241,
             "unit": "cycles"
           }
         ]
