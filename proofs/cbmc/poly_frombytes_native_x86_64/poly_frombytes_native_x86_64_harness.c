@@ -9,7 +9,7 @@ int mlk_poly_frombytes_native(int16_t r[MLKEM_N],
 
 void harness(void)
 {
-  uint16_t *r;
+  int16_t *r;
   uint8_t *a;
   int t;
   t = mlk_poly_frombytes_native(r, a);

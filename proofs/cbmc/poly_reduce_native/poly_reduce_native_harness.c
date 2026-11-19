@@ -8,6 +8,6 @@ void harness(void)
 {
   mlk_poly *a;
 
-  /* Contracts for this function are in compress.h */
+  /* Contracts for this function are in poly.h */
   mlk_poly_reduce(a);
 }
