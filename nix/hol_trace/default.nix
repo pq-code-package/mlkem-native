@@ -18,17 +18,16 @@
 # - s2n_bignum_hashtt: s2n-bignum rewritten for hashtt's constructors,
 #   with a fix (0005) for code that breaks while HOLTrace records.
 # - bin/holtrace-hashtt-rewrite: the same rewrite, for our proofs.
-# - bin/holtrace-prune: shrinks a trace to what named theorems need.
+#
+# HOLTrace's own holtrace-prune is not installed: nix/holtrace_prune
+# provides a faster one with the same output.
 #
 # All changes to HOLTrace are the patches in this directory.
 { lib
-, stdenv
 , stdenvNoCC
 , fetchurl
 , writeText
-, makeWrapper
 , python3
-, pypy3
 , hol_light'
 , s2n_bignum
 }:
@@ -115,23 +114,14 @@ let
       cp -a . "$out"
     '';
   };
-
-  # holtrace-prune is a pypy3 script; fall back to CPython (slower).
-  python_prune =
-    if lib.meta.availableOn stdenv.hostPlatform pypy3
-    then "${pypy3}/bin/pypy3"
-    else "${python3}/bin/python3";
 in
 stdenvNoCC.mkDerivation {
   pname = "hol_trace";
   inherit version;
   dontUnpack = true;
-  nativeBuildInputs = [ makeWrapper ];
   installPhase = ''
     mkdir -p "$out/bin"
     ln -s ${hashtt_rewrite}/bin/holtrace-hashtt-rewrite "$out/bin/"
-    makeWrapper ${python_prune} "$out/bin/holtrace-prune" \
-      --add-flags ${src_record}/holtrace-prune
   '';
   # HOLTRACE_REPLAY_HOL is exported by every HOL Light shell instead; see
   # flake.nix.

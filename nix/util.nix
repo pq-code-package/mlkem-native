@@ -117,6 +117,7 @@ rec {
   hol_server = pkgs.callPackage ./hol_light/hol_server.nix { inherit hol_light'; };
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
   hol_trace = pkgs.callPackage ./hol_trace { inherit hol_light' s2n_bignum; };
+  holtrace_prune = pkgs.callPackage ./holtrace_prune { };
   # HolLean pins Lean 4.35.0, which nixpkgs-unstable provides. It links
   # against Lean's runtime, so it is built with the same (unstable) stdenv.
   hol_lean = pkgs-unstable.callPackage ./hol_lean { };

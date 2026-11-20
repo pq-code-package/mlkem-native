@@ -94,6 +94,7 @@
           packages.hol_light = util.hol_light';
           packages.s2n_bignum = util.s2n_bignum;
           packages.hol_trace = util.hol_trace;
+          packages.holtrace_prune = util.holtrace_prune;
           packages.hol_lean = util.hol_lean;
           packages.valgrind_varlat = util.valgrind_varlat;
           packages.slothy = util.slothy;
@@ -133,6 +134,7 @@
           # hol_light-cross with HOLTrace's recording tools and HolLean.
           devShells.hol_trace-cross = mkHolLightShell (holLightCrossPackages ++ [
             config.packages.hol_trace
+            config.packages.holtrace_prune
             config.packages.hol_lean
           ]);
           devShells.ci = util.mkShell {
