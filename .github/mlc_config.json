@@ -30,6 +30,10 @@
     {
       "_comment": "CBMC's documentation build currently drops this page (Doxygen 1.15).",
       "pattern": "^https://diffblue\\.github\\.io/cbmc/memory-bounds-checking\\.html"
+    },
+    {
+      "_comment": "cakeml.org's TLS certificate expired on 2026-11-19.",
+      "pattern": "^https://cakeml\\.org"
     }
   ]
 }
