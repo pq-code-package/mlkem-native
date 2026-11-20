@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795184946921,
+  "lastUpdate": 1795184993434,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -47085,6 +47085,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 118219,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "def370229aa57d759e5779a27261086d5855aead",
+          "message": "CBMC: Fix types and comments in harnesses\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-20T12:58:50Z",
+          "tree_id": "70396abf67cf982fab8c053e0d0f2db478fdb9d2",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/def370229aa57d759e5779a27261086d5855aead"
+        },
+        "date": 1795184993000,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 35968,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 42318,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 53586,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 60585,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 66514,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 81028,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 89268,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 98873,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 118207,
             "unit": "cycles"
           }
         ]
