@@ -1553,7 +1553,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_pk",
@@ -1562,7 +1562,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_pk",
@@ -1571,7 +1571,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_pk",
@@ -1580,7 +1580,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_pk",
@@ -1589,7 +1589,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_pk",
@@ -1598,7 +1598,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_pk",
@@ -1607,7 +1607,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_pk",
@@ -1616,8 +1616,8 @@
       "default": false,
       "exploratory": false,
       "unit": "seconds",
-      "value": 439,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "value": 468,
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_pk",
@@ -1626,7 +1626,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_pk",
@@ -1635,7 +1635,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_pk",
@@ -1644,7 +1644,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_pk",
@@ -1653,7 +1653,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_pk",
@@ -1662,8 +1662,8 @@
       "default": true,
       "exploratory": false,
       "unit": "seconds",
-      "value": 2,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "value": 4,
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_pk",
@@ -1672,7 +1672,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_sk",
@@ -1681,7 +1681,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_sk",
@@ -1690,7 +1690,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_sk",
@@ -1699,7 +1699,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_sk",
@@ -1708,7 +1708,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_sk",
@@ -1717,7 +1717,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_sk",
@@ -1726,7 +1726,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_sk",
@@ -1735,145 +1735,145 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_check_sk",
-      "dm": "LP64",
-      "solver": "bitwuzla",
-      "default": false,
-      "exploratory": false,
-      "unit": "seconds",
-      "value": 3,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_check_sk",
-      "dm": "LP64",
-      "solver": "cadical",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_check_sk",
-      "dm": "LP64",
-      "solver": "cvc5_arrays_exp",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_check_sk",
-      "dm": "LP64",
-      "solver": "cvc5_enum_inst",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_check_sk",
-      "dm": "LP64",
-      "solver": "cvc5_mbqi_enum",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_check_sk",
-      "dm": "LP64",
-      "solver": "z3",
-      "default": true,
-      "exploratory": false,
-      "unit": "seconds",
-      "value": 2,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_check_sk",
-      "dm": "LP64",
-      "solver": "z3_smt_only",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_dec",
-      "dm": "ILP32",
-      "solver": "bitwuzla",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_dec",
-      "dm": "ILP32",
-      "solver": "cadical",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_dec",
-      "dm": "ILP32",
-      "solver": "cvc5_arrays_exp",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_dec",
-      "dm": "ILP32",
-      "solver": "cvc5_enum_inst",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_dec",
-      "dm": "ILP32",
-      "solver": "cvc5_mbqi_enum",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_dec",
-      "dm": "ILP32",
-      "solver": "z3",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_dec",
-      "dm": "ILP32",
-      "solver": "z3_smt_only",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_dec",
       "dm": "LP64",
       "solver": "bitwuzla",
       "default": false,
       "exploratory": false,
       "unit": "seconds",
       "value": 4,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_check_sk",
+      "dm": "LP64",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_check_sk",
+      "dm": "LP64",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_check_sk",
+      "dm": "LP64",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_check_sk",
+      "dm": "LP64",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_check_sk",
+      "dm": "LP64",
+      "solver": "z3",
+      "default": true,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 5,
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_check_sk",
+      "dm": "LP64",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_dec",
+      "dm": "ILP32",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_dec",
+      "dm": "ILP32",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_dec",
+      "dm": "ILP32",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_dec",
+      "dm": "ILP32",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_dec",
+      "dm": "ILP32",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_dec",
+      "dm": "ILP32",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_dec",
+      "dm": "ILP32",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_dec",
+      "dm": "LP64",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 8,
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_dec",
@@ -1882,7 +1882,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_dec",
@@ -1891,7 +1891,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_dec",
@@ -1900,7 +1900,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_dec",
@@ -1909,7 +1909,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_dec",
@@ -1918,8 +1918,8 @@
       "default": true,
       "exploratory": false,
       "unit": "seconds",
-      "value": 8,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "value": 11,
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_dec",
@@ -1928,7 +1928,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_enc",
@@ -1937,7 +1937,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_enc",
@@ -1946,7 +1946,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_enc",
@@ -1955,7 +1955,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_enc",
@@ -1964,7 +1964,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_enc",
@@ -1973,7 +1973,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_enc",
@@ -1982,7 +1982,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_enc",
@@ -1991,7 +1991,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_enc",
@@ -2000,8 +2000,8 @@
       "default": false,
       "exploratory": false,
       "unit": "seconds",
-      "value": 42,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "value": 50,
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_enc",
@@ -2010,7 +2010,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_enc",
@@ -2019,7 +2019,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_enc",
@@ -2028,7 +2028,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_enc",
@@ -2037,145 +2037,145 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_enc",
+      "dm": "LP64",
+      "solver": "z3",
+      "default": true,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 5,
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_enc",
+      "dm": "LP64",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_enc_derand",
+      "dm": "ILP32",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_enc_derand",
+      "dm": "ILP32",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_enc_derand",
+      "dm": "ILP32",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_enc_derand",
+      "dm": "ILP32",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_enc_derand",
+      "dm": "ILP32",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_enc_derand",
+      "dm": "ILP32",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_enc_derand",
+      "dm": "ILP32",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_enc_derand",
+      "dm": "LP64",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_enc_derand",
+      "dm": "LP64",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 13,
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_enc_derand",
+      "dm": "LP64",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_enc_derand",
+      "dm": "LP64",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_enc_derand",
+      "dm": "LP64",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_enc_derand",
       "dm": "LP64",
       "solver": "z3",
       "default": true,
       "exploratory": false,
       "unit": "seconds",
       "value": 1,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_enc",
-      "dm": "LP64",
-      "solver": "z3_smt_only",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_enc_derand",
-      "dm": "ILP32",
-      "solver": "bitwuzla",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_enc_derand",
-      "dm": "ILP32",
-      "solver": "cadical",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_enc_derand",
-      "dm": "ILP32",
-      "solver": "cvc5_arrays_exp",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_enc_derand",
-      "dm": "ILP32",
-      "solver": "cvc5_enum_inst",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_enc_derand",
-      "dm": "ILP32",
-      "solver": "cvc5_mbqi_enum",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_enc_derand",
-      "dm": "ILP32",
-      "solver": "z3",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_enc_derand",
-      "dm": "ILP32",
-      "solver": "z3_smt_only",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_enc_derand",
-      "dm": "LP64",
-      "solver": "bitwuzla",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_enc_derand",
-      "dm": "LP64",
-      "solver": "cadical",
-      "default": false,
-      "exploratory": false,
-      "unit": "seconds",
-      "value": 9,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_enc_derand",
-      "dm": "LP64",
-      "solver": "cvc5_arrays_exp",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_enc_derand",
-      "dm": "LP64",
-      "solver": "cvc5_enum_inst",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_enc_derand",
-      "dm": "LP64",
-      "solver": "cvc5_mbqi_enum",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_enc_derand",
-      "dm": "LP64",
-      "solver": "z3",
-      "default": true,
-      "exploratory": false,
-      "unit": "seconds",
-      "value": 3,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_enc_derand",
@@ -2184,7 +2184,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair",
@@ -2193,7 +2193,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair",
@@ -2202,7 +2202,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair",
@@ -2211,7 +2211,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair",
@@ -2220,7 +2220,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair",
@@ -2229,7 +2229,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair",
@@ -2238,7 +2238,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair",
@@ -2247,7 +2247,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair",
@@ -2256,7 +2256,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair",
@@ -2265,8 +2265,8 @@
       "default": false,
       "exploratory": false,
       "unit": "seconds",
-      "value": 190,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "value": 235,
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair",
@@ -2275,7 +2275,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair",
@@ -2284,7 +2284,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair",
@@ -2293,7 +2293,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair",
@@ -2302,8 +2302,8 @@
       "default": true,
       "exploratory": false,
       "unit": "seconds",
-      "value": 3,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "value": 1,
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair",
@@ -2312,7 +2312,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair_derand",
@@ -2321,7 +2321,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair_derand",
@@ -2330,7 +2330,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair_derand",
@@ -2339,7 +2339,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair_derand",
@@ -2348,7 +2348,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair_derand",
@@ -2357,7 +2357,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair_derand",
@@ -2366,7 +2366,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair_derand",
@@ -2375,7 +2375,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair_derand",
@@ -2385,7 +2385,7 @@
       "exploratory": false,
       "unit": "seconds",
       "value": 8,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair_derand",
@@ -2394,7 +2394,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair_derand",
@@ -2403,7 +2403,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair_derand",
@@ -2412,7 +2412,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair_derand",
@@ -2421,273 +2421,273 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "kem_keypair_derand",
       "dm": "LP64",
       "solver": "z3",
       "default": true,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 2,
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "kem_keypair_derand",
+      "dm": "LP64",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "mlk_barrett_reduce",
+      "dm": "ILP32",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "mlk_barrett_reduce",
+      "dm": "ILP32",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "mlk_barrett_reduce",
+      "dm": "ILP32",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "mlk_barrett_reduce",
+      "dm": "ILP32",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "mlk_barrett_reduce",
+      "dm": "ILP32",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "mlk_barrett_reduce",
+      "dm": "ILP32",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "mlk_barrett_reduce",
+      "dm": "ILP32",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "mlk_barrett_reduce",
+      "dm": "LP64",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 2,
+      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "mlk_barrett_reduce",
+      "dm": "LP64",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "mlk_barrett_reduce",
+      "dm": "LP64",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "mlk_barrett_reduce",
+      "dm": "LP64",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "mlk_barrett_reduce",
+      "dm": "LP64",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "mlk_barrett_reduce",
+      "dm": "LP64",
+      "solver": "z3",
+      "default": true,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 2,
+      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "mlk_barrett_reduce",
+      "dm": "LP64",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
+    },
+    {
+      "name": "mlk_check_pct",
+      "dm": "ILP32",
+      "solver": "bitwuzla",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "mlk_check_pct",
+      "dm": "ILP32",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "mlk_check_pct",
+      "dm": "ILP32",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "mlk_check_pct",
+      "dm": "ILP32",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "mlk_check_pct",
+      "dm": "ILP32",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "mlk_check_pct",
+      "dm": "ILP32",
+      "solver": "z3",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "mlk_check_pct",
+      "dm": "ILP32",
+      "solver": "z3_smt_only",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "mlk_check_pct",
+      "dm": "LP64",
+      "solver": "bitwuzla",
+      "default": true,
+      "exploratory": false,
+      "unit": "seconds",
+      "value": 2,
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "mlk_check_pct",
+      "dm": "LP64",
+      "solver": "cadical",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "mlk_check_pct",
+      "dm": "LP64",
+      "solver": "cvc5_arrays_exp",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "mlk_check_pct",
+      "dm": "LP64",
+      "solver": "cvc5_enum_inst",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "mlk_check_pct",
+      "dm": "LP64",
+      "solver": "cvc5_mbqi_enum",
+      "default": false,
+      "exploratory": false,
+      "status": "omitted",
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+    },
+    {
+      "name": "mlk_check_pct",
+      "dm": "LP64",
+      "solver": "z3",
+      "default": false,
       "exploratory": false,
       "unit": "seconds",
       "value": 3,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "kem_keypair_derand",
-      "dm": "LP64",
-      "solver": "z3_smt_only",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "mlk_barrett_reduce",
-      "dm": "ILP32",
-      "solver": "bitwuzla",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "mlk_barrett_reduce",
-      "dm": "ILP32",
-      "solver": "cadical",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "mlk_barrett_reduce",
-      "dm": "ILP32",
-      "solver": "cvc5_arrays_exp",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "mlk_barrett_reduce",
-      "dm": "ILP32",
-      "solver": "cvc5_enum_inst",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "mlk_barrett_reduce",
-      "dm": "ILP32",
-      "solver": "cvc5_mbqi_enum",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "mlk_barrett_reduce",
-      "dm": "ILP32",
-      "solver": "z3",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "mlk_barrett_reduce",
-      "dm": "ILP32",
-      "solver": "z3_smt_only",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "mlk_barrett_reduce",
-      "dm": "LP64",
-      "solver": "bitwuzla",
-      "default": false,
-      "exploratory": false,
-      "unit": "seconds",
-      "value": 2,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "mlk_barrett_reduce",
-      "dm": "LP64",
-      "solver": "cadical",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "mlk_barrett_reduce",
-      "dm": "LP64",
-      "solver": "cvc5_arrays_exp",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "mlk_barrett_reduce",
-      "dm": "LP64",
-      "solver": "cvc5_enum_inst",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "mlk_barrett_reduce",
-      "dm": "LP64",
-      "solver": "cvc5_mbqi_enum",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "mlk_barrett_reduce",
-      "dm": "LP64",
-      "solver": "z3",
-      "default": true,
-      "exploratory": false,
-      "unit": "seconds",
-      "value": 2,
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "mlk_barrett_reduce",
-      "dm": "LP64",
-      "solver": "z3_smt_only",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "82bb544d21d5d2d2467760a6b50187d4e8ca2bcb"
-    },
-    {
-      "name": "mlk_check_pct",
-      "dm": "ILP32",
-      "solver": "bitwuzla",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "mlk_check_pct",
-      "dm": "ILP32",
-      "solver": "cadical",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "mlk_check_pct",
-      "dm": "ILP32",
-      "solver": "cvc5_arrays_exp",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "mlk_check_pct",
-      "dm": "ILP32",
-      "solver": "cvc5_enum_inst",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "mlk_check_pct",
-      "dm": "ILP32",
-      "solver": "cvc5_mbqi_enum",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "mlk_check_pct",
-      "dm": "ILP32",
-      "solver": "z3",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "mlk_check_pct",
-      "dm": "ILP32",
-      "solver": "z3_smt_only",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "mlk_check_pct",
-      "dm": "LP64",
-      "solver": "bitwuzla",
-      "default": true,
-      "exploratory": false,
-      "unit": "seconds",
-      "value": 3,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "mlk_check_pct",
-      "dm": "LP64",
-      "solver": "cadical",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "mlk_check_pct",
-      "dm": "LP64",
-      "solver": "cvc5_arrays_exp",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "mlk_check_pct",
-      "dm": "LP64",
-      "solver": "cvc5_enum_inst",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "mlk_check_pct",
-      "dm": "LP64",
-      "solver": "cvc5_mbqi_enum",
-      "default": false,
-      "exploratory": false,
-      "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
-    },
-    {
-      "name": "mlk_check_pct",
-      "dm": "LP64",
-      "solver": "z3",
-      "default": false,
-      "exploratory": false,
-      "unit": "seconds",
-      "value": 2,
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "mlk_check_pct",
@@ -2696,7 +2696,7 @@
       "default": false,
       "exploratory": false,
       "status": "omitted",
-      "source_commit": "c001f97fba1a645c756ee99a863f495502fbc700"
+      "source_commit": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
     },
     {
       "name": "mlk_ct_cmask_neg_i16",
