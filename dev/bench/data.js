@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795109546442,
+  "lastUpdate": 1795173884920,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -66697,6 +66697,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 40224,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "bf26f2b2bcc5113260c98f4d740d7b4ef2723092",
+          "message": "FIPS202: Drop the extra `L` from the Keccak x4 AVX2 loop label\n\nsimpasm writes the native assembly in mlkem/ and proofs/ from the\nsources in dev/. With CFI enabled, it puts an `L` in front of every\nlabel it writes, so dev/ sources use plain label names. The x86_64\nKeccak x4 AVX2 source, added in PR 1576, writes its loop label as\n`Lmlk_keccak_f1600_x4_avx2`, so the generated copies carry\n`LLmlk_keccak_f1600_x4_avx2`. It is the only dev/ label with such a\nprefix.\n\nIn PR 1576 the `L` was needed: the function and its loop label were\nboth called `keccak_f1600_x4_avx2`. The function has since been renamed\nto `keccak_f1600_x4_avx2_asm`, so the two names now differ without the\n`L`.\n\nWrite the label without the `L`, as the other dev/ sources do. The\ngenerated copies now carry `Lmlk_keccak_f1600_x4_avx2`. The machine\ncode is unchanged.\n\nPorts https://github.com/pq-code-package/mldsa-native/pull/1551\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-20T07:32:45Z",
+          "tree_id": "73a26aadfa81d0569c167a99f91d62aea80da57f",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/bf26f2b2bcc5113260c98f4d740d7b4ef2723092"
+        },
+        "date": 1795173830886,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 12217,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 13976,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 18199,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 21057,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 22290,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 28345,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 29911,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 33078,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 40201,
             "unit": "cycles"
           }
         ]
