@@ -245,8 +245,8 @@ reduce_avx2_asm:
   arch: x86_64
   function: mlkem_reduce_avx2_asm
   sha256:
-    mlkem_reduce_mc: 2940ac31a03e174749cd863923dfe5a1eb168e91b5407c7e2349a1c7386f5646
-    mlkem_reduce_tmc: 0928fbf004b1b08826739d732c0df7f3089b6e7509a0093af75fcfa63ed84184
+    mlkem_reduce_mc: 7ae8cb259e84c817c562665910f5ed22edfb7eae28cde6b9c9c98a27b9ddde40
+    mlkem_reduce_tmc: eac3723bb5ef771c1aa65e1e19bc1cb02758d1cebd7cf90c67d8b8583697ee99
 rej_uniform_aarch64_asm:
   arch: aarch64
   function: mlkem_rej_uniform_aarch64_asm

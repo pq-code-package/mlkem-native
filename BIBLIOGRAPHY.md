@@ -438,6 +438,17 @@ source code and documentation.
   - [proofs/hol_light/aarch64/mlkem/mlkem_intt_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/mlkem_intt_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mlkem/mlkem_ntt_aarch64_asm.S](proofs/hol_light/aarch64/mlkem/mlkem_ntt_aarch64_asm.S)
 
+### `ShortLimb`
+
+* Short-Limb Modular Multiplication Techniques: Barrett, Montgomery, Plantard, and the Explicit CRT
+* Author(s):
+  - Bo-Yin Yang
+* URL: https://eprint.iacr.org/2026/1743
+* Referenced from:
+  - [dev/x86_64/src/mlkem_reduce_avx2_asm.S](dev/x86_64/src/mlkem_reduce_avx2_asm.S)
+  - [mlkem/src/native/x86_64/src/mlkem_reduce_avx2_asm.S](mlkem/src/native/x86_64/src/mlkem_reduce_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mlkem/mlkem_reduce_avx2_asm.S](proofs/hol_light/x86_64/mlkem/mlkem_reduce_avx2_asm.S)
+
 ### `SysVAMD64`
 
 * System V Application Binary Interface — AMD64 Architecture Processor Supplement
