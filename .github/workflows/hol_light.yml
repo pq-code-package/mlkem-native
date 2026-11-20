@@ -89,7 +89,17 @@ jobs:
           nix-shell: 'hol_light'
           script: |
             make -C proofs/hol_light/aarch64 mlkem/mlkem_poly_tobytes_aarch64_asm.o
-            echo 'needs "mlkem_native/aarch64/proofs/mlkem_poly_tobytes_aarch64_asm.ml";;' | hol.sh
+            # The proof reads its object file relative to proofs/hol_light.
+            cd proofs/hol_light
+            set -o pipefail
+            printf '%s\n' \
+              'try use_file_raise_failure := true;' \
+              '    needs "mlkem_native/aarch64/proofs/mlkem_poly_tobytes_aarch64_asm.ml";' \
+              '    print_endline "HOL_LIGHT_SMOKE_OK"' \
+              'with e -> prerr_endline (Printexc.to_string e);;' \
+              '#quit;;' |
+              hol.sh 2>&1 |
+              awk '{ print } $0 == "HOL_LIGHT_SMOKE_OK" { ok = 1 } END { if (!ok) exit 1 }'
   hol_light_proofs:
     needs: [ check_modified_files, hol_light_bytecode ]
     if: needs.check_modified_files.outputs.aarch64 != '[]'
@@ -141,7 +151,17 @@ jobs:
           nix-shell: 'hol_light'
           script: |
             make -C proofs/hol_light/x86_64 mlkem/mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.o
-            echo 'needs "mlkem_native/x86_64/proofs/mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.ml";;' | hol.sh
+            # The proof reads its object file relative to proofs/hol_light.
+            cd proofs/hol_light
+            set -o pipefail
+            printf '%s\n' \
+              'try use_file_raise_failure := true;' \
+              '    needs "mlkem_native/x86_64/proofs/mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.ml";' \
+              '    print_endline "HOL_LIGHT_SMOKE_OK"' \
+              'with e -> prerr_endline (Printexc.to_string e);;' \
+              '#quit;;' |
+              hol.sh 2>&1 |
+              awk '{ print } $0 == "HOL_LIGHT_SMOKE_OK" { ok = 1 } END { if (!ok) exit 1 }'
   hol_light_proofs_x86_64:
     needs: [ check_modified_files, hol_light_bytecode_x86_64 ]
     if: needs.check_modified_files.outputs.x86_64 != '[]'
