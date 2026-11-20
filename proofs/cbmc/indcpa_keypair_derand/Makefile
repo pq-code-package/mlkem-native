@@ -38,6 +38,10 @@ USE_DYNAMIC_FRAMES=1
 CBMC_SUPPORTED_CONFIGS = \
   LP64:z3 \
   LP64:cadical
+# The ML-KEM-1024 ILP32 proof exceeds the CI timeout.
+ifneq ($(MLKEM_K),4)
+CBMC_SUPPORTED_CONFIGS += ILP32:z3
+endif
 CBMC_DEFAULT_CONFIG = LP64:z3
 
 FUNCTION_NAME = mlk_indcpa_keypair_derand

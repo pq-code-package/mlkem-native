@@ -26,7 +26,8 @@ USE_DYNAMIC_FRAMES=1
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = \
   LP64:z3 \
-  LP64:cvc5_mbqi_enum
+  LP64:cvc5_mbqi_enum \
+  ILP32:z3
 CBMC_DEFAULT_CONFIG = LP64:z3
 
 FUNCTION_NAME = mlk_polyvec_tobytes

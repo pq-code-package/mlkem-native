@@ -29,7 +29,8 @@ USE_DYNAMIC_FRAMES=1
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = \
   LP64:z3 \
-  LP64:cvc5_enum_inst
+  LP64:cvc5_enum_inst \
+  ILP32:cadical
 CBMC_DEFAULT_CONFIG = LP64:z3
 
 FUNCTION_NAME = nttunpack_native_x86_64
