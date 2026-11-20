@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795180347249,
+  "lastUpdate": 1795184424472,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -68284,6 +68284,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 40201,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "e8701dbfb76a405831bcbae8a632ce69233aa363",
+          "message": "HOL-Light: Prune HOLTrace traces with a C program\n\n`hol-trace gen` prunes each recorded trace to what the proof's main\ntheorems need, with HOLTrace's holtrace-prune. That is a PyPy script:\nit parses numbers by slicing the line once per character and keeps a\ntuple of Python objects per record. For the largest proofs it\ndominates capture. In the merge-queue run of PR 2003, pruning took\n6.1 of the 18.7 hours of capture, and 40 to 99 minutes, 59-68% of\ntheir capture time, for the AArch64 NTT and for both INTTs.\n\nAdd nix/holtrace_prune, a C program with the same arguments and output,\nand use it instead of HOLTrace's script. It reads the trace three times\ninstead of keeping it in memory: forward to count records and to find\nthe inferences that define constants and type operators, backward to\nmark what the selected theorems need, and forward to print the marked\nlines with references renumbered. One backward sweep suffices for the\nmarking because every reference is to an earlier line. Memory is a few\nbits per record.\n\nOn six raw mldsa-native traces of 10.9 to 41.0 GiB, its output was\nbyte for byte that of the Python pruner, in 64 to 197 s instead of\n2,683 to 10,769 s, with at most 0.26 GiB of memory.\n\nThe hol_trace package no longer installs HOLTrace's pruner, and no\nlonger needs pypy3; the hol_trace-cross shell gets holtrace-prune from\nthe new package. The pruner is outside the trusted base: replay and\ncomparison check its output. It requires its input to be a regular\nfile.\n\nPorts https://github.com/pq-code-package/mldsa-native/pull/1551\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-20T09:02:43Z",
+          "tree_id": "5147bf2916e68388ffe627231ff037fa118b330c",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/e8701dbfb76a405831bcbae8a632ce69233aa363"
+        },
+        "date": 1795184374043,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 12220,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 13979,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 18201,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 21055,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 22289,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 28342,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 29926,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 33101,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 40220,
             "unit": "cycles"
           }
         ]
