@@ -22,6 +22,9 @@ jobs:
     uses: ./.github/workflows/base.yml
   lint-markdown:
     name: Lint Markdown
+    # Skipped in the merge queue: external links can be down temporarily,
+    # which should not block merges. It still runs on pull requests.
+    if: github.event_name != 'merge_group'
     permissions:
       contents: 'read'
       id-token: 'write'
