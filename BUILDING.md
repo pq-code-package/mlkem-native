@@ -71,6 +71,16 @@ them, or explicitly:
 CFLAGS='-mavx512f -mavx512vl -mavx512dq -mprefer-vector-width=256' make test AUTO=1
 ```
 
+or, with the `tests` script (see below), which adds those flags:
+
+```bash
+./scripts/tests all --fips202-x86_64-backend avx512
+```
+
+On a machine without AVX-512, the tests can run under the
+[Intel Software Development Emulator](https://www.intel.com/content/www/us/en/developer/articles/tool/software-development-emulator.html),
+e.g. with `--exec-wrapper="sde64 -spr --"`, as in CI.
+
 The backend uses only 128-bit and 256-bit registers. On some Intel
 processors, 512-bit instructions mixed with the heavy 256-bit instructions of
 the arithmetic backend lower the clock frequency of the core, so keep the

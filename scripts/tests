@@ -687,6 +687,23 @@ class Tests:
             # Specify the backend file
             cflags += f' -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\"fips202/native/aarch64/{self.args.fips202_aarch64_backend}.h\\"'
 
+        if self.args.fips202_x86_64_backend != "auto" and opt is True:
+            # Make sure we're forcing x86_64 architecture
+            if " -DMLK_FORCE_X86_64" not in cflags:
+                cflags += " -DMLK_FORCE_X86_64"
+
+            # The AVX-512 backend needs AVX-512F, AVX-512VL and AVX-512DQ;
+            # keep the compiler to 256-bit vectors itself (see BUILDING.md)
+            if self.args.fips202_x86_64_backend == "avx512":
+                cflags += " -mavx512f -mavx512vl -mavx512dq"
+                cflags += " -mprefer-vector-width=256"
+
+            # Enable native backend for FIPS202
+            cflags += " -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202"
+
+            # Specify the backend file
+            cflags += f' -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\"fips202/native/x86_64/{self.args.fips202_x86_64_backend}.h\\"'
+
         env_update = {}
         if self.args.extra_makefile:
             env_update["EXTRA_MAKEFILE"] = self.args.extra_makefile
@@ -1396,6 +1413,15 @@ def cli():
         choices=["ALL", "OPT", "NO_OPT"],
         type=str.upper,
         default="ALL",
+    )
+
+    common_parser.add_argument(
+        "--fips202-x86_64-backend",
+        help="Select FIPS202 x86_64 backend (avx512: the AVX-512 backend, "
+        "which needs AVX-512F, AVX-512VL and AVX-512DQ)",
+        choices=["auto", "avx512"],
+        default="auto",
+        type=str,
     )
 
     common_parser.add_argument(
