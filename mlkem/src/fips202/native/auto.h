@@ -16,8 +16,8 @@
 #endif
 
 /* The x86_64 backend requires toolchain support for the SysV ABI */
-#if defined(MLK_SYS_X86_64_AVX2) && defined(MLK_SYSV_ABI_SUPPORTED)
-#include "x86_64/keccak_f1600_x4_avx2.h"
+#if defined(MLK_SYS_X86_64) && defined(MLK_SYSV_ABI_SUPPORTED)
+#include "x86_64/auto.h"
 #endif
 
 /* We do not yet include the FIPS202 backend for Armv8.1-M+MVE by default

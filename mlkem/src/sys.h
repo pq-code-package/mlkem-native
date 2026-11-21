@@ -69,6 +69,11 @@
 #if defined(__AVX2__)
 #define MLK_SYS_X86_64_AVX2
 #endif
+/* Check if the compilation target supports the AVX-512 extensions used by
+ * the AVX-512 backend: AVX-512F, AVX-512VL and AVX-512DQ. */
+#if defined(__AVX512F__) && defined(__AVX512VL__) && defined(__AVX512DQ__)
+#define MLK_SYS_X86_64_AVX512
+#endif
 #endif /* __x86_64__ || _M_X64 || _M_AMD64 */
 
 #if defined(MLK_SYS_LITTLE_ENDIAN) && defined(__powerpc64__)
@@ -286,6 +291,8 @@ typedef enum
 {
   /* x86_64 */
   MLK_SYS_CAP_X86_64_AVX2,
+  /* AVX-512F, AVX-512VL and AVX-512DQ */
+  MLK_SYS_CAP_X86_64_AVX512,
   /* AArch64 */
   MLK_SYS_CAP_AARCH64_NEON,
   MLK_SYS_CAP_AARCH64_SHA3,

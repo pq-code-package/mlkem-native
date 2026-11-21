@@ -1,0 +1,77 @@
+/*
+ * Copyright (c) The mlkem-native project authors
+ * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+ */
+
+/*
+ * WARNING: This file is auto-generated from scripts/autogen
+ *          in the mlkem-native repository.
+ *          Do not modify it directly.
+ */
+
+#include <stdio.h>
+
+#include "../abicheck_x86_64.h"
+#include "../checks_x86_64_all.h"
+
+#if defined(MLK_SYS_X86_64) && defined(MLK_SYSV_ABI_SUPPORTED) && \
+    defined(MLK_SYS_X86_64_AVX512)
+
+#include "../../../notrandombytes/notrandombytes.h"
+
+typedef struct x86_64_register_state reg_state;
+
+MLK_SYSV_ABI
+void mlk_keccak_f1600_x1_avx512_asm(uint64_t state[25], const uint64_t rc[24]);
+
+int check_keccak_f1600_x1_avx512_asm(void)
+{
+  int test_iter;
+  reg_state input_state, output_state;
+  int violations;
+  MLK_ALIGN uint8_t buf_rdi[200]; /* Keccak state (25 x uint64_t) */
+  MLK_ALIGN uint8_t buf_rsi[192]; /* Round constants (24 x uint64_t) */
+
+  if (!mlk_sys_check_capability(MLK_SYS_CAP_X86_64_AVX512))
+  {
+    fprintf(stderr,
+            "ABI check keccak_f1600_x1_avx512_asm: host lacks AVX-512F, "
+            "AVX-512VL and AVX-512DQ, skipping\n");
+    return MLK_ABICHECK_SKIPPED;
+  }
+
+  for (test_iter = 0; test_iter < MLK_ABICHECK_NUM_TESTS; test_iter++)
+  {
+    /* Initialize random register state */
+    init_x86_64_register_state(&input_state);
+
+    randombytes(buf_rdi, 200);
+    randombytes(buf_rsi, 192);
+
+    /* Set up register state for function arguments */
+    input_state.rdi = (uint64_t)buf_rdi;
+    input_state.rsi = (uint64_t)buf_rsi;
+
+    /* Call function through ABI test stub */
+    asm_call_stub_x86_64_sysv(
+        &input_state, &output_state,
+        (MLK_SYSV_ABI
+         void (*)(void))mlk_keccak_f1600_x1_avx512_asm);
+
+    /* Check ABI compliance */
+    violations = check_x86_64_sysv_compliance(&input_state, &output_state,
+                                              MLK_ABICHECK_VERBOSE);
+    if (violations > 0)
+    {
+      fprintf(stderr,
+              "ABI test FAILED for keccak_f1600_x1_avx512_asm (iteration %d): "
+              "%d violations\n",
+              test_iter + 1, violations);
+      return MLK_ABICHECK_FAILED;
+    }
+  }
+
+  return MLK_ABICHECK_PASSED;
+}
+
+#endif /* MLK_SYS_X86_64 && MLK_SYSV_ABI_SUPPORTED && MLK_SYS_X86_64_AVX512 */
