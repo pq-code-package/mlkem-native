@@ -392,6 +392,34 @@ struct test_ctx_t; /* Forward declaration */
 /* #define MLK_CONFIG_FIPS202X4_CUSTOM_HEADER "SOME_FILE.h" */
 
 /**
+ * MLK_CONFIG_FIPS202_CAN_FAIL
+ *
+ * Set this option if your custom FIPS-202 implementation (see
+ * MLK_CONFIG_FIPS202_CUSTOM_HEADER and MLK_CONFIG_FIPS202X4_CUSTOM_HEADER)
+ * can fail.
+ *
+ * If this option is set, all functions of the custom FIPS-202 API, including
+ * the init and release functions, must return an int: 0 on success, and any
+ * non-zero value on failure. mlkem-native checks every call. If one fails,
+ * the public API function returns MLK_ERR_FIPS202_FAIL, and its output
+ * buffers are left unmodified or zeroized.
+ *
+ * Whether a call fails must not depend on the contents of its input and
+ * output buffers or of the FIPS-202 state, as these can be secret. It may
+ * depend on the lengths of the inputs and outputs, which are public.
+ *
+ * If this option is unset, the functions of the custom FIPS-202 API return
+ * void and cannot fail.
+ *
+ * This option has no effect if the FIPS-202 implementation shipped with
+ * mlkem-native is used, as it never fails.
+ *
+ * @note In the next major version (v3), the custom FIPS-202 API is planned to
+ *       always return int, and this option will be removed.
+ */
+/* #define MLK_CONFIG_FIPS202_CAN_FAIL */
+
+/**
  * MLK_CONFIG_CUSTOM_ZEROIZE
  *
  * In compliance with @[FIPS203, Section 3.3], mlkem-native zeroizes

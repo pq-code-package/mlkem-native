@@ -1291,15 +1291,17 @@ static int test_poly_rej_uniform_consistency(void)
     }
 
     /* Test x4 version */
-    mlk_poly_rej_uniform_x4(&vec_x4[0], &vec_x4[1], &vec_x4[2], &vec_x4[3],
-                            (uint8_t (*)[MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)])
-                                seed);
+    CHECK_ERR(mlk_poly_rej_uniform_x4(
+                  &vec_x4[0], &vec_x4[1], &vec_x4[2], &vec_x4[3],
+                  (uint8_t (*)[MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)]) seed),
+              0);
 
     /* Test x1 version with same seeds */
     for (j = 0; j < 4; j++)
     {
-      mlk_poly_rej_uniform(&vec_x1[j],
-                           seed + j * MLK_ALIGN_UP(MLKEM_SYMBYTES + 2));
+      CHECK_ERR(mlk_poly_rej_uniform(
+                    &vec_x1[j], seed + j * MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)),
+                0);
     }
 
     /* Compare results */

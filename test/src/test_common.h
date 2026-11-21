@@ -63,6 +63,8 @@ static MLK_INLINE const char *mlk_err_name(int rc)
       return "MLK_ERR_INVALID_SK";
     case MLK_ERR_PCT_FAIL:
       return "MLK_ERR_PCT_FAIL";
+    case MLK_ERR_FIPS202_FAIL:
+      return "MLK_ERR_FIPS202_FAIL";
     default:
       return "unknown error";
   }

@@ -229,10 +229,11 @@ __contract__(
  *
  * Not static for benchmarking */
 MLK_INTERNAL_API
-void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
-                    int transposed)
+int mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
+                   int transposed)
 {
   unsigned i, j;
+  int ret = 0;
   MLK_ALIGN uint8_t seed_ext[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)];
 
   for (j = 0; j < 4; j++)
@@ -242,7 +243,7 @@ void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
 
 #if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
   /* Sample 4 matrix entries a time. */
-  for (i = 0; i < (MLKEM_K * MLKEM_K / 4) * 4; i += 4)
+  for (i = 0; ret == 0 && i < (MLKEM_K * MLKEM_K / 4) * 4; i += 4)
   {
     for (j = 0; j < 4; j++)
     {
@@ -262,11 +263,11 @@ void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
       }
     }
 
-    mlk_poly_rej_uniform_x4(&a->vec[i / MLKEM_K].vec[i % MLKEM_K],
-                            &a->vec[(i + 1) / MLKEM_K].vec[(i + 1) % MLKEM_K],
-                            &a->vec[(i + 2) / MLKEM_K].vec[(i + 2) % MLKEM_K],
-                            &a->vec[(i + 3) / MLKEM_K].vec[(i + 3) % MLKEM_K],
-                            seed_ext);
+    ret = mlk_poly_rej_uniform_x4(
+        &a->vec[i / MLKEM_K].vec[i % MLKEM_K],
+        &a->vec[(i + 1) / MLKEM_K].vec[(i + 1) % MLKEM_K],
+        &a->vec[(i + 2) / MLKEM_K].vec[(i + 2) % MLKEM_K],
+        &a->vec[(i + 3) / MLKEM_K].vec[(i + 3) % MLKEM_K], seed_ext);
   }
 #else  /* !MLK_CONFIG_SERIAL_FIPS202_ONLY */
   /* When using serial FIPS202, sample all entries individually. */
@@ -276,7 +277,7 @@ void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
   /* For MLKEM_K == 3, sample the last entry individually.
    * When MLK_CONFIG_SERIAL_FIPS202_ONLY is set, sample all entries
    * individually. */
-  for (; i < MLKEM_K * MLKEM_K; i++)
+  for (; ret == 0 && i < MLKEM_K * MLKEM_K; i++)
   {
     uint8_t x, y;
     /* MLKEM_K <= 4, so the values fit in uint8_t. */
@@ -294,20 +295,25 @@ void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
       seed_ext[0][MLKEM_SYMBYTES + 1] = x;
     }
 
-    mlk_poly_rej_uniform(&a->vec[i / MLKEM_K].vec[i % MLKEM_K], seed_ext[0]);
+    ret = mlk_poly_rej_uniform(&a->vec[i / MLKEM_K].vec[i % MLKEM_K],
+                               seed_ext[0]);
   }
 
-  mlk_assert(i == MLKEM_K * MLKEM_K);
+  if (ret == 0)
+  {
+    mlk_assert(i == MLKEM_K * MLKEM_K);
 
-  /*
-   * The public matrix is generated in NTT domain. If the native backend
-   * uses a custom order in NTT domain, permute A accordingly.
-   */
-  mlk_polymat_permute_bitrev_to_custom(a);
+    /*
+     * The public matrix is generated in NTT domain. If the native backend
+     * uses a custom order in NTT domain, permute A accordingly.
+     */
+    mlk_polymat_permute_bitrev_to_custom(a);
+  }
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(seed_ext, sizeof(seed_ext));
+  return ret;
 }
 
 /**
@@ -357,38 +363,49 @@ __contract__(
  * @param[in]  seed Seed bytes for sampling.
  */
 #if !defined(MLK_CONFIG_NO_KEYPAIR_API)
-static void mlk_keypair_getnoise_eta1(mlk_polyvec *pv, mlk_polyvec *e,
-                                      const uint8_t seed[MLKEM_SYMBYTES])
+MLK_MUST_CHECK_RETURN_VALUE
+static int mlk_keypair_getnoise_eta1(mlk_polyvec *pv, mlk_polyvec *e,
+                                     const uint8_t seed[MLKEM_SYMBYTES])
 __contract__(
   requires(memory_no_alias(pv, sizeof(mlk_polyvec)))
   requires(memory_no_alias(e, sizeof(mlk_polyvec)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
   assigns(memory_slice(pv, sizeof(mlk_polyvec)))
   assigns(memory_slice(e, sizeof(mlk_polyvec)))
-  ensures(forall(k0, 0, MLKEM_K, array_abs_bound(pv->vec[k0].coeffs, 0, MLKEM_N, MLKEM_ETA1 + 1)))
-  ensures(forall(k1, 0, MLKEM_K, array_abs_bound(e->vec[k1].coeffs, 0, MLKEM_N, MLKEM_ETA1 + 1)))
+  ensures(return_value == 0 || return_value == MLK_ERR_FIPS202_FAIL)
+  ensures(return_value == 0 ==> forall(k0, 0, MLKEM_K, array_abs_bound(pv->vec[k0].coeffs, 0, MLKEM_N, MLKEM_ETA1 + 1)))
+  ensures(return_value == 0 ==> forall(k1, 0, MLKEM_K, array_abs_bound(e->vec[k1].coeffs, 0, MLKEM_N, MLKEM_ETA1 + 1)))
 )
 {
+  int ret;
 #if MLKEM_K == 2
-  mlk_poly_getnoise_eta1_4x(&pv->vec[0], &pv->vec[1], /* Fill elements of pv */
-                            &e->vec[0], &e->vec[1], /* and two elements of e */
-                            seed, 0, 1, 2, 3);
+  ret = mlk_poly_getnoise_eta1_4x(
+      &pv->vec[0], &pv->vec[1], /* Fill elements of pv */
+      &e->vec[0], &e->vec[1],   /* and two elements of e */
+      seed, 0, 1, 2, 3);
 #elif MLKEM_K == 3
   /*
    * Only the first three output buffers are needed, so we pass NULL as
    * the fourth parameter, and 0xFF as its dummy nonce.
    */
-  mlk_poly_getnoise_eta1_4x(&pv->vec[0], &pv->vec[1], &pv->vec[2], NULL, seed,
-                            0, 1, 2, 0xFF);
+  ret = mlk_poly_getnoise_eta1_4x(&pv->vec[0], &pv->vec[1], &pv->vec[2], NULL,
+                                  seed, 0, 1, 2, 0xFF);
   /* Same here */
-  mlk_poly_getnoise_eta1_4x(&e->vec[0], &e->vec[1], &e->vec[2], NULL, seed, 3,
-                            4, 5, 0xFF);
+  if (ret == 0)
+  {
+    ret = mlk_poly_getnoise_eta1_4x(&e->vec[0], &e->vec[1], &e->vec[2], NULL,
+                                    seed, 3, 4, 5, 0xFF);
+  }
 #elif MLKEM_K == 4
-  mlk_poly_getnoise_eta1_4x(&pv->vec[0], &pv->vec[1], &pv->vec[2], &pv->vec[3],
-                            seed, 0, 1, 2, 3);
-  mlk_poly_getnoise_eta1_4x(&e->vec[0], &e->vec[1], &e->vec[2], &e->vec[3],
-                            seed, 4, 5, 6, 7);
+  ret = mlk_poly_getnoise_eta1_4x(&pv->vec[0], &pv->vec[1], &pv->vec[2],
+                                  &pv->vec[3], seed, 0, 1, 2, 3);
+  if (ret == 0)
+  {
+    ret = mlk_poly_getnoise_eta1_4x(&e->vec[0], &e->vec[1], &e->vec[2],
+                                    &e->vec[3], seed, 4, 5, 6, 7);
+  }
 #endif /* MLKEM_K == 4 */
+  return ret;
 }
 #endif /* !MLK_CONFIG_NO_KEYPAIR_API */
 
@@ -405,9 +422,10 @@ __contract__(
  * @param[in]  coins Seed bytes for sampling.
  */
 #if !defined(MLK_CONFIG_NO_ENCAPS_API) || !defined(MLK_CONFIG_NO_DECAPS_API)
-static void mlk_enc_getnoise_eta1_eta2(mlk_polyvec *sp, mlk_polyvec *ep,
-                                       mlk_poly *epp,
-                                       const uint8_t coins[MLKEM_SYMBYTES])
+MLK_MUST_CHECK_RETURN_VALUE
+static int mlk_enc_getnoise_eta1_eta2(mlk_polyvec *sp, mlk_polyvec *ep,
+                                      mlk_poly *epp,
+                                      const uint8_t coins[MLKEM_SYMBYTES])
 __contract__(
   requires(memory_no_alias(sp, sizeof(mlk_polyvec)))
   requires(memory_no_alias(ep, sizeof(mlk_polyvec)))
@@ -416,32 +434,47 @@ __contract__(
   assigns(memory_slice(sp, sizeof(mlk_polyvec)))
   assigns(memory_slice(ep, sizeof(mlk_polyvec)))
   assigns(memory_slice(epp, sizeof(mlk_poly)))
-  ensures(forall(k0, 0, MLKEM_K, array_abs_bound(sp->vec[k0].coeffs, 0, MLKEM_N, MLKEM_ETA1 + 1)))
-  ensures(forall(k1, 0, MLKEM_K, array_abs_bound(ep->vec[k1].coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1)))
-  ensures(array_abs_bound(epp->coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1))
+  ensures(return_value == 0 || return_value == MLK_ERR_FIPS202_FAIL)
+  ensures(return_value == 0 ==> forall(k0, 0, MLKEM_K, array_abs_bound(sp->vec[k0].coeffs, 0, MLKEM_N, MLKEM_ETA1 + 1)))
+  ensures(return_value == 0 ==> forall(k1, 0, MLKEM_K, array_abs_bound(ep->vec[k1].coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1)))
+  ensures(return_value == 0 ==> array_abs_bound(epp->coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1))
 )
 {
+  int ret;
 #if MLKEM_K == 2
-  mlk_poly_getnoise_eta1122_4x(&sp->vec[0], &sp->vec[1], &ep->vec[0],
-                               &ep->vec[1], coins, 0, 1, 2, 3);
-  mlk_poly_getnoise_eta2(epp, coins, 4);
+  ret = mlk_poly_getnoise_eta1122_4x(&sp->vec[0], &sp->vec[1], &ep->vec[0],
+                                     &ep->vec[1], coins, 0, 1, 2, 3);
+  if (ret == 0)
+  {
+    ret = mlk_poly_getnoise_eta2(epp, coins, 4);
+  }
 #elif MLKEM_K == 3
   /*
    * In this call, only the first three output buffers are needed,
    * so we pass NULL as the fourth parameter, and 0xFF as its dummy nonce.
    */
-  mlk_poly_getnoise_eta1_4x(&sp->vec[0], &sp->vec[1], &sp->vec[2], NULL, coins,
-                            0, 1, 2, 0xFF /* irrelevant */);
+  ret = mlk_poly_getnoise_eta1_4x(&sp->vec[0], &sp->vec[1], &sp->vec[2], NULL,
+                                  coins, 0, 1, 2, 0xFF /* irrelevant */);
   /* The fourth output buffer in this call _is_ used. */
-  mlk_poly_getnoise_eta2_4x(&ep->vec[0], &ep->vec[1], &ep->vec[2], epp, coins,
-                            3, 4, 5, 6);
+  if (ret == 0)
+  {
+    ret = mlk_poly_getnoise_eta2_4x(&ep->vec[0], &ep->vec[1], &ep->vec[2], epp,
+                                    coins, 3, 4, 5, 6);
+  }
 #elif MLKEM_K == 4
-  mlk_poly_getnoise_eta1_4x(&sp->vec[0], &sp->vec[1], &sp->vec[2], &sp->vec[3],
-                            coins, 0, 1, 2, 3);
-  mlk_poly_getnoise_eta2_4x(&ep->vec[0], &ep->vec[1], &ep->vec[2], &ep->vec[3],
-                            coins, 4, 5, 6, 7);
-  mlk_poly_getnoise_eta2(epp, coins, 8);
+  ret = mlk_poly_getnoise_eta1_4x(&sp->vec[0], &sp->vec[1], &sp->vec[2],
+                                  &sp->vec[3], coins, 0, 1, 2, 3);
+  if (ret == 0)
+  {
+    ret = mlk_poly_getnoise_eta2_4x(&ep->vec[0], &ep->vec[1], &ep->vec[2],
+                                    &ep->vec[3], coins, 4, 5, 6, 7);
+  }
+  if (ret == 0)
+  {
+    ret = mlk_poly_getnoise_eta2(epp, coins, 8);
+  }
 #endif /* MLKEM_K == 4 */
+  return ret;
 }
 #endif /* !MLK_CONFIG_NO_ENCAPS_API || !MLK_CONFIG_NO_DECAPS_API */
 
@@ -484,7 +517,11 @@ int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
   mlk_memcpy(coins_with_domain_separator, coins, MLKEM_SYMBYTES);
   coins_with_domain_separator[MLKEM_SYMBYTES] = MLKEM_K;
 
-  mlk_hash_g(buf, coins_with_domain_separator, MLKEM_SYMBYTES + 1);
+  ret = mlk_hash_g(buf, coins_with_domain_separator, MLKEM_SYMBYTES + 1);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
 
   /*
    * Declassify the public seed.
@@ -494,9 +531,17 @@ int mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
    */
   MLK_CT_TESTING_DECLASSIFY(publicseed, MLKEM_SYMBYTES);
 
-  mlk_gen_matrix(a, publicseed, 0 /* no transpose */);
+  ret = mlk_gen_matrix(a, publicseed, 0 /* no transpose */);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
 
-  mlk_keypair_getnoise_eta1(skpv, e, noiseseed);
+  ret = mlk_keypair_getnoise_eta1(skpv, e, noiseseed);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
 
   mlk_polyvec_ntt(skpv);
   mlk_polyvec_ntt(e);
@@ -572,9 +617,17 @@ int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
    */
   MLK_CT_TESTING_DECLASSIFY(seed, MLKEM_SYMBYTES);
 
-  mlk_gen_matrix(at, seed, 1 /* transpose */);
+  ret = mlk_gen_matrix(at, seed, 1 /* transpose */);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
 
-  mlk_enc_getnoise_eta1_eta2(sp, ep, epp, coins);
+  ret = mlk_enc_getnoise_eta1_eta2(sp, ep, epp, coins);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
 
   mlk_polyvec_ntt(sp);
 

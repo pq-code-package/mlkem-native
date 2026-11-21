@@ -70,11 +70,11 @@ int main(void)
 #endif
 
 
-  mlk_shake256(coins, sizeof(coins), seed, sizeof(seed));
+  CHECK_ERR(mlk_shake256(coins, sizeof(coins), seed, sizeof(seed)), 0);
 
   for (i = 0; i < NTESTS_KAT; i++)
   {
-    mlk_shake256(coins, sizeof(coins), coins, sizeof(coins));
+    CHECK_ERR(mlk_shake256(coins, sizeof(coins), coins, sizeof(coins)), 0);
 
     CHECK_ERR(mlk_kem_keypair_derand(pk, sk, coins), 0);
     print_hex("pk", pk, sizeof(pk));

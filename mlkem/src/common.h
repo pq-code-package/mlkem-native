@@ -313,6 +313,11 @@
  * MLK_CONFIG_KEYGEN_PCT is enabled; signals that the freshly generated key
  * pair failed its encaps/decaps self-test. */
 #define MLK_ERR_PCT_FAIL (-6)
+/* A FIPS202 (SHA-3/SHAKE) operation failed. This can only happen with a
+ * custom FIPS202 implementation (MLK_CONFIG_FIPS202_CUSTOM_HEADER) if
+ * MLK_CONFIG_FIPS202_CAN_FAIL is defined and that implementation reports a
+ * failure. The FIPS202 implementation shipped with mlkem-native never fails. */
+#define MLK_ERR_FIPS202_FAIL (-7)
 
 #endif /* !__ASSEMBLER__ */
 

@@ -21,9 +21,10 @@ typedef struct
 
 #define mlk_shake128x4_absorb_once MLK_NAMESPACE(shake128x4_absorb_once)
 MLK_INTERNAL_API
-void mlk_shake128x4_absorb_once(mlk_shake128x4ctx *state, const uint8_t *in0,
-                                const uint8_t *in1, const uint8_t *in2,
-                                const uint8_t *in3, size_t inlen)
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_shake128x4_absorb_once(mlk_shake128x4ctx *state, const uint8_t *in0,
+                               const uint8_t *in1, const uint8_t *in2,
+                               const uint8_t *in3, size_t inlen)
 __contract__(
   requires(inlen <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(state, sizeof(mlk_shake128x4ctx)))
@@ -36,9 +37,10 @@ __contract__(
 
 #define mlk_shake128x4_squeezeblocks MLK_NAMESPACE(shake128x4_squeezeblocks)
 MLK_INTERNAL_API
-void mlk_shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
-                                  uint8_t *out3, size_t nblocks,
-                                  mlk_shake128x4ctx *state)
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
+                                 uint8_t *out3, size_t nblocks,
+                                 mlk_shake128x4ctx *state)
 __contract__(
   requires(nblocks <= 8 /* somewhat arbitrary bound */)
   requires(memory_no_alias(state, sizeof(mlk_shake128x4ctx)))
@@ -55,17 +57,20 @@ __contract__(
 
 #define mlk_shake128x4_init MLK_NAMESPACE(shake128x4_init)
 MLK_INTERNAL_API
-void mlk_shake128x4_init(mlk_shake128x4ctx *state);
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_shake128x4_init(mlk_shake128x4ctx *state);
 
 #define mlk_shake128x4_release MLK_NAMESPACE(shake128x4_release)
 MLK_INTERNAL_API
-void mlk_shake128x4_release(mlk_shake128x4ctx *state);
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_shake128x4_release(mlk_shake128x4ctx *state);
 
 #define mlk_shake256x4 MLK_NAMESPACE(shake256x4)
 MLK_INTERNAL_API
-void mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
-                    size_t outlen, const uint8_t *in0, const uint8_t *in1,
-                    const uint8_t *in2, const uint8_t *in3, size_t inlen)
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
+                   size_t outlen, const uint8_t *in0, const uint8_t *in1,
+                   const uint8_t *in2, const uint8_t *in3, size_t inlen)
 __contract__(
   requires(inlen <= MLK_MAX_BUFFER_SIZE)
   requires(outlen <= MLK_MAX_BUFFER_SIZE)

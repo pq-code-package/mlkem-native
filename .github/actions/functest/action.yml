@@ -68,6 +68,9 @@ inputs:
   rng_fail:
     description: Determine whether to run rng fail tests or not
     default: "true"
+  fips202_fail:
+    description: Determine whether to run FIPS202 fail tests or not
+    default: "true"
   extra_args:
     description: Additional arguments to pass to the tests script
     default: ""
@@ -89,6 +92,7 @@ runs:
           echo STACK="${{ inputs.stack == 'true' && 'stack' || 'no-stack' }}" >> $GITHUB_ENV
           echo ALLOC="${{ inputs.alloc == 'true' && 'alloc' || 'no-alloc' }}" >> $GITHUB_ENV
           echo RNGFAIL="${{ inputs.rng_fail == 'true' && 'rng-fail' || 'no-rng-fail' }}" >> $GITHUB_ENV
+          echo FIPS202FAIL="${{ inputs.fips202_fail == 'true' && 'fips202-fail' || 'no-fips202-fail' }}" >> $GITHUB_ENV
       - name: Setup nix
         uses: ./.github/actions/setup-shell
         with:
@@ -121,7 +125,7 @@ runs:
             - $(python3 --version)
             - Platform: $PLATFORM
           EOF
-      - name: ${{ inputs.platform }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.EXAMPLES }}, ${{ env.STACK }}, ${{ env.UNIT }}, ${{ env.ALLOC }}, ${{ env.RNGFAIL }})
+      - name: ${{ inputs.platform }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.EXAMPLES }}, ${{ env.STACK }}, ${{ env.UNIT }}, ${{ env.ALLOC }}, ${{ env.RNGFAIL }}, ${{ env.FIPS202FAIL }})
         shell: ${{ env.SHELL }}
         env:
           CFLAGS_EXTRA: ${{ inputs.cflags }}
@@ -138,7 +142,7 @@ runs:
           # EXTRA_ENV is a list of assignments and EXTRA_ARGS a list of
           # arguments, so both are deliberately left unquoted. EXTRA_ENV goes
           # through env(1) because an expansion is not an assignment prefix.
-          env $EXTRA_ENV ./scripts/tests all --platform="$PLATFORM" ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --cross-prefix="$CROSS_PREFIX" --exec-wrapper="$EXEC_WRAPPER" --cflags="$CFLAGS_EXTRA" --ldflags="$LDFLAGS_EXTRA" --opt="$OPT_MODE" --"$FUNC" --"$KAT" --"$ACVP" --"$WYCHEPROOF" --"$EXAMPLES" --"$STACK" --"$UNIT" --"$ALLOC" --"$RNGFAIL" -v $EXTRA_ARGS
+          env $EXTRA_ENV ./scripts/tests all --platform="$PLATFORM" ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --cross-prefix="$CROSS_PREFIX" --exec-wrapper="$EXEC_WRAPPER" --cflags="$CFLAGS_EXTRA" --ldflags="$LDFLAGS_EXTRA" --opt="$OPT_MODE" --"$FUNC" --"$KAT" --"$ACVP" --"$WYCHEPROOF" --"$EXAMPLES" --"$STACK" --"$UNIT" --"$ALLOC" --"$RNGFAIL" --"$FIPS202FAIL" -v $EXTRA_ARGS
       - name: Post ${{ inputs.platform }} Tests
         shell: ${{ env.SHELL }}
         if: success() || failure()

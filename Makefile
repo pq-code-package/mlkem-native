@@ -1,14 +1,14 @@
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: func kat acvp wycheproof stack alloc rng_fail \
-	func_512 kat_512 acvp_512 wycheproof_512 stack_512 alloc_512 rng_fail_512 \
-	func_768 kat_768 acvp_768 wycheproof_768 stack_768 alloc_768 rng_fail_768 \
-	func_1024 kat_1024 acvp_1024 wycheproof_1024 stack_1024 alloc_1024 rng_fail_1024 \
-	run_func run_kat run_acvp run_wycheproof run_stack run_alloc run_rng_fail \
-	run_func_512 run_kat_512 run_stack_512 run_alloc_512 run_rng_fail_512 \
-	run_func_768 run_kat_768 run_stack_768 run_alloc_768 run_rng_fail_768 \
-	run_func_1024 run_kat_1024 run_stack_1024 run_alloc_1024 run_rng_fail_1024 \
+.PHONY: func kat acvp wycheproof stack alloc rng_fail fips202_fail \
+	func_512 kat_512 acvp_512 wycheproof_512 stack_512 alloc_512 rng_fail_512 fips202_fail_512 \
+	func_768 kat_768 acvp_768 wycheproof_768 stack_768 alloc_768 rng_fail_768 fips202_fail_768 \
+	func_1024 kat_1024 acvp_1024 wycheproof_1024 stack_1024 alloc_1024 rng_fail_1024 fips202_fail_1024 \
+	run_func run_kat run_acvp run_wycheproof run_stack run_alloc run_rng_fail run_fips202_fail \
+	run_func_512 run_kat_512 run_stack_512 run_alloc_512 run_rng_fail_512 run_fips202_fail_512 \
+	run_func_768 run_kat_768 run_stack_768 run_alloc_768 run_rng_fail_768 run_fips202_fail_768 \
+	run_func_1024 run_kat_1024 run_stack_1024 run_alloc_1024 run_rng_fail_1024 run_fips202_fail_1024 \
 	bench_512 bench_768 bench_1024 bench \
 	run_bench_512 run_bench_768 run_bench_1024 run_bench \
 	bench_components_512 bench_components_768 bench_components_1024 bench_components \
@@ -46,7 +46,7 @@ quickcheck: test
 build: func kat acvp wycheproof
 	$(Q)echo "  Everything builds fine!"
 
-test: run_kat run_func run_acvp run_wycheproof run_unit run_alloc run_rng_fail run_abicheck
+test: run_kat run_func run_acvp run_wycheproof run_unit run_alloc run_rng_fail run_fips202_fail run_abicheck
 	$(Q)echo "  Everything checks fine!"
 
 run_kat_512: kat_512
@@ -175,6 +175,22 @@ run_rng_fail_768: rng_fail_768
 run_rng_fail_1024: rng_fail_1024
 	$(W) $(MLKEM1024_DIR)/bin/test_rng_fail1024
 run_rng_fail: run_rng_fail_512 run_rng_fail_768 run_rng_fail_1024
+
+fips202_fail_512: $(MLKEM512_DIR)/bin/test_fips202_fail512
+	$(Q)echo "  FIPS202_FAIL ML-KEM-512: $^"
+fips202_fail_768: $(MLKEM768_DIR)/bin/test_fips202_fail768
+	$(Q)echo "  FIPS202_FAIL ML-KEM-768: $^"
+fips202_fail_1024: $(MLKEM1024_DIR)/bin/test_fips202_fail1024
+	$(Q)echo "  FIPS202_FAIL ML-KEM-1024: $^"
+fips202_fail: fips202_fail_512 fips202_fail_768 fips202_fail_1024
+
+run_fips202_fail_512: fips202_fail_512
+	$(W) $(MLKEM512_DIR)/bin/test_fips202_fail512
+run_fips202_fail_768: fips202_fail_768
+	$(W) $(MLKEM768_DIR)/bin/test_fips202_fail768
+run_fips202_fail_1024: fips202_fail_1024
+	$(W) $(MLKEM1024_DIR)/bin/test_fips202_fail1024
+run_fips202_fail: run_fips202_fail_512 run_fips202_fail_768 run_fips202_fail_1024
 
 lib: $(BUILD_DIR)/libmlkem.a $(BUILD_DIR)/libmlkem512.a $(BUILD_DIR)/libmlkem768.a $(BUILD_DIR)/libmlkem1024.a
 

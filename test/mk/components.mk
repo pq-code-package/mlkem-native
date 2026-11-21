@@ -29,7 +29,8 @@ BENCH_TESTS = bench_mlkem bench_components_mlkem
 UNIT_TESTS = test_unit
 ALLOC_TESTS = test_alloc
 RNG_FAIL_TESTS = test_rng_fail
-ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(WYCHEPROOF_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS) $(RNG_FAIL_TESTS)
+FIPS202_FAIL_TESTS = test_fips202_fail
+ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(WYCHEPROOF_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS) $(RNG_FAIL_TESTS) $(FIPS202_FAIL_TESTS)
 
 MLKEM512_DIR = $(BUILD_DIR)/mlkem512
 MLKEM768_DIR = $(BUILD_DIR)/mlkem768
@@ -47,6 +48,10 @@ MLKEM512_ALLOC_OBJS = $(call MAKE_OBJS,$(MLKEM512_DIR)/alloc,$(LIB_SRCS))
 MLKEM768_ALLOC_OBJS = $(call MAKE_OBJS,$(MLKEM768_DIR)/alloc,$(LIB_SRCS))
 MLKEM1024_ALLOC_OBJS = $(call MAKE_OBJS,$(MLKEM1024_DIR)/alloc,$(LIB_SRCS))
 
+MLKEM512_FIPS202_FAIL_OBJS = $(call MAKE_OBJS,$(MLKEM512_DIR)/fips202_fail,$(LIB_SRCS))
+MLKEM768_FIPS202_FAIL_OBJS = $(call MAKE_OBJS,$(MLKEM768_DIR)/fips202_fail,$(LIB_SRCS))
+MLKEM1024_FIPS202_FAIL_OBJS = $(call MAKE_OBJS,$(MLKEM1024_DIR)/fips202_fail,$(LIB_SRCS))
+
 CFLAGS += -Imlkem
 
 $(BUILD_DIR)/libmlkem512.a: $(MLKEM512_OBJS)
@@ -60,6 +65,10 @@ $(BUILD_DIR)/libmlkem1024_unit.a: $(MLKEM1024_UNIT_OBJS)
 $(BUILD_DIR)/libmlkem512_alloc.a: $(MLKEM512_ALLOC_OBJS)
 $(BUILD_DIR)/libmlkem768_alloc.a: $(MLKEM768_ALLOC_OBJS)
 $(BUILD_DIR)/libmlkem1024_alloc.a: $(MLKEM1024_ALLOC_OBJS)
+
+$(BUILD_DIR)/libmlkem512_fips202_fail.a: $(MLKEM512_FIPS202_FAIL_OBJS)
+$(BUILD_DIR)/libmlkem768_fips202_fail.a: $(MLKEM768_FIPS202_FAIL_OBJS)
+$(BUILD_DIR)/libmlkem1024_fips202_fail.a: $(MLKEM1024_FIPS202_FAIL_OBJS)
 
 $(BUILD_DIR)/libmlkem.a: $(MLKEM512_OBJS) $(MLKEM768_OBJS) $(MLKEM1024_OBJS)
 
@@ -97,6 +106,10 @@ $(MLKEM512_DIR)/bin/test_alloc512: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs
 $(MLKEM768_DIR)/bin/test_alloc768: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 $(MLKEM1024_DIR)/bin/test_alloc1024: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 
+$(MLKEM512_DIR)/bin/test_fips202_fail512: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_fips202_fail_config.h\"
+$(MLKEM768_DIR)/bin/test_fips202_fail768: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_fips202_fail_config.h\"
+$(MLKEM1024_DIR)/bin/test_fips202_fail1024: CFLAGS += -DMLK_CONFIG_FILE=\"../test/configs/test_fips202_fail_config.h\"
+
 define ADD_SOURCE
 # Record this binary's test sources -- entrypoint test/$(3)/$(2).c plus extras
 # $(4) -- in the per-binary TEST_SRCS. A custom build (CUSTOM_BUILD, see
@@ -124,6 +137,7 @@ $(foreach scheme,mlkem512 mlkem768 mlkem1024, \
 	$(eval $(call ADD_SOURCE,$(scheme),test_rng_fail,src)) \
 	$(eval $(call ADD_SOURCE,$(scheme),test_unit,src,,_unit)) \
 	$(eval $(call ADD_SOURCE,$(scheme),test_alloc,src,,_alloc)) \
+	$(eval $(call ADD_SOURCE,$(scheme),test_fips202_fail,src,,_fips202_fail)) \
 )
 
 # The set of test binaries, per parameter set.

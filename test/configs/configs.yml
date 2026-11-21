@@ -537,3 +537,14 @@ configs:
           #endif /* !__ASSEMBLER__ */
       MLK_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: test/configs/test_fips202_fail_config.h
+    description: "Using a custom FIPS202 implementation that can be made fail at specific invocation"
+    defines:
+      MLK_CONFIG_NAMESPACE_PREFIX: mlk
+      MLK_CONFIG_FIPS202_CUSTOM_HEADER: "\"../test/fips202_fail/fips202.h\""
+      MLK_CONFIG_FIPS202X4_CUSTOM_HEADER: "\"../test/fips202_fail/fips202x4.h\""
+      MLK_CONFIG_FIPS202_CAN_FAIL: true
+      MLK_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+

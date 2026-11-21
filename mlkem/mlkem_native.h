@@ -110,6 +110,11 @@
  * MLK_CONFIG_KEYGEN_PCT is enabled; signals that the freshly generated key
  * pair failed its encaps/decaps self-test. */
 #define MLK_ERR_PCT_FAIL (-6)
+/* A FIPS202 (SHA-3/SHAKE) operation failed. This can only happen with a
+ * custom FIPS202 implementation (MLK_CONFIG_FIPS202_CUSTOM_HEADER) if
+ * MLK_CONFIG_FIPS202_CAN_FAIL is defined and that implementation reports a
+ * failure. The FIPS202 implementation shipped with mlkem-native never fails. */
+#define MLK_ERR_FIPS202_FAIL (-7)
 
 /****************************** Configuration *********************************/
 
@@ -192,6 +197,9 @@ extern "C"
  *                               MLK_CUSTOM_ALLOC returned NULL.
  * @retval MLK_ERR_RNG_FAIL      MLK_CONFIG_KEYGEN_PCT enabled and random
  *                               number generation failed within the PCT.
+ * @retval MLK_ERR_FIPS202_FAIL  MLK_CONFIG_FIPS202_CAN_FAIL was used and
+ *                               the custom FIPS202 implementation
+ *                               reported a failure.
  */
 MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
@@ -234,6 +242,9 @@ int MLK_API_NAMESPACE(keypair_derand)(
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
  * @retval MLK_ERR_RNG_FAIL      Random number generation failed.
+ * @retval MLK_ERR_FIPS202_FAIL  MLK_CONFIG_FIPS202_CAN_FAIL was used and
+ *                               the custom FIPS202 implementation
+ *                               reported a failure.
  */
 MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
@@ -271,6 +282,9 @@ int MLK_API_NAMESPACE(keypair)(
  *                               for the public key failed.
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
+ * @retval MLK_ERR_FIPS202_FAIL  MLK_CONFIG_FIPS202_CAN_FAIL was used and
+ *                               the custom FIPS202 implementation
+ *                               reported a failure.
  */
 MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
@@ -308,6 +322,9 @@ int MLK_API_NAMESPACE(enc_derand)(
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
  * @retval MLK_ERR_RNG_FAIL      Random number generation failed.
+ * @retval MLK_ERR_FIPS202_FAIL  MLK_CONFIG_FIPS202_CAN_FAIL was used and
+ *                               the custom FIPS202 implementation
+ *                               reported a failure.
  */
 MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
@@ -345,6 +362,9 @@ int MLK_API_NAMESPACE(enc)(
  *                               for the secret key failed.
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
+ * @retval MLK_ERR_FIPS202_FAIL  MLK_CONFIG_FIPS202_CAN_FAIL was used and
+ *                               the custom FIPS202 implementation
+ *                               reported a failure.
  */
 MLK_API_QUALIFIER
 MLK_API_MUST_CHECK_RETURN_VALUE
@@ -405,6 +425,9 @@ int MLK_API_NAMESPACE(check_pk)(
  * @retval MLK_ERR_INVALID_SK    Public key hash check failed.
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
+ * @retval MLK_ERR_FIPS202_FAIL  MLK_CONFIG_FIPS202_CAN_FAIL was used and
+ *                               the custom FIPS202 implementation
+ *                               reported a failure.
  */
 #if !defined(MLK_CONFIG_NO_DECAPS_API)
 MLK_API_QUALIFIER

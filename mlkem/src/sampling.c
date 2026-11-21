@@ -152,9 +152,9 @@ __contract__(
  *            - x4-batched version of `rej_uniform()` from the
  *              reference implementation, leveraging x4-batched Keccak-f1600. */
 MLK_INTERNAL_API
-void mlk_poly_rej_uniform_x4(mlk_poly *vec0, mlk_poly *vec1, mlk_poly *vec2,
-                             mlk_poly *vec3,
-                             uint8_t seed[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)])
+int mlk_poly_rej_uniform_x4(mlk_poly *vec0, mlk_poly *vec1, mlk_poly *vec2,
+                            mlk_poly *vec3,
+                            uint8_t seed[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)])
 {
   /* Temporary buffers for XOF output before rejection sampling */
   MLK_ALIGN uint8_t
@@ -164,15 +164,29 @@ void mlk_poly_rej_uniform_x4(mlk_poly *vec0, mlk_poly *vec1, mlk_poly *vec2,
   unsigned ctr[4];
   mlk_xof_x4_ctx statex;
   unsigned buflen;
+  int ret, ret_release;
 
-  mlk_xof_x4_init(&statex);
-  mlk_xof_x4_absorb(&statex, seed, MLKEM_SYMBYTES + 2);
+  ret = mlk_xof_x4_init(&statex);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
+
+  ret = mlk_xof_x4_absorb(&statex, seed, MLKEM_SYMBYTES + 2);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
 
   /*
    * Initially, squeeze heuristic number of MLKEM_GEN_MATRIX_NBLOCKS.
    * This should generate the matrix entries with high probability.
    */
-  mlk_xof_x4_squeezeblocks(buf, MLKEM_GEN_MATRIX_NBLOCKS, &statex);
+  ret = mlk_xof_x4_squeezeblocks(buf, MLKEM_GEN_MATRIX_NBLOCKS, &statex);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
   buflen = MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE;
   ctr[0] = mlk_rej_uniform(vec0->coeffs, MLKEM_N, 0, buf[0], buflen);
   ctr[1] = mlk_rej_uniform(vec1->coeffs, MLKEM_N, 0, buf[1], buflen);
@@ -184,15 +198,16 @@ void mlk_poly_rej_uniform_x4(mlk_poly *vec0, mlk_poly *vec1, mlk_poly *vec2,
    * one more block a time until we're done.
    */
   buflen = MLK_XOF_RATE;
-  while (ctr[0] < MLKEM_N || ctr[1] < MLKEM_N || ctr[2] < MLKEM_N ||
-         ctr[3] < MLKEM_N)
+  while (ret == 0 && (ctr[0] < MLKEM_N || ctr[1] < MLKEM_N ||
+                      ctr[2] < MLKEM_N || ctr[3] < MLKEM_N))
   __loop__(
-    assigns(ctr, statex,
+    assigns(ret, ctr, statex,
             memory_slice(vec0, sizeof(mlk_poly)),
             memory_slice(vec1, sizeof(mlk_poly)),
             memory_slice(vec2, sizeof(mlk_poly)),
             memory_slice(vec3, sizeof(mlk_poly)),
             object_whole(buf))
+    invariant(ret == 0 || ret == MLK_ERR_FIPS202_FAIL)
     invariant(ctr[0] <= MLKEM_N && ctr[1] <= MLKEM_N)
     invariant(ctr[2] <= MLKEM_N && ctr[3] <= MLKEM_N)
     invariant(array_bound(vec0->coeffs, 0, ctr[0], 0, MLKEM_Q))
@@ -200,55 +215,90 @@ void mlk_poly_rej_uniform_x4(mlk_poly *vec0, mlk_poly *vec1, mlk_poly *vec2,
     invariant(array_bound(vec2->coeffs, 0, ctr[2], 0, MLKEM_Q))
     invariant(array_bound(vec3->coeffs, 0, ctr[3], 0, MLKEM_Q)))
   {
-    mlk_xof_x4_squeezeblocks(buf, 1, &statex);
-    ctr[0] = mlk_rej_uniform(vec0->coeffs, MLKEM_N, ctr[0], buf[0], buflen);
-    ctr[1] = mlk_rej_uniform(vec1->coeffs, MLKEM_N, ctr[1], buf[1], buflen);
-    ctr[2] = mlk_rej_uniform(vec2->coeffs, MLKEM_N, ctr[2], buf[2], buflen);
-    ctr[3] = mlk_rej_uniform(vec3->coeffs, MLKEM_N, ctr[3], buf[3], buflen);
+    ret = mlk_xof_x4_squeezeblocks(buf, 1, &statex);
+    if (ret == 0)
+    {
+      ctr[0] = mlk_rej_uniform(vec0->coeffs, MLKEM_N, ctr[0], buf[0], buflen);
+      ctr[1] = mlk_rej_uniform(vec1->coeffs, MLKEM_N, ctr[1], buf[1], buflen);
+      ctr[2] = mlk_rej_uniform(vec2->coeffs, MLKEM_N, ctr[2], buf[2], buflen);
+      ctr[3] = mlk_rej_uniform(vec3->coeffs, MLKEM_N, ctr[3], buf[3], buflen);
+    }
   }
 
-  mlk_xof_x4_release(&statex);
+cleanup:
+  /* Release the context also after a failure; report the first error. */
+  ret_release = mlk_xof_x4_release(&statex);
+  if (ret == 0)
+  {
+    ret = ret_release;
+  }
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(buf, sizeof(buf));
+  return ret;
 }
 #endif /* !MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
 MLK_INTERNAL_API
-void mlk_poly_rej_uniform(mlk_poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
+int mlk_poly_rej_uniform(mlk_poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
 {
   mlk_xof_ctx state;
   MLK_ALIGN uint8_t buf[MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE];
   unsigned ctr, buflen;
+  int ret, ret_release;
 
-  mlk_xof_init(&state);
-  mlk_xof_absorb(&state, seed, MLKEM_SYMBYTES + 2);
+  ret = mlk_xof_init(&state);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
+
+  ret = mlk_xof_absorb(&state, seed, MLKEM_SYMBYTES + 2);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
 
   /* Initially, squeeze + sample heuristic number of MLKEM_GEN_MATRIX_NBLOCKS.
    */
   /* This should generate the matrix entry with high probability. */
-  mlk_xof_squeezeblocks(buf, MLKEM_GEN_MATRIX_NBLOCKS, &state);
+  ret = mlk_xof_squeezeblocks(buf, MLKEM_GEN_MATRIX_NBLOCKS, &state);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
   buflen = MLKEM_GEN_MATRIX_NBLOCKS * MLK_XOF_RATE;
   ctr = mlk_rej_uniform(entry->coeffs, MLKEM_N, 0, buf, buflen);
 
   /* Squeeze + sample one more block a time until we're done */
   buflen = MLK_XOF_RATE;
-  while (ctr < MLKEM_N)
+  while (ret == 0 && ctr < MLKEM_N)
   __loop__(
-    assigns(ctr, state, memory_slice(entry, sizeof(mlk_poly)), object_whole(buf))
+    assigns(ret, ctr, state, memory_slice(entry, sizeof(mlk_poly)), object_whole(buf))
+    invariant(ret == 0 || ret == MLK_ERR_FIPS202_FAIL)
     invariant(ctr <= MLKEM_N)
     invariant(array_bound(entry->coeffs, 0, ctr, 0, MLKEM_Q)))
   {
-    mlk_xof_squeezeblocks(buf, 1, &state);
-    ctr = mlk_rej_uniform(entry->coeffs, MLKEM_N, ctr, buf, buflen);
+    ret = mlk_xof_squeezeblocks(buf, 1, &state);
+    if (ret == 0)
+    {
+      ctr = mlk_rej_uniform(entry->coeffs, MLKEM_N, ctr, buf, buflen);
+    }
   }
 
-  mlk_xof_release(&state);
+cleanup:
+  /* Release the context also after a failure; report the first error. */
+  ret_release = mlk_xof_release(&state);
+  if (ret == 0)
+  {
+    ret = ret_release;
+  }
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(buf, sizeof(buf));
+  return ret;
 }
 
 #if defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_ETA1 == 2 || \
