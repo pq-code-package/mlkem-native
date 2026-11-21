@@ -20,7 +20,7 @@ reconstructs every accepted theorem through its own kernel.
 
 --- a/x86/proofs/decode.ml
 +++ b/x86/proofs/decode.ml
-@@ -2962,13 +2962,13 @@
+@@ -3815,13 +3815,13 @@
                (INST [rand (lhs (concl th3)),el'; n',en] pth2) in
            fun a ls -> INST ((a,ea)::ls) th) in
          function
@@ -37,7 +37,7 @@ reconstructs every accepted theorem through its own kernel.
            gint a ls
          | _ -> failwith "DECODE_LEN_THM" in
      mk_pths 0 (ARITH_RULE `LENGTH (l:byte list) = LENGTH l + 0`)
-@@ -2990,7 +2990,7 @@
+@@ -3843,7 +3843,7 @@
      let lhs,rhs = dest_eq (concl th) in
      let tm',next = dest_comb (rand rhs) in
      let rec len n = function
@@ -46,7 +46,7 @@ reconstructs every accepted theorem through its own kernel.
      | Comb(Comb(Const("CONS",_),_),l) -> len (n+1) l
      | Comb(Comb(Const("APPEND",_),
          Comb(Comb(Const("bytelist_of_num",_),i),_)),l) ->
-@@ -3260,7 +3260,7 @@
+@@ -4113,7 +4113,7 @@
            let lhs,rhs = dest_eq (concl th) in
            let tm',next = dest_comb (rand rhs) in
            let rec len n = function

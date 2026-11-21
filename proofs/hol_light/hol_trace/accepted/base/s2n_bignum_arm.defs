@@ -5,7 +5,7 @@
 # Definitions added by loading s2n_bignum/arm/proofs/base.ml, s2n_bignum/arm/proofs/consttime.ml, s2n_bignum/common/misc.ml, and the HOL Light libraries that these load.
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 # pin: hol_light https://github.com/jrh13/hol-light/commit/9b510bc76da4cecf6e509be44d327c9236ec273f
-# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/bf75b6c61dae86bbb383785987bc316e20b7ebbf
+# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/d4518712d040485efe621caba1c723a07fbc549e
 
 definition ITER
   |- (ITER : num -> ('?1 -> '?1) -> '?1 -> '?1)
@@ -1052,6 +1052,11 @@ definition bytes256
      = (specification "bytes256" bytes256:('A word -> ('A word -> byte, 256 word) component).
          !addr:('A word). bytes256 addr = bytes (addr, 32) :> (asword : (num, 256 word) component))
 
+definition bytes512
+  |- (bytes512 : 'A word -> ('A word -> byte, 512 word) component)
+     = (specification "bytes512" bytes512:('A word -> ('A word -> byte, 512 word) component).
+         !addr:('A word). bytes512 addr = bytes (addr, 64) :> (asword : (num, 512 word) component))
+
 definition top
   |- (top : ('?1 list, '?1) component)
      = component ((\l:('?1 list). HD l), (\h:'?1 l:('?1 list). CONS h (TL l)))
@@ -1155,40 +1160,46 @@ definition _<EventLoad>
      = (\a:('A word # num).
          _mk_address_uarch_event ((\a:('A word # num).
            CONSTR 0
-             (a, (@v:('A word # 'A word). T), (@v:(int64 # int64 # num). T), (@v:(int64 # num). T))
+             (a
+             , (@v:('A word # 'A word). T)
+               , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 #
-                   num) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
+                   (int64 # num) # int64) recspace))) a))
 
 definition _<EventStore>
   |- (_<EventStore> : 'A word # num -> 'A address_uarch_event)
      = (\a:('A word # num).
          _mk_address_uarch_event ((\a:('A word # num).
            CONSTR (SUC 0)
-             (a, (@v:('A word # 'A word). T), (@v:(int64 # int64 # num). T), (@v:(int64 # num). T))
+             (a
+             , (@v:('A word # 'A word). T)
+               , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 #
-                   num) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
+                   (int64 # num) # int64) recspace))) a))
 
 definition _<EventJump>
   |- (_<EventJump> : 'A word # 'A word -> 'A address_uarch_event)
      = (\a:('A word # 'A word).
          _mk_address_uarch_event ((\a:('A word # 'A word).
            CONSTR (SUC (SUC 0))
-             ((@v:('A word # num). T), a, (@v:(int64 # int64 # num). T), (@v:(int64 # num). T))
+             ((@v:('A word # num). T)
+             , a, (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 #
-                   num) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
+                   (int64 # num) # int64) recspace))) a))
 
 definition _<EventX86PEXT>
   |- (_<EventX86PEXT> : int64 # int64 # num -> 'A address_uarch_event)
      = (\a:(int64 # int64 # num).
          _mk_address_uarch_event ((\a:(int64 # int64 # num).
            CONSTR (SUC (SUC (SUC 0)))
-             ((@v:('A word # num). T), (@v:('A word # 'A word). T), a, (@v:(int64 # num). T))
+             ((@v:('A word # num). T)
+             , (@v:('A word # 'A word). T), a, (@v:(int64 # num). T), (@v:int64. T))
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 #
-                   num) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
+                   (int64 # num) # int64) recspace))) a))
 
 definition _<EventX86POPCNT>
   |- (_<EventX86POPCNT> : int64 # num -> 'A address_uarch_event)
@@ -1196,10 +1207,21 @@ definition _<EventX86POPCNT>
          _mk_address_uarch_event ((\a:(int64 # num).
            CONSTR (SUC (SUC (SUC (SUC 0))))
              ((@v:('A word # num). T)
-             , (@v:('A word # 'A word). T), (@v:(int64 # int64 # num). T), a)
+             , (@v:('A word # 'A word). T), (@v:(int64 # int64 # num). T), a, (@v:int64. T))
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 #
-                   num) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
+                   (int64 # num) # int64) recspace))) a))
+
+definition _<EventX86Opmask>
+  |- (_<EventX86Opmask> : int64 -> 'A address_uarch_event)
+     = (\a:int64.
+         _mk_address_uarch_event ((\a:int64.
+           CONSTR (SUC (SUC (SUC (SUC (SUC 0)))))
+             ((@v:('A word # num). T)
+             , (@v:('A word # 'A word). T), (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), a)
+             (\n:num.
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
+                   (int64 # num) # int64) recspace))) a))
 
 definition EventLoad
   |- (EventLoad : 'A word # num -> 'A address_uarch_event)
@@ -1220,6 +1242,10 @@ definition EventX86PEXT
 definition EventX86POPCNT
   |- (EventX86POPCNT : int64 # num -> 'A address_uarch_event)
      = (_<EventX86POPCNT> : int64 # num -> 'A address_uarch_event)
+
+definition EventX86Opmask
+  |- (EventX86Opmask : int64 -> 'A address_uarch_event)
+     = (_<EventX86Opmask> : int64 -> 'A address_uarch_event)
 
 definition memaccess_inbounds
   |- (memaccess_inbounds : ('A address_uarch_event) list -> ('A word # num) list ->
@@ -3554,6 +3580,44 @@ definition arm_DUP_GEN
                          (word_duplicate (word_zx n : byte) : int64)) in
                  := Rd (word_zx d : int128) s)))
 
+definition arm_DUP_ELEM_SCALAR
+  |- arm_DUP_ELEM_SCALAR
+     = (specification "arm_DUP_ELEM_SCALAR" arm_DUP_ELEM_SCALAR:((armstate, int128) component ->
+           (armstate, int128) component -> num -> num -> armstate -> armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component) idx:num esize:num.
+           arm_DUP_ELEM_SCALAR Rd Rn idx esize
+           = (\s:armstate.
+               let n:int128 = read Rn s in
+               let e:int64 = (word_subword n (idx * esize, esize) : int64) in
+               := Rd (word_zx e : int128) s))
+
+definition arm_DUP_ELEM
+  |- arm_DUP_ELEM
+     = (specification "arm_DUP_ELEM" arm_DUP_ELEM:((armstate, int128) component ->
+           (armstate, int128) component -> num -> num -> num -> armstate -> armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component) idx:num esize:num
+          datasize:num.
+           arm_DUP_ELEM Rd Rn idx esize datasize
+           = (\s:armstate.
+               let n:int128 = read Rn s in
+               COND (datasize = 128)
+                 (let d:int128 =
+                     COND (esize = 64)
+                       (word_duplicate (word_subword n (64 * idx, 64) : int64) : int128)
+                       (COND (esize = 32)
+                         (word_duplicate (word_subword n (32 * idx, 32) : int32) : int128)
+                         (COND (esize = 16)
+                           (word_duplicate (word_subword n (16 * idx, 16) : int16) : int128)
+                           (word_duplicate (word_subword n (8 * idx, 8) : byte) : int128))) in
+                 := Rd d s)
+                 (let d:int64 =
+                     COND (esize = 32)
+                       (word_duplicate (word_subword n (32 * idx, 32) : int32) : int64)
+                       (COND (esize = 16)
+                         (word_duplicate (word_subword n (16 * idx, 16) : int16) : int64)
+                         (word_duplicate (word_subword n (8 * idx, 8) : byte) : int64)) in
+                 := Rd (word_zx d : int128) s)))
+
 definition arm_EON
   |- (arm_EON : ('?1, 'N word) component -> ('?1, 'N word) component -> ('?1, 'N word) component ->
          '?1 -> '?1 -> bool)
@@ -4088,9 +4152,10 @@ definition arm_SHL_VEC
                  := Rd d s)
                  (let n:int64 = (word_subword n (0, 64) : int64) in
                  let d:int64 =
-                     COND (esize = 32) (usimd2 (\x:int32. word_shl x amt) n)
-                       (COND (esize = 16) (usimd4 (\x:int16. word_shl x amt) n)
-                         (usimd8 (\x:byte. word_shl x amt) n)) in
+                     COND (esize = 64) (word_shl n amt)
+                       (COND (esize = 32) (usimd2 (\x:int32. word_shl x amt) n)
+                         (COND (esize = 16) (usimd4 (\x:int16. word_shl x amt) n)
+                           (usimd8 (\x:byte. word_shl x amt) n))) in
                  := Rd (word_zx d : int128) s)))
 
 definition word_ishr_round
@@ -4263,6 +4328,24 @@ definition arm_SHRN
                        (usimd4 (\x:int32. (word_subword (word_ushr x amnt) (0, 16) : int16)) n)
                        (usimd8 (\x:int16. (word_subword (word_ushr x amnt) (0, 8) : byte)) n)) in
                := Rd (word_subword res (0, 128) : '?2 word) s))
+
+definition arm_SHRN2
+  |- (arm_SHRN2 : ('?1, int128) component -> ('?1, int128) component -> num -> num -> '?1 -> '?1 ->
+         bool)
+     = (specification "arm_SHRN2" arm_SHRN2:(('?1, int128) component -> ('?1, int128) component ->
+           num -> num -> '?1 -> '?1 -> bool).
+         !Rd:(('?1, int128) component) Rn:(('?1, int128) component) amnt:num esize:num.
+           arm_SHRN2 Rd Rn amnt esize
+           = (\s:'?1.
+               let n:int128 = read Rn s in
+               let d:int128 = read Rd s in
+               let res:int64 =
+                   COND (esize = 32)
+                     (usimd2 (\x:int64. (word_subword (word_ushr x amnt) (0, 32) : int32)) n)
+                     (COND (esize = 16)
+                       (usimd4 (\x:int32. (word_subword (word_ushr x amnt) (0, 16) : int16)) n)
+                       (usimd8 (\x:int16. (word_subword (word_ushr x amnt) (0, 8) : byte)) n)) in
+               := Rd (word_join res (word_subword d (0, 64) : int64) : int128) s))
 
 definition word_uqshrun
   |- (word_uqshrun : 'N word -> num -> 'M word)
@@ -5167,6 +5250,232 @@ definition arm_SSHLL2_VEC
                    (let r:int128 = usimd8 (\x:byte. word_shl (word_sx x : int16) shift) nl in
                    := Rd r s))))
 
+definition arm_SADDW
+  |- arm_SADDW
+     = (specification "arm_SADDW" arm_SADDW:((armstate, int128) component ->
+           (armstate, int128) component -> (armstate, int128) component -> num -> armstate ->
+           armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component)
+          Rm:((armstate, int128) component) esize:num.
+           arm_SADDW Rd Rn Rm esize
+           = (\s:armstate.
+               let n:int128 = read Rn s in
+               let m:int128 = read Rm s in
+               let mlow:int64 = (word_subword m (0, 64) : int64) in
+               COND (esize = 32)
+                 (let mlowsx:int128 = usimd2 (word_sx : int32 -> int64) mlow in
+                 := Rd (simd2 (word_add : int64 -> int64 -> int64) n mlowsx) s)
+                 (COND (esize = 16)
+                   (let mlowsx:int128 = usimd4 (word_sx : int16 -> int32) mlow in
+                   := Rd (simd4 (word_add : int32 -> int32 -> int32) n mlowsx) s)
+                   (let mlowsx:int128 = usimd8 (word_sx : byte -> int16) mlow in
+                   := Rd (simd8 (word_add : int16 -> int16 -> int16) n mlowsx) s))))
+
+definition arm_SADDW2
+  |- arm_SADDW2
+     = (specification "arm_SADDW2" arm_SADDW2:((armstate, int128) component ->
+           (armstate, int128) component -> (armstate, int128) component -> num -> armstate ->
+           armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component)
+          Rm:((armstate, int128) component) esize:num.
+           arm_SADDW2 Rd Rn Rm esize
+           = (\s:armstate.
+               let n:int128 = read Rn s in
+               let m:int128 = read Rm s in
+               let mhi:int64 = (word_subword m (64, 64) : int64) in
+               COND (esize = 32)
+                 (let mhisx:int128 = usimd2 (word_sx : int32 -> int64) mhi in
+                 := Rd (simd2 (word_add : int64 -> int64 -> int64) n mhisx) s)
+                 (COND (esize = 16)
+                   (let mhisx:int128 = usimd4 (word_sx : int16 -> int32) mhi in
+                   := Rd (simd4 (word_add : int32 -> int32 -> int32) n mhisx) s)
+                   (let mhisx:int128 = usimd8 (word_sx : byte -> int16) mhi in
+                   := Rd (simd8 (word_add : int16 -> int16 -> int16) n mhisx) s))))
+
+definition arm_SSUBL
+  |- arm_SSUBL
+     = (specification "arm_SSUBL" arm_SSUBL:((armstate, int128) component ->
+           (armstate, int128) component -> (armstate, int128) component -> num -> armstate ->
+           armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component)
+          Rm:((armstate, int128) component) esize:num.
+           arm_SSUBL Rd Rn Rm esize
+           = (\s:armstate.
+               let n:int128 = read Rn s in
+               let m:int128 = read Rm s in
+               let nlow:int64 = (word_subword n (0, 64) : int64) in
+               let mlow:int64 = (word_subword m (0, 64) : int64) in
+               COND (esize = 32)
+                 (let nlowsx:int128 = usimd2 (word_sx : int32 -> int64) nlow in
+                 let mlowsx:int128 = usimd2 (word_sx : int32 -> int64) mlow in
+                 := Rd (simd2 (word_sub : int64 -> int64 -> int64) nlowsx mlowsx) s)
+                 (COND (esize = 16)
+                   (let nlowsx:int128 = usimd4 (word_sx : int16 -> int32) nlow in
+                   let mlowsx:int128 = usimd4 (word_sx : int16 -> int32) mlow in
+                   := Rd (simd4 (word_sub : int32 -> int32 -> int32) nlowsx mlowsx) s)
+                   (let nlowsx:int128 = usimd8 (word_sx : byte -> int16) nlow in
+                   let mlowsx:int128 = usimd8 (word_sx : byte -> int16) mlow in
+                   := Rd (simd8 (word_sub : int16 -> int16 -> int16) nlowsx mlowsx) s))))
+
+definition arm_SSUBL2
+  |- arm_SSUBL2
+     = (specification "arm_SSUBL2" arm_SSUBL2:((armstate, int128) component ->
+           (armstate, int128) component -> (armstate, int128) component -> num -> armstate ->
+           armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component)
+          Rm:((armstate, int128) component) esize:num.
+           arm_SSUBL2 Rd Rn Rm esize
+           = (\s:armstate.
+               let n:int128 = read Rn s in
+               let m:int128 = read Rm s in
+               let nhi:int64 = (word_subword n (64, 64) : int64) in
+               let mhi:int64 = (word_subword m (64, 64) : int64) in
+               COND (esize = 32)
+                 (let nhisx:int128 = usimd2 (word_sx : int32 -> int64) nhi in
+                 let mhisx:int128 = usimd2 (word_sx : int32 -> int64) mhi in
+                 := Rd (simd2 (word_sub : int64 -> int64 -> int64) nhisx mhisx) s)
+                 (COND (esize = 16)
+                   (let nhisx:int128 = usimd4 (word_sx : int16 -> int32) nhi in
+                   let mhisx:int128 = usimd4 (word_sx : int16 -> int32) mhi in
+                   := Rd (simd4 (word_sub : int32 -> int32 -> int32) nhisx mhisx) s)
+                   (let nhisx:int128 = usimd8 (word_sx : byte -> int16) nhi in
+                   let mhisx:int128 = usimd8 (word_sx : byte -> int16) mhi in
+                   := Rd (simd8 (word_sub : int16 -> int16 -> int16) nhisx mhisx) s))))
+
+definition arm_SSUBW
+  |- arm_SSUBW
+     = (specification "arm_SSUBW" arm_SSUBW:((armstate, int128) component ->
+           (armstate, int128) component -> (armstate, int128) component -> num -> armstate ->
+           armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component)
+          Rm:((armstate, int128) component) esize:num.
+           arm_SSUBW Rd Rn Rm esize
+           = (\s:armstate.
+               let n:int128 = read Rn s in
+               let m:int128 = read Rm s in
+               let mlow:int64 = (word_subword m (0, 64) : int64) in
+               COND (esize = 32)
+                 (let mlowsx:int128 = usimd2 (word_sx : int32 -> int64) mlow in
+                 := Rd (simd2 (word_sub : int64 -> int64 -> int64) n mlowsx) s)
+                 (COND (esize = 16)
+                   (let mlowsx:int128 = usimd4 (word_sx : int16 -> int32) mlow in
+                   := Rd (simd4 (word_sub : int32 -> int32 -> int32) n mlowsx) s)
+                   (let mlowsx:int128 = usimd8 (word_sx : byte -> int16) mlow in
+                   := Rd (simd8 (word_sub : int16 -> int16 -> int16) n mlowsx) s))))
+
+definition arm_SSUBW2
+  |- arm_SSUBW2
+     = (specification "arm_SSUBW2" arm_SSUBW2:((armstate, int128) component ->
+           (armstate, int128) component -> (armstate, int128) component -> num -> armstate ->
+           armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component)
+          Rm:((armstate, int128) component) esize:num.
+           arm_SSUBW2 Rd Rn Rm esize
+           = (\s:armstate.
+               let n:int128 = read Rn s in
+               let m:int128 = read Rm s in
+               let mhi:int64 = (word_subword m (64, 64) : int64) in
+               COND (esize = 32)
+                 (let mhisx:int128 = usimd2 (word_sx : int32 -> int64) mhi in
+                 := Rd (simd2 (word_sub : int64 -> int64 -> int64) n mhisx) s)
+                 (COND (esize = 16)
+                   (let mhisx:int128 = usimd4 (word_sx : int16 -> int32) mhi in
+                   := Rd (simd4 (word_sub : int32 -> int32 -> int32) n mhisx) s)
+                   (let mhisx:int128 = usimd8 (word_sx : byte -> int16) mhi in
+                   := Rd (simd8 (word_sub : int16 -> int16 -> int16) n mhisx) s))))
+
+definition arm_USUBL
+  |- arm_USUBL
+     = (specification "arm_USUBL" arm_USUBL:((armstate, int128) component ->
+           (armstate, int128) component -> (armstate, int128) component -> num -> armstate ->
+           armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component)
+          Rm:((armstate, int128) component) esize:num.
+           arm_USUBL Rd Rn Rm esize
+           = (\s:armstate.
+               let n:int128 = read Rn s in
+               let m:int128 = read Rm s in
+               let nlow:int64 = (word_subword n (0, 64) : int64) in
+               let mlow:int64 = (word_subword m (0, 64) : int64) in
+               COND (esize = 32)
+                 (let nlowzx:int128 = usimd2 (word_zx : int32 -> int64) nlow in
+                 let mlowzx:int128 = usimd2 (word_zx : int32 -> int64) mlow in
+                 := Rd (simd2 (word_sub : int64 -> int64 -> int64) nlowzx mlowzx) s)
+                 (COND (esize = 16)
+                   (let nlowzx:int128 = usimd4 (word_zx : int16 -> int32) nlow in
+                   let mlowzx:int128 = usimd4 (word_zx : int16 -> int32) mlow in
+                   := Rd (simd4 (word_sub : int32 -> int32 -> int32) nlowzx mlowzx) s)
+                   (let nlowzx:int128 = usimd8 (word_zx : byte -> int16) nlow in
+                   let mlowzx:int128 = usimd8 (word_zx : byte -> int16) mlow in
+                   := Rd (simd8 (word_sub : int16 -> int16 -> int16) nlowzx mlowzx) s))))
+
+definition arm_USUBL2
+  |- arm_USUBL2
+     = (specification "arm_USUBL2" arm_USUBL2:((armstate, int128) component ->
+           (armstate, int128) component -> (armstate, int128) component -> num -> armstate ->
+           armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component)
+          Rm:((armstate, int128) component) esize:num.
+           arm_USUBL2 Rd Rn Rm esize
+           = (\s:armstate.
+               let n:int128 = read Rn s in
+               let m:int128 = read Rm s in
+               let nhi:int64 = (word_subword n (64, 64) : int64) in
+               let mhi:int64 = (word_subword m (64, 64) : int64) in
+               COND (esize = 32)
+                 (let nhizx:int128 = usimd2 (word_zx : int32 -> int64) nhi in
+                 let mhizx:int128 = usimd2 (word_zx : int32 -> int64) mhi in
+                 := Rd (simd2 (word_sub : int64 -> int64 -> int64) nhizx mhizx) s)
+                 (COND (esize = 16)
+                   (let nhizx:int128 = usimd4 (word_zx : int16 -> int32) nhi in
+                   let mhizx:int128 = usimd4 (word_zx : int16 -> int32) mhi in
+                   := Rd (simd4 (word_sub : int32 -> int32 -> int32) nhizx mhizx) s)
+                   (let nhizx:int128 = usimd8 (word_zx : byte -> int16) nhi in
+                   let mhizx:int128 = usimd8 (word_zx : byte -> int16) mhi in
+                   := Rd (simd8 (word_sub : int16 -> int16 -> int16) nhizx mhizx) s))))
+
+definition arm_USUBW
+  |- arm_USUBW
+     = (specification "arm_USUBW" arm_USUBW:((armstate, int128) component ->
+           (armstate, int128) component -> (armstate, int128) component -> num -> armstate ->
+           armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component)
+          Rm:((armstate, int128) component) esize:num.
+           arm_USUBW Rd Rn Rm esize
+           = (\s:armstate.
+               let n:int128 = read Rn s in
+               let m:int128 = read Rm s in
+               let mlow:int64 = (word_subword m (0, 64) : int64) in
+               COND (esize = 32)
+                 (let mlowzx:int128 = usimd2 (word_zx : int32 -> int64) mlow in
+                 := Rd (simd2 (word_sub : int64 -> int64 -> int64) n mlowzx) s)
+                 (COND (esize = 16)
+                   (let mlowzx:int128 = usimd4 (word_zx : int16 -> int32) mlow in
+                   := Rd (simd4 (word_sub : int32 -> int32 -> int32) n mlowzx) s)
+                   (let mlowzx:int128 = usimd8 (word_zx : byte -> int16) mlow in
+                   := Rd (simd8 (word_sub : int16 -> int16 -> int16) n mlowzx) s))))
+
+definition arm_USUBW2
+  |- arm_USUBW2
+     = (specification "arm_USUBW2" arm_USUBW2:((armstate, int128) component ->
+           (armstate, int128) component -> (armstate, int128) component -> num -> armstate ->
+           armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component)
+          Rm:((armstate, int128) component) esize:num.
+           arm_USUBW2 Rd Rn Rm esize
+           = (\s:armstate.
+               let n:int128 = read Rn s in
+               let m:int128 = read Rm s in
+               let mhi:int64 = (word_subword m (64, 64) : int64) in
+               COND (esize = 32)
+                 (let mhizx:int128 = usimd2 (word_zx : int32 -> int64) mhi in
+                 := Rd (simd2 (word_sub : int64 -> int64 -> int64) n mhizx) s)
+                 (COND (esize = 16)
+                   (let mhizx:int128 = usimd4 (word_zx : int16 -> int32) mhi in
+                   := Rd (simd4 (word_sub : int32 -> int32 -> int32) n mhizx) s)
+                   (let mhizx:int128 = usimd8 (word_zx : byte -> int16) mhi in
+                   := Rd (simd8 (word_sub : int16 -> int16 -> int16) n mhizx) s))))
+
 definition arm_USHR_VEC
   |- (arm_USHR_VEC : ('?1, int128) component -> ('?1, int128) component -> num -> num -> num ->
          '?1 -> '?1 -> bool)
@@ -5221,6 +5530,159 @@ definition arm_USHL_VEC
                        (COND (esize = 16) (simd4 (word_ushl : int16 -> int16 -> int16) n m)
                          (simd8 (word_ushl : byte -> byte -> byte) n m)) in
                  := Rd (word_zx d : int128) s)))
+
+definition word_urhadd
+  |- (word_urhadd : 'N word -> 'N word -> 'N word)
+     = (specification "word_urhadd" word_urhadd:('N word -> 'N word -> 'N word).
+         !x:('N word) y:('N word). word_urhadd x y = (word ((val x + val y + 1) DIV 2) : 'N word))
+
+definition arm_URHADD_VEC
+  |- arm_URHADD_VEC
+     = (specification "arm_URHADD_VEC" arm_URHADD_VEC:((armstate, int128) component ->
+           (armstate, int128) component -> (armstate, int128) component -> num -> num -> armstate ->
+           armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component)
+          Rm:((armstate, int128) component) esize:num datasize:num.
+           arm_URHADD_VEC Rd Rn Rm esize datasize
+           = (\s:armstate.
+               let n:int128 = read Rn s
+               and m:int128 = read Rm s in
+               COND (datasize = 128)
+                 (let d:int128 =
+                     COND (esize = 32) (simd4 (word_urhadd : int32 -> int32 -> int32) n m)
+                       (COND (esize = 16) (simd8 (word_urhadd : int16 -> int16 -> int16) n m)
+                         (simd16 (word_urhadd : byte -> byte -> byte) n m)) in
+                 := Rd d s)
+                 (let n:int64 = (word_subword n (0, 64) : int64) in
+                 let m:int64 = (word_subword m (0, 64) : int64) in
+                 let d:int64 =
+                     COND (esize = 32) (simd2 (word_urhadd : int32 -> int32 -> int32) n m)
+                       (COND (esize = 16) (simd4 (word_urhadd : int16 -> int16 -> int16) n m)
+                         (simd8 (word_urhadd : byte -> byte -> byte) n m)) in
+                 := Rd (word_zx d : int128) s)))
+
+definition arm_SMAX_VEC
+  |- arm_SMAX_VEC
+     = (specification "arm_SMAX_VEC" arm_SMAX_VEC:((armstate, int128) component ->
+           (armstate, int128) component -> (armstate, int128) component -> num -> num -> armstate ->
+           armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component)
+          Rm:((armstate, int128) component) esize:num datasize:num.
+           arm_SMAX_VEC Rd Rn Rm esize datasize
+           = (\s:armstate.
+               let n:int128 = read Rn s
+               and m:int128 = read Rm s in
+               COND (datasize = 128)
+                 (let d:int128 =
+                     COND (esize = 32) (simd4 (word_imax : int32 -> int32 -> int32) n m)
+                       (COND (esize = 16) (simd8 (word_imax : int16 -> int16 -> int16) n m)
+                         (simd16 (word_imax : byte -> byte -> byte) n m)) in
+                 := Rd d s)
+                 (let n:int64 = (word_subword n (0, 64) : int64) in
+                 let m:int64 = (word_subword m (0, 64) : int64) in
+                 let d:int64 =
+                     COND (esize = 32) (simd2 (word_imax : int32 -> int32 -> int32) n m)
+                       (COND (esize = 16) (simd4 (word_imax : int16 -> int16 -> int16) n m)
+                         (simd8 (word_imax : byte -> byte -> byte) n m)) in
+                 := Rd (word_zx d : int128) s)))
+
+definition arm_UMAX_VEC
+  |- arm_UMAX_VEC
+     = (specification "arm_UMAX_VEC" arm_UMAX_VEC:((armstate, int128) component ->
+           (armstate, int128) component -> (armstate, int128) component -> num -> num -> armstate ->
+           armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component)
+          Rm:((armstate, int128) component) esize:num datasize:num.
+           arm_UMAX_VEC Rd Rn Rm esize datasize
+           = (\s:armstate.
+               let n:int128 = read Rn s
+               and m:int128 = read Rm s in
+               COND (datasize = 128)
+                 (let d:int128 =
+                     COND (esize = 32) (simd4 (word_umax : int32 -> int32 -> int32) n m)
+                       (COND (esize = 16) (simd8 (word_umax : int16 -> int16 -> int16) n m)
+                         (simd16 (word_umax : byte -> byte -> byte) n m)) in
+                 := Rd d s)
+                 (let n:int64 = (word_subword n (0, 64) : int64) in
+                 let m:int64 = (word_subword m (0, 64) : int64) in
+                 let d:int64 =
+                     COND (esize = 32) (simd2 (word_umax : int32 -> int32 -> int32) n m)
+                       (COND (esize = 16) (simd4 (word_umax : int16 -> int16 -> int16) n m)
+                         (simd8 (word_umax : byte -> byte -> byte) n m)) in
+                 := Rd (word_zx d : int128) s)))
+
+definition arm_UADALP
+  |- arm_UADALP
+     = (specification "arm_UADALP" arm_UADALP:((armstate, int128) component ->
+           (armstate, int128) component -> num -> num -> armstate -> armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component) esize:num
+          datasize:num.
+           arm_UADALP Rd Rn esize datasize
+           = (\s:armstate.
+               let n:int128 = read Rn s in
+               let d:int128 = read Rd s in
+               COND (datasize = 128)
+                 (COND (esize = 32)
+                   (let res:int128 =
+                       usimd2
+                         (\x:int64.
+                           word_add (word_zx (word_subword x (0, 32) : int32) : int64)
+                             (word_zx (word_subword x (32, 32) : int32) : int64))
+                         n in
+                   := Rd (simd2 (word_add : int64 -> int64 -> int64) d res) s)
+                   (COND (esize = 16)
+                     (let res:int128 =
+                         usimd4
+                           (\x:int32.
+                             word_add (word_zx (word_subword x (0, 16) : int16) : int32)
+                               (word_zx (word_subword x (16, 16) : int16) : int32))
+                           n in
+                     := Rd (simd4 (word_add : int32 -> int32 -> int32) d res) s)
+                     (let res:int128 =
+                         usimd8
+                           (\x:int16.
+                             word_add (word_zx (word_subword x (0, 8) : byte) : int16)
+                               (word_zx (word_subword x (8, 8) : byte) : int16))
+                           n in
+                     := Rd (simd8 (word_add : int16 -> int16 -> int16) d res) s)))
+                 (let n:int64 = (word_subword n (0, 64) : int64) in
+                 let d:int64 = (word_subword d (0, 64) : int64) in
+                 let d:int64 =
+                     COND (esize = 32)
+                       (let res:int64 =
+                           word_add (word_zx (word_subword n (0, 32) : int32) : int64)
+                             (word_zx (word_subword n (32, 32) : int32) : int64) in
+                       word_add d res)
+                       (COND (esize = 16)
+                         (let res:int64 =
+                             usimd2
+                               (\x:int32.
+                                 word_add (word_zx (word_subword x (0, 16) : int16) : int32)
+                                   (word_zx (word_subword x (16, 16) : int16) : int32))
+                               n in
+                         simd2 (word_add : int32 -> int32 -> int32) d res)
+                         (let res:int64 =
+                             usimd4
+                               (\x:int16.
+                                 word_add (word_zx (word_subword x (0, 8) : byte) : int16)
+                                   (word_zx (word_subword x (8, 8) : byte) : int16))
+                               n in
+                         simd4 (word_add : int16 -> int16 -> int16) d res)) in
+                 := Rd (word_zx d : int128) s)))
+
+definition arm_ADDV
+  |- arm_ADDV
+     = (specification "arm_ADDV" arm_ADDV:((armstate, int128) component ->
+           (armstate, int128) component -> num -> num -> armstate -> armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component) elements:num
+          esize:num.
+           arm_ADDV Rd Rn elements esize
+           = (\s:armstate.
+               let n:int128 = read Rn s in
+               let d:num =
+                   nsum (0..(elements - 1)) (\i:num.
+                     val (word_subword n (esize * i, esize) : int128)) in
+               := Rd (word (d MOD 2 EXP esize) : int128) s))
 
 definition arm_USRA_VEC
   |- (arm_USRA_VEC : ('?1, int128) component -> ('?1, int128) component -> num -> num -> num ->
@@ -5323,6 +5785,21 @@ definition arm_XTN
                    := Rd (word_zx nlow : int128) s)
                    (let nlow:int64 = usimd8 (\x:int16. (word_subword x (0, 8) : byte)) n in
                    := Rd (word_zx nlow : int128) s))))
+
+definition arm_XTN2
+  |- arm_XTN2
+     = (specification "arm_XTN2" arm_XTN2:((armstate, int128) component ->
+           (armstate, int128) component -> num -> armstate -> armstate -> bool).
+         !Rd:((armstate, int128) component) Rn:((armstate, int128) component) esize:num.
+           arm_XTN2 Rd Rn esize
+           = (\s:armstate.
+               let n:int128 = read Rn s in
+               let d:int128 = read Rd s in
+               let res:int64 =
+                   COND (esize = 32) (usimd2 (\x:int64. (word_subword x (0, 32) : int32)) n)
+                     (COND (esize = 16) (usimd4 (\x:int32. (word_subword x (0, 16) : int16)) n)
+                       (usimd8 (\x:int16. (word_subword x (0, 8) : byte)) n)) in
+               := Rd (word_join res (word_subword d (0, 64) : int64) : int128) s))
 
 definition word_split_lohi
   |- (word_split_lohi : ('N tybit0) word -> 'N word # 'N word)
@@ -5581,6 +6058,35 @@ definition arm_TBL2
                        (word_zx m : int64) in
                  := Rd (word_zx d : int128) s)))
 
+definition arm_TBL3
+  |- (arm_TBL3 : (armstate, int128) component -> (armstate, int128) component ->
+         (armstate, int128) component -> (armstate, int128) component ->
+         (armstate, (((('?1 tybit0) tybit0) tybit0) tybit0) word) component -> num -> armstate ->
+         armstate -> bool)
+     = (specification "arm_TBL3" arm_TBL3:((armstate, int128) component ->
+           (armstate, int128) component -> (armstate, int128) component ->
+           (armstate, int128) component ->
+           (armstate, (((('?1 tybit0) tybit0) tybit0) tybit0) word) component -> num -> armstate ->
+           armstate -> bool).
+         !Rd:((armstate, int128) component) Rn1:((armstate, int128) component)
+          Rn2:((armstate, int128) component) Rn3:((armstate, int128) component)
+          Rm:((armstate, (((('?1 tybit0) tybit0) tybit0) tybit0) word) component) datasize:num.
+           arm_TBL3 Rd Rn1 Rn2 Rn3 Rm datasize
+           = (\s:armstate.
+               let n1:int128 = read Rn1 s in
+               let n2:int128 = read Rn2 s in
+               let n3:int128 = read Rn3 s in
+               let table:(384 word) = (word_join n3 (word_join n2 n1 : 256 word) : 384 word) in
+               let m:((((('?1 tybit0) tybit0) tybit0) tybit0) word) = read Rm s in
+               COND (datasize = 128)
+                 (let d:int128 =
+                     usimd16 (\x:('?1 word). (word_subword table (8 * val x, 8) : byte)) m in
+                 := Rd d s)
+                 (let d:int64 =
+                     usimd8 (\x:byte. (word_subword table (8 * val x, 8) : byte))
+                       (word_zx m : int64) in
+                 := Rd (word_zx d : int128) s)))
+
 definition arm_LDR
   |- (arm_LDR : (armstate, 'N word) component -> (armstate, int64) component -> offset ->
          armstate -> armstate -> bool)
@@ -5663,6 +6169,86 @@ definition arm_STRB
                  (ASSIGNS (entirety : (armstate, armstate) component))
                  s))
 
+definition arm_LDRH
+  |- (arm_LDRH : (armstate, 'N word) component -> (armstate, int64) component -> offset ->
+         armstate -> armstate -> bool)
+     = (specification "arm_LDRH" arm_LDRH:((armstate, 'N word) component ->
+           (armstate, int64) component -> offset -> armstate -> armstate -> bool).
+         !Rt:((armstate, 'N word) component) Rn:((armstate, int64) component) off:offset.
+           arm_LDRH Rt Rn off
+           = (\s:armstate.
+               let base:int64 = read Rn s in
+               let addr:int64 = word_add base (offset_address off s) in
+               COND
+                 ((Rn = SP ==> aligned 16 base)
+                 /\ (offset_writesback off ==> orthogonal_components Rt Rn))
+                 (:= Rt (word_zx (read (memory :> bytes16 addr) s) : 'N word)
+                 ,, := events (CONS (EventLoad (addr, 2)) (read events s))
+                 ,, COND (offset_writesback off) (:= Rn (word_add base (offset_writeback off s)))
+                      ((=) : armstate -> armstate -> bool))
+                 (ASSIGNS (entirety : (armstate, armstate) component))
+                 s))
+
+definition arm_STRH
+  |- (arm_STRH : (armstate, 'N word) component -> (armstate, int64) component -> offset ->
+         armstate -> armstate -> bool)
+     = (specification "arm_STRH" arm_STRH:((armstate, 'N word) component ->
+           (armstate, int64) component -> offset -> armstate -> armstate -> bool).
+         !Rt:((armstate, 'N word) component) Rn:((armstate, int64) component) off:offset.
+           arm_STRH Rt Rn off
+           = (\s:armstate.
+               let base:int64 = read Rn s in
+               let addr:int64 = word_add base (offset_address off s) in
+               COND
+                 ((Rn = SP ==> aligned 16 base)
+                 /\ (offset_writesback off ==> orthogonal_components Rt Rn))
+                 (:= (memory :> bytes16 addr) (word_zx (read Rt s) : int16)
+                 ,, := events (CONS (EventStore (addr, 2)) (read events s))
+                 ,, COND (offset_writesback off) (:= Rn (word_add base (offset_writeback off s)))
+                      ((=) : armstate -> armstate -> bool))
+                 (ASSIGNS (entirety : (armstate, armstate) component))
+                 s))
+
+definition arm_LDRSB
+  |- (arm_LDRSB : (armstate, 'N word) component -> (armstate, int64) component -> offset ->
+         armstate -> armstate -> bool)
+     = (specification "arm_LDRSB" arm_LDRSB:((armstate, 'N word) component ->
+           (armstate, int64) component -> offset -> armstate -> armstate -> bool).
+         !Rt:((armstate, 'N word) component) Rn:((armstate, int64) component) off:offset.
+           arm_LDRSB Rt Rn off
+           = (\s:armstate.
+               let base:int64 = read Rn s in
+               let addr:int64 = word_add base (offset_address off s) in
+               COND
+                 ((Rn = SP ==> aligned 16 base)
+                 /\ (offset_writesback off ==> orthogonal_components Rt Rn))
+                 (:= Rt (word_sx (read (memory :> bytes8 addr) s) : 'N word)
+                 ,, := events (CONS (EventLoad (addr, 1)) (read events s))
+                 ,, COND (offset_writesback off) (:= Rn (word_add base (offset_writeback off s)))
+                      ((=) : armstate -> armstate -> bool))
+                 (ASSIGNS (entirety : (armstate, armstate) component))
+                 s))
+
+definition arm_LDRSH
+  |- (arm_LDRSH : (armstate, 'N word) component -> (armstate, int64) component -> offset ->
+         armstate -> armstate -> bool)
+     = (specification "arm_LDRSH" arm_LDRSH:((armstate, 'N word) component ->
+           (armstate, int64) component -> offset -> armstate -> armstate -> bool).
+         !Rt:((armstate, 'N word) component) Rn:((armstate, int64) component) off:offset.
+           arm_LDRSH Rt Rn off
+           = (\s:armstate.
+               let base:int64 = read Rn s in
+               let addr:int64 = word_add base (offset_address off s) in
+               COND
+                 ((Rn = SP ==> aligned 16 base)
+                 /\ (offset_writesback off ==> orthogonal_components Rt Rn))
+                 (:= Rt (word_sx (read (memory :> bytes16 addr) s) : 'N word)
+                 ,, := events (CONS (EventLoad (addr, 2)) (read events s))
+                 ,, COND (offset_writesback off) (:= Rn (word_add base (offset_writeback off s)))
+                      ((=) : armstate -> armstate -> bool))
+                 (ASSIGNS (entirety : (armstate, armstate) component))
+                 s))
+
 definition arm_LDP
   |- (arm_LDP : (armstate, 'N word) component -> (armstate, 'N word) component ->
          (armstate, int64) component -> offset -> armstate -> armstate -> bool)
@@ -5677,6 +6263,7 @@ definition arm_LDP
                let addr:int64 = word_add base (offset_address off s) in
                COND
                  ((Rn = SP ==> aligned 16 base)
+                 /\ ~ (Rt1 = Rt2)
                  /\ orthogonal_components Rt1 Rt2
                  /\ (offset_writesback off
                     ==> orthogonal_components Rt1 Rn /\ orthogonal_components Rt2 Rn))
@@ -6092,6 +6679,151 @@ definition arm_ST3
                    := (memory :> (wbytes eaddr : (int64 -> byte, 192 word) component)) ilv)
                  ,, := events (CONS (EventStore (eaddr, 3 * datasize DIV 8)) (read events s))
                  ,, COND (offset_writesback off) (:= Rn (word_add address (offset_writeback off s)))
+                      ((=) : armstate -> armstate -> bool))
+                 (ASSIGNS (entirety : (armstate, armstate) component))
+                 s))
+
+definition arm_LDP3
+  |- (arm_LDP3 : (armstate, 'N word) component -> (armstate, 'N word) component ->
+         (armstate, 'N word) component -> (armstate, int64) component -> offset -> armstate ->
+         armstate -> bool)
+     = (specification "arm_LDP3" arm_LDP3:((armstate, 'N word) component ->
+           (armstate, 'N word) component -> (armstate, 'N word) component ->
+           (armstate, int64) component -> offset -> armstate -> armstate -> bool).
+         !Rt1:((armstate, 'N word) component) Rt2:((armstate, 'N word) component)
+          Rt3:((armstate, 'N word) component) Rn:((armstate, int64) component) off:offset.
+           arm_LDP3 Rt1 Rt2 Rt3 Rn off
+           = (\s:armstate.
+               let base:int64 = read Rn s in
+               let addr:int64 = word_add base (offset_address off s) in
+               COND
+                 ((Rn = SP ==> aligned 16 base)
+                 /\ orthogonal_components Rt1 Rt2
+                 /\ orthogonal_components Rt1 Rt3
+                 /\ orthogonal_components Rt2 Rt3
+                 /\ (offset_writesback off
+                    ==> orthogonal_components Rt1 Rn
+                        /\ orthogonal_components Rt2 Rn
+                        /\ orthogonal_components Rt3 Rn))
+                 (let w:num = dimindex (UNIV : 'N -> bool) DIV 8 in
+                 := Rt1 (read (memory :> (wbytes addr : (int64 -> byte, 'N word) component)) s)
+                 ,, := Rt2 (read
+                      (memory
+                      :> (wbytes (word_add addr (word w : int64))
+                           : (int64 -> byte, 'N word) component))
+                      s)
+                 ,, := Rt3 (read
+                      (memory
+                      :> (wbytes (word_add addr (word (2 * w) : int64))
+                           : (int64 -> byte, 'N word) component))
+                      s)
+                 ,, := events (CONS (EventLoad (addr, 3 * w)) (read events s))
+                 ,, COND (offset_writesback off) (:= Rn (word_add base (offset_writeback off s)))
+                      ((=) : armstate -> armstate -> bool))
+                 (ASSIGNS (entirety : (armstate, armstate) component))
+                 s))
+
+definition arm_STP3
+  |- (arm_STP3 : (armstate, 'N word) component -> (armstate, 'N word) component ->
+         (armstate, 'N word) component -> (armstate, int64) component -> offset -> armstate ->
+         armstate -> bool)
+     = (specification "arm_STP3" arm_STP3:((armstate, 'N word) component ->
+           (armstate, 'N word) component -> (armstate, 'N word) component ->
+           (armstate, int64) component -> offset -> armstate -> armstate -> bool).
+         !Rt1:((armstate, 'N word) component) Rt2:((armstate, 'N word) component)
+          Rt3:((armstate, 'N word) component) Rn:((armstate, int64) component) off:offset.
+           arm_STP3 Rt1 Rt2 Rt3 Rn off
+           = (\s:armstate.
+               let base:int64 = read Rn s in
+               let addr:int64 = word_add base (offset_address off s) in
+               COND
+                 ((Rn = SP ==> aligned 16 base)
+                 /\ (offset_writesback off
+                    ==> orthogonal_components Rt1 Rn
+                        /\ orthogonal_components Rt2 Rn
+                        /\ orthogonal_components Rt3 Rn))
+                 (let w:num = dimindex (UNIV : 'N -> bool) DIV 8 in
+                 := (memory :> (wbytes addr : (int64 -> byte, 'N word) component)) (read Rt1 s)
+                 ,, :=
+                      (memory
+                      :> (wbytes (word_add addr (word w : int64))
+                           : (int64 -> byte, 'N word) component))
+                      (read Rt2 s)
+                 ,, :=
+                      (memory
+                      :> (wbytes (word_add addr (word (2 * w) : int64))
+                           : (int64 -> byte, 'N word) component))
+                      (read Rt3 s)
+                 ,, := events (CONS (EventStore (addr, 3 * w)) (read events s))
+                 ,, COND (offset_writesback off) (:= Rn (word_add base (offset_writeback off s)))
+                      ((=) : armstate -> armstate -> bool))
+                 (ASSIGNS (entirety : (armstate, armstate) component))
+                 s))
+
+definition arm_LD1_LANE
+  |- arm_LD1_LANE
+     = (specification "arm_LD1_LANE" arm_LD1_LANE:((armstate, int128) component ->
+           (armstate, int64) component -> offset -> num -> num -> armstate -> armstate -> bool).
+         !Rt:((armstate, int128) component) Rn:((armstate, int64) component) off:offset esize:num
+          ix:num.
+           arm_LD1_LANE Rt Rn off esize ix
+           = (\s:armstate.
+               let base:int64 = read Rn s in
+               let addr:int64 = word_add base (offset_address off s) in
+               COND
+                 ((Rn = SP ==> aligned 16 base)
+                 /\ (offset_writesback off ==> orthogonal_components Rt Rn))
+                 (let old:int128 = read Rt s in
+                 let nu:int128 =
+                     COND (esize = 64)
+                       (word_insert old (64 * ix, 64)
+                         (read (memory :> (wbytes addr : (int64 -> byte, int64) component)) s)
+                         : int128)
+                       (COND (esize = 32)
+                         (word_insert old (32 * ix, 32)
+                           (read (memory :> (wbytes addr : (int64 -> byte, int32) component)) s)
+                           : int128)
+                         (COND (esize = 16)
+                           (word_insert old (16 * ix, 16)
+                             (read (memory :> (wbytes addr : (int64 -> byte, int16) component)) s)
+                             : int128)
+                           (word_insert old (8 * ix, 8)
+                             (read (memory :> (wbytes addr : (int64 -> byte, byte) component)) s)
+                             : int128))) in
+                 := Rt nu
+                 ,, := events (CONS (EventLoad (addr, esize DIV 8)) (read events s))
+                 ,, COND (offset_writesback off) (:= Rn (word_add base (offset_writeback off s)))
+                      ((=) : armstate -> armstate -> bool))
+                 (ASSIGNS (entirety : (armstate, armstate) component))
+                 s))
+
+definition arm_ST1_LANE
+  |- arm_ST1_LANE
+     = (specification "arm_ST1_LANE" arm_ST1_LANE:((armstate, int128) component ->
+           (armstate, int64) component -> offset -> num -> num -> armstate -> armstate -> bool).
+         !Rt:((armstate, int128) component) Rn:((armstate, int64) component) off:offset esize:num
+          ix:num.
+           arm_ST1_LANE Rt Rn off esize ix
+           = (\s:armstate.
+               let base:int64 = read Rn s in
+               let addr:int64 = word_add base (offset_address off s) in
+               COND
+                 ((Rn = SP ==> aligned 16 base)
+                 /\ (offset_writesback off ==> orthogonal_components Rt Rn))
+                 (let v:int128 = read Rt s in
+                 COND (esize = 64)
+                   (:= (memory :> (wbytes addr : (int64 -> byte, int64) component))
+                     (word_subword v (64 * ix, 64) : int64))
+                   (COND (esize = 32)
+                     (:= (memory :> (wbytes addr : (int64 -> byte, int32) component))
+                       (word_subword v (32 * ix, 32) : int32))
+                     (COND (esize = 16)
+                       (:= (memory :> (wbytes addr : (int64 -> byte, int16) component))
+                         (word_subword v (16 * ix, 16) : int16))
+                       (:= (memory :> (wbytes addr : (int64 -> byte, byte) component))
+                         (word_subword v (8 * ix, 8) : byte))))
+                 ,, := events (CONS (EventStore (addr, esize DIV 8)) (read events s))
+                 ,, COND (offset_writesback off) (:= Rn (word_add base (offset_writeback off s)))
                       ((=) : armstate -> armstate -> bool))
                  (ASSIGNS (entirety : (armstate, armstate) component))
                  s))
@@ -6609,6 +7341,15 @@ definition QREG'
 definition DREG'
   |- DREG' = (\_1:(5 word). DREG (val _1))
 
+definition SREG'
+  |- SREG' = (\_1:(5 word). SREG (val _1))
+
+definition HREG'
+  |- HREG' = (\_1:(5 word). HREG (val _1))
+
+definition BREG'
+  |- BREG' = (\_1:(5 word). BREG (val _1))
+
 definition QLANE
   |- QLANE
      = (specification "QLANE" QLANE:(5 word -> num -> num -> (armstate, int128) component).
@@ -6816,6 +7557,36 @@ definition arm_ldst_d
                armstate -> armstate -> bool)
            (DREG' _2))
 
+definition arm_ldst_s
+  |- arm_ldst_s
+     = (\_1:bool _2:(5 word).
+         COND _1
+           (arm_LDR : (armstate, int32) component -> (armstate, int64) component -> offset ->
+               armstate -> armstate -> bool)
+           (arm_STR : (armstate, int32) component -> (armstate, int64) component -> offset ->
+               armstate -> armstate -> bool)
+           (SREG' _2))
+
+definition arm_ldst_h
+  |- arm_ldst_h
+     = (\_1:bool _2:(5 word).
+         COND _1
+           (arm_LDR : (armstate, int16) component -> (armstate, int64) component -> offset ->
+               armstate -> armstate -> bool)
+           (arm_STR : (armstate, int16) component -> (armstate, int64) component -> offset ->
+               armstate -> armstate -> bool)
+           (HREG' _2))
+
+definition arm_ldst_b_simd
+  |- arm_ldst_b_simd
+     = (\_1:bool _2:(5 word).
+         COND _1
+           (arm_LDR : (armstate, byte) component -> (armstate, int64) component -> offset ->
+               armstate -> armstate -> bool)
+           (arm_STR : (armstate, byte) component -> (armstate, int64) component -> offset ->
+               armstate -> armstate -> bool)
+           (BREG' _2))
+
 definition arm_ldstb
   |- arm_ldstb
      = (\_1:bool _2:(5 word).
@@ -6825,6 +7596,22 @@ definition arm_ldstb
            (arm_STRB : (armstate, int32) component -> (armstate, int64) component -> offset ->
                armstate -> armstate -> bool)
            (WREG' _2))
+
+definition arm_ldsth
+  |- arm_ldsth
+     = (\_1:bool _2:(5 word).
+         COND _1
+           (arm_LDRH : (armstate, int32) component -> (armstate, int64) component -> offset ->
+               armstate -> armstate -> bool)
+           (arm_STRH : (armstate, int32) component -> (armstate, int64) component -> offset ->
+               armstate -> armstate -> bool)
+           (WREG' _2))
+
+definition arm_ldrsb
+  |- arm_ldrsb = (\_1:bool _2:(5 word). COND _1 (arm_LDRSB (WREG' _2)) (arm_LDRSB (XREG' _2)))
+
+definition arm_ldrsh
+  |- arm_ldrsh = (\_1:bool _2:(5 word). COND _1 (arm_LDRSH (WREG' _2)) (arm_LDRSH (XREG' _2)))
 
 definition arm_ldstp
   |- arm_ldstp
@@ -6914,6 +7701,41 @@ definition arm_ldstp_4d
            (DREG' Rt2)
            (DREG' Rt3)
            (DREG' Rt4))
+
+definition arm_ldstp_3q
+  |- arm_ldstp_3q
+     = (\_1:bool _2:(5 word).
+         let Rt2:(5 word) = (word ((val _2 + 1) MOD 32) : 5 word) in
+         let Rt3:(5 word) = (word ((val _2 + 2) MOD 32) : 5 word) in
+         COND _1
+           (arm_LDP3 : (armstate, int128) component -> (armstate, int128) component ->
+               (armstate, int128) component -> (armstate, int64) component -> offset -> armstate ->
+               armstate -> bool)
+           (arm_STP3 : (armstate, int128) component -> (armstate, int128) component ->
+               (armstate, int128) component -> (armstate, int64) component -> offset -> armstate ->
+               armstate -> bool)
+           (QREG' _2)
+           (QREG' Rt2)
+           (QREG' Rt3))
+
+definition arm_ldstp_3d
+  |- arm_ldstp_3d
+     = (\_1:bool _2:(5 word).
+         let Rt2:(5 word) = (word ((val _2 + 1) MOD 32) : 5 word) in
+         let Rt3:(5 word) = (word ((val _2 + 2) MOD 32) : 5 word) in
+         COND _1
+           (arm_LDP3 : (armstate, int64) component -> (armstate, int64) component ->
+               (armstate, int64) component -> (armstate, int64) component -> offset -> armstate ->
+               armstate -> bool)
+           (arm_STP3 : (armstate, int64) component -> (armstate, int64) component ->
+               (armstate, int64) component -> (armstate, int64) component -> offset -> armstate ->
+               armstate -> bool)
+           (DREG' _2)
+           (DREG' Rt2)
+           (DREG' Rt3))
+
+definition arm_ldst_lane
+  |- arm_ldst_lane = (\_1:bool _2:(5 word). COND _1 arm_LD1_LANE arm_ST1_LANE (QREG' _2))
 
 definition arm_ldst2
   |- arm_ldst2
@@ -7036,7 +7858,7 @@ definition decode_extendtype
                          (_ELSEPATTERN (ARB : extendtype) : num -> extendtype -> bool))))))))))
 
 definition decode
-  sha256 1332e2f658aa30c734564b75d341ce7555500d0378ed194a30e56a38ef1e1e67 (2279764 characters, not shown)
+  sha256 1c95f46917fa1c0c5b645330dffae6ebbeb705511a43b93f08dd4b32bca45e56 (3739917 characters, not shown)
 
 definition encode_BL
   |- encode_BL = (\_1:int. 2483027968 + val (iword (_1 div &4) : 26 word))
@@ -7158,7 +7980,7 @@ definition __opaque_bitmatch_2
                    : num -> (armstate -> armstate -> bool) option -> bool))))))
 
 definition __opaque_bitmatch_3
-  sha256 594b02e30f1437dee13b4a8d8723369c65aa2a4a2f8766bfbf6ee1b7baffd5c1 (2279777 characters, not shown)
+  sha256 a1813746515ca5da40371156de91069fad32b552668ff453ef3b6b3471efe36e (3739930 characters, not shown)
 
 definition __opaque_bitmatch_4
   |- __opaque_bitmatch_4
@@ -7350,73 +8172,87 @@ typedef component
        = {r:('S -> 'V) # ('V -> 'S -> 'S)})
 
 typedef address_uarch_event
-  |- (\a:((('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num) recspace).
+  |- (\a:((('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) # int64)
+         recspace).
        !address_uarch_event':((('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                int64 # num) recspace -> bool).
-         (!a:((('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num)
-             recspace).
+                (int64 # num) # int64) recspace -> bool).
+         (!a:((('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
+               int64) recspace).
            (?a:('A word # num).
-             {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num)
-               recspace}
+             {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
+                 int64) recspace}
              = (\a:('A word # num).
                  CONSTR 0
                    (a
                    , (@v:('A word # 'A word). T)
-                     , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T))
+                     , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
                    (\n:num.
                      (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                         int64 # num) recspace))) a)
+                         (int64 # num) # int64) recspace))) a)
            \/ (?a:('A word # num).
-                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num)
-                  recspace}
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
+                    int64) recspace}
                 = (\a:('A word # num).
                     CONSTR (SUC 0)
                       (a
                       , (@v:('A word # 'A word). T)
-                        , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T))
+                        , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
                       (\n:num.
                         (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                            int64 # num) recspace))) a)
+                            (int64 # num) # int64) recspace))) a)
            \/ (?a:('A word # 'A word).
-                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num)
-                  recspace}
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
+                    int64) recspace}
                 = (\a:('A word # 'A word).
                     CONSTR (SUC (SUC 0))
                       ((@v:('A word # num). T)
-                      , a, (@v:(int64 # int64 # num). T), (@v:(int64 # num). T))
+                      , a, (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
                       (\n:num.
                         (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                            int64 # num) recspace))) a)
+                            (int64 # num) # int64) recspace))) a)
            \/ (?a:(int64 # int64 # num).
-                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num)
-                  recspace}
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
+                    int64) recspace}
                 = (\a:(int64 # int64 # num).
                     CONSTR (SUC (SUC (SUC 0)))
                       ((@v:('A word # num). T)
-                      , (@v:('A word # 'A word). T), a, (@v:(int64 # num). T))
+                      , (@v:('A word # 'A word). T), a, (@v:(int64 # num). T), (@v:int64. T))
                       (\n:num.
                         (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                            int64 # num) recspace))) a)
+                            (int64 # num) # int64) recspace))) a)
            \/ (?a:(int64 # num).
-                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num)
-                  recspace}
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
+                    int64) recspace}
                 = (\a:(int64 # num).
                     CONSTR (SUC (SUC (SUC (SUC 0))))
                       ((@v:('A word # num). T)
-                      , (@v:('A word # 'A word). T), (@v:(int64 # int64 # num). T), a)
+                      , (@v:('A word # 'A word). T)
+                        , (@v:(int64 # int64 # num). T), a, (@v:int64. T))
                       (\n:num.
                         (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                            int64 # num) recspace))) a)
+                            (int64 # num) # int64) recspace))) a)
+           \/ (?a:int64.
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
+                    int64) recspace}
+                = (\a:int64.
+                    CONSTR (SUC (SUC (SUC (SUC (SUC 0)))))
+                      ((@v:('A word # num). T)
+                      , (@v:('A word # 'A word). T)
+                        , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), a)
+                      (\n:num.
+                        (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
+                            (int64 # num) # int64) recspace))) a)
            ==> address_uarch_event' a)
          ==> address_uarch_event' a) {r:(('A word # num) # ('A word # 'A word) #
-         (int64 # int64 # num) # int64 # num) recspace}
+         (int64 # int64 # num) # (int64 # num) # int64) recspace}
      = ((_dest_address_uarch_event : 'A address_uarch_event ->
-           (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num) recspace)
-         ((_mk_address_uarch_event : (('A word # num) # ('A word # 'A word) #
-                 (int64 # int64 # num) # int64 # num) recspace -> 'A address_uarch_event)
-           {r:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num)
-             recspace})
-       = {r:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num) recspace})
+           (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) # int64)
+             recspace) ((_mk_address_uarch_event : (('A word # num) # ('A word # 'A word) #
+               (int64 # int64 # num) # (int64 # num) # int64) recspace -> 'A address_uarch_event)
+         {r:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) # int64)
+           recspace})
+       = {r:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) # int64)
+           recspace})
 
 typedef armstate
   |- (\a:((int64 # (5 word -> int64) # (5 word -> int128) # 4 word # (int64 -> byte) #
