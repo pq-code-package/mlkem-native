@@ -134,7 +134,7 @@ static vuint16m2_t bitswap_perm(unsigned a, unsigned b, size_t vl)
   vuint16m2_t xa, xb;
   xa = __riscv_vsrl_vx_u16m2(v2id, b - a, vl);
   xa = __riscv_vxor_vv_u16m2(xa, v2id, vl);
-  xa = __riscv_vand_vx_u16m2(xa, (1 << a), vl);
+  xa = __riscv_vand_vx_u16m2(xa, (uint16_t)(1u << a), vl);
   xb = __riscv_vsll_vx_u16m2(xa, b - a, vl);
   xa = __riscv_vxor_vv_u16m2(xa, xb, vl);
   xa = __riscv_vxor_vv_u16m2(v2id, xa, vl);
