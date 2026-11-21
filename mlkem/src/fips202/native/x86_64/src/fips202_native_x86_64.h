@@ -41,4 +41,28 @@ __contract__(
   assigns(memory_slice(states, sizeof(uint64_t) * 25 * 4))
 );
 
+#define mlk_keccak_f1600_x1_avx512_asm \
+  MLK_NAMESPACE(keccak_f1600_x1_avx512_asm)
+MLK_SYSV_ABI
+void mlk_keccak_f1600_x1_avx512_asm(uint64_t state[25], const uint64_t rc[24])
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/x86_64/proofs/keccak_f1600_x1_avx512_asm.ml */
+__contract__(
+  requires(memory_no_alias(state, sizeof(uint64_t) * 25))
+  requires(rc == mlk_keccakf1600_round_constants)
+  assigns(memory_slice(state, sizeof(uint64_t) * 25))
+);
+
+#define mlk_keccak_f1600_x4_avx512_asm \
+  MLK_NAMESPACE(keccak_f1600_x4_avx512_asm)
+MLK_SYSV_ABI
+void mlk_keccak_f1600_x4_avx512_asm(uint64_t states[100], const uint64_t rc[24])
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/x86_64/proofs/keccak_f1600_x4_avx512_asm.ml */
+__contract__(
+  requires(memory_no_alias(states, sizeof(uint64_t) * 25 * 4))
+  requires(rc == mlk_keccakf1600_round_constants)
+  assigns(memory_slice(states, sizeof(uint64_t) * 25 * 4))
+);
+
 #endif /* !MLK_FIPS202_NATIVE_X86_64_SRC_FIPS202_NATIVE_X86_64_H */

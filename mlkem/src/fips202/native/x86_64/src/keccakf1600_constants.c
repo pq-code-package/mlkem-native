@@ -10,7 +10,9 @@
  */
 
 #include "../../../../common.h"
-#if defined(MLK_FIPS202_X86_64_NEED_X4_AVX2) && \
+#if (defined(MLK_FIPS202_X86_64_NEED_X4_AVX2) ||    \
+     defined(MLK_FIPS202_X86_64_NEED_X1_AVX512) ||  \
+     defined(MLK_FIPS202_X86_64_NEED_X4_AVX512)) && \
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <stdint.h>
@@ -29,6 +31,8 @@ MLK_ALIGN MLK_INTERNAL_DATA_DEFINITION const uint64_t
         0x8000000000008080, 0x0000000080000001, 0x8000000080008008,
 };
 
+#if defined(MLK_FIPS202_X86_64_NEED_X4_AVX2)
+
 MLK_ALIGN MLK_INTERNAL_DATA_DEFINITION const uint64_t mlk_keccak_rho8[4] = {
     0x0605040302010007,
     0x0e0d0c0b0a09080f,
@@ -43,10 +47,15 @@ MLK_ALIGN MLK_INTERNAL_DATA_DEFINITION const uint64_t mlk_keccak_rho56[4] = {
     0x181f1e1d1c1b1a19,
 };
 
-#else /* MLK_FIPS202_X86_64_NEED_X4_AVX2 && !MLK_CONFIG_MULTILEVEL_NO_SHARED \
-       */
+#endif /* MLK_FIPS202_X86_64_NEED_X4_AVX2 */
+
+#else /* (MLK_FIPS202_X86_64_NEED_X4_AVX2 || MLK_FIPS202_X86_64_NEED_X1_AVX512 \
+         || MLK_FIPS202_X86_64_NEED_X4_AVX512) &&                              \
+         !MLK_CONFIG_MULTILEVEL_NO_SHARED */
 
 MLK_EMPTY_CU(fips202_x86_64_constants)
 
-#endif /* !(MLK_FIPS202_X86_64_NEED_X4_AVX2 && \
+#endif /* !((MLK_FIPS202_X86_64_NEED_X4_AVX2 || \
+          MLK_FIPS202_X86_64_NEED_X1_AVX512 ||  \
+          MLK_FIPS202_X86_64_NEED_X4_AVX512) && \
           !MLK_CONFIG_MULTILEVEL_NO_SHARED) */
