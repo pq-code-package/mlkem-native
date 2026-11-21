@@ -51,6 +51,7 @@ int main(void)
 {
   unsigned i;
   MLK_ALIGN uint8_t coins[3 * MLKEM_SYMBYTES];
+  MLK_ALIGN uint8_t next_coins[3 * MLKEM_SYMBYTES];
   MLK_ALIGN uint8_t pk[MLKEM_PK_BYTES];
   MLK_ALIGN uint8_t sk[MLKEM_SK_BYTES];
   MLK_ALIGN uint8_t ct[MLKEM_CT_BYTES];
@@ -74,7 +75,9 @@ int main(void)
 
   for (i = 0; i < NTESTS_KAT; i++)
   {
-    mlk_shake256(coins, sizeof(coins), coins, sizeof(coins));
+    /* mlk_shake256 does not allow its input and output to overlap. */
+    mlk_shake256(next_coins, sizeof(next_coins), coins, sizeof(coins));
+    memcpy(coins, next_coins, sizeof(coins));
 
     CHECK_ERR(mlk_kem_keypair_derand(pk, sk, coins), 0);
     print_hex("pk", pk, sizeof(pk));

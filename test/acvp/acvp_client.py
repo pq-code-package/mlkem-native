@@ -51,6 +51,22 @@ def download_file(url, dest, token):
             time.sleep(wait)
 
 
+# Commit of each ACVP-Server release tag that we test against. We download
+# by commit rather than by tag, because tags have been moved after their
+# release: v1.1.0.43 was moved to include hotfix patches. Other refs are
+# used as given.
+ACVP_TAG_COMMITS = {
+    "v1.1.0.41": "b121fee031dc65d32c96f4109a42a10dacbe2076",
+    "v1.1.0.42": "15c0f3deeefbfa8cb6cd32a99e1ca3b738c66bf0",
+    "v1.1.0.43": "975de31eb83d87039ec88934fdc47d8c312b892d",
+}
+
+
+def acvp_ref(version):
+    """The ACVP-Server git ref to download `version` from."""
+    return ACVP_TAG_COMMITS.get(version, version)
+
+
 def acvp_version_has_tr1(version):
     """Whether `version` ships the FIPS203-tr1 encapDecap vectors (v1.1.0.43+)."""
     try:
@@ -83,7 +99,7 @@ def download_acvp_files(version):
         ]
 
     # Create directory structure
-    data_dir = Path(f"test/acvp/.acvp-data/{version}/files")
+    data_dir = Path(f"test/acvp/.acvp-data/{acvp_ref(version)}/files")
     data_dir.mkdir(parents=True, exist_ok=True)
 
     token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
@@ -93,7 +109,7 @@ def download_acvp_files(version):
         local_file.parent.mkdir(parents=True, exist_ok=True)
 
         if not local_file.exists():
-            url = f"{api_base}/{file_path}?ref={version}"
+            url = f"{api_base}/{file_path}?ref={acvp_ref(version)}"
             print(f"Downloading {file_path} ({auth})...", file=sys.stderr)
             try:
                 download_file(url, local_file, token)
@@ -172,7 +188,7 @@ def loadDefaultAcvpData(version, supported_functions):
     keyGen_any = "keyGen" in supported_functions
     encapDecap_any = bool(ENCAP_DECAP_FUNCTIONS & supported_functions)
 
-    data_dir = f"test/acvp/.acvp-data/{version}/files"
+    data_dir = f"test/acvp/.acvp-data/{acvp_ref(version)}/files"
     acvp_jsons_for_version = [
         (
             "keyGen",
@@ -262,20 +278,6 @@ def seed_key_format(tg, tc):
     # decapsulation key.
     if tg.get("keyFormat") == "seed":
         return "seed key format requires the keyGen API"
-    return None
-
-
-def keyless_decap_key_check(tg, tc):
-    """should_drop predicate for decapsulationKeyCheck cases carrying no key.
-
-    The v1.1.0.43 sample vectors omit dk for these cases; the check cannot run
-    without a key. They run normally again once a key is present.
-
-    TODO(#1842): drop this once we bump past v1.1.0.43. The upstream bug
-    (usnistgov/ACVP-Server#459) is fixed on master, but not in any tag yet.
-    """
-    if tg.get("function") == "decapsulationKeyCheck" and "dk" not in tc:
-        return "decapsulationKeyCheck without a key"
     return None
 
 
@@ -576,10 +578,6 @@ def test(prompt, expected, output, version, supported_functions):
         if seed_reasons:
             summary = ", ".join(sorted(set(seed_reasons)))
             info(f"Skipping {len(seed_reasons)} test case(s): {summary}")
-
-    reasons = filter_test_cases(data, keyless_decap_key_check)
-    if reasons:
-        info(f"Skipping {len(reasons)} decapsulationKeyCheck case(s) with no key")
 
     runTest(data, output)
     flush_warnings()
