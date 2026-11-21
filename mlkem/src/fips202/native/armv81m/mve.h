@@ -13,6 +13,9 @@
 #define MLK_USE_NATIVE_FIPS202_X4_XOR_BYTES
 #define MLK_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES
 /* Guard for assembly file */
+/* Only needed if the built-in FIPS202-x4 code is used. */
+#if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER) && \
+    !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
 #define MLK_FIPS202_ARMV81M_NEED_X4
 
 #if !defined(__ASSEMBLER__)
@@ -62,4 +65,6 @@ static MLK_INLINE int mlk_keccakf1600_extract_bytes_x4_native(
 
 #endif /* !__ASSEMBLER__ */
 
+#endif /* !MLK_CONFIG_FIPS202_CUSTOM_HEADER && !MLK_CONFIG_SERIAL_FIPS202_ONLY \
+        */
 #endif /* !MLK_FIPS202_NATIVE_ARMV81M_MVE_H */
