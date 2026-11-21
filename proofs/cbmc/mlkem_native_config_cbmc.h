@@ -203,6 +203,9 @@
  *
  * The type of the context parameter is configured via
  * MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
+ *
+ * The context is passed to MLK_CUSTOM_ALLOC and MLK_CUSTOM_FREE; see
+ * MLK_CONFIG_CUSTOM_ALLOC_FREE.
  */
 /* #define MLK_CONFIG_CONTEXT_PARAMETER */
 
@@ -489,6 +492,8 @@ __contract__(
  * must use this option.
  */
 /* #define MLK_CONFIG_CUSTOM_CAPABILITY_FUNC
+   #if !defined(__ASSEMBLER__)
+   #include "src/sys.h"
    static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
    __contract__(
      ensures(return_value == 0 || return_value == 1)
@@ -496,6 +501,7 @@ __contract__(
    {
        ... your implementation ...
    }
+   #endif
 */
 
 /**
@@ -516,6 +522,11 @@ __contract__(
  *  - T* v: Target pointer to free. May be NULL.
  *  - T: Type of structure to be freed.
  *  - N: Number of elements to be freed.
+ *
+ * If MLK_CONFIG_CONTEXT_PARAMETER is set, both macros receive the
+ * context as a fourth parameter, e.g. MLK_CUSTOM_ALLOC(v, T, N, context):
+ *  - context: The context passed to the public API function, of type
+ *    MLK_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @note Even if this option is set, some allocations further down the call
  *       stack will still be made from the stack, consuming up to 3KB of
