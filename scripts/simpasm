@@ -13,7 +13,16 @@ import os
 import re
 
 
-def patchup_disasm(asm, cfify=False):
+# x86_64 instructions with two encodings, of which GNU as and LLVM choose
+# different ones, and with no syntax that selects one: vmovq between a
+# 64-bit register or memory and one of xmm16-xmm31, which only EVEX can
+# encode (66 0F 6E/7E for GNU as, F3 0F 7E/66 0F D6 for LLVM). They are
+# emitted as their bytes, so that the code is the same with either
+# assembler, as scripts/check-binary requires of the proved code.
+X86_64_AS_BYTES = re.compile(r"^vmovq\s.*\bxmm(1[6-9]|2[0-9]|3[01])\b")
+
+
+def patchup_disasm(asm, cfify=False, as_bytes=None):
     asm = asm.split("\n")
     indentation = 8
 
@@ -63,14 +72,19 @@ def patchup_disasm(asm, cfify=False):
                 )
             # Drop address and byte code from line
             d = re.search(
-                r"^\s*[0-9a-fA-F]+:\s+([0-9a-fA-F][0-9a-fA-F][ ]*)+\s+(?P<inst>.*)$",
+                r"^\s*[0-9a-fA-F]+:\s+(?P<bytes>([0-9a-fA-F][0-9a-fA-F][ ]*)+)\s+(?P<inst>.*)$",
                 line,
             )
             if d is None:
                 raise Exception(
                     f'The following does not seem to be an assembly line of the expected format `ADDRESS: BYTECODE INSTRUCTION`:\n"{line}"'
                 )
-            yield " " * indentation + d.group("inst").expandtabs(1)
+            inst = d.group("inst").expandtabs(1)
+            if as_bytes is not None and as_bytes.search(inst):
+                code = ", ".join("0x" + b for b in d.group("bytes").split())
+                yield " " * indentation + f".byte {code} /* {inst} */"
+                continue
+            yield " " * indentation + inst
 
     return list(gen(asm))
 
@@ -264,7 +278,11 @@ def simplify(logger, args, asm_input, asm_output=None):
         disasm = run_cmd(cmd).stdout
 
         logger.debug("Patching up disassembly ...")
-        simplified = patchup_disasm(disasm, cfify=args.cfify)
+        simplified = patchup_disasm(
+            disasm,
+            cfify=args.cfify,
+            as_bytes=X86_64_AS_BYTES if args.arch == "x86_64" else None,
+        )
 
         # Mark stack as non-executable for ELF targets.
         # This must be outside any preprocessor guards to ensure the
