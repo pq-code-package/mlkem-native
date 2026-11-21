@@ -59,6 +59,25 @@ sudo make run_bench CYCLES=PERF
 sudo make run_bench_components CYCLES=PERF
 ```
 
+#### x86_64 with AVX-512
+
+mlkem-native has a FIPS-202 backend for x86_64 with AVX-512: implementations
+of Keccak-f1600 for one state and for four states at a time, which use
+AVX-512F, AVX-512VL and AVX-512DQ. It is used whenever those extensions are
+enabled at compile time, for example by `-march=native` on a machine that has
+them, or explicitly:
+
+```bash
+CFLAGS='-mavx512f -mavx512vl -mavx512dq -mprefer-vector-width=256' make test AUTO=1
+```
+
+The backend uses only 128-bit and 256-bit registers. On some Intel
+processors, 512-bit instructions mixed with the heavy 256-bit instructions of
+the arithmetic backend lower the clock frequency of the core, so keep the
+compiler from emitting 512-bit instructions itself: use
+`-mprefer-vector-width=256` with clang and gcc, and with gcc also
+`-mmove-max=256 -mstore-max=256`.
+
 ### Using `tests` script
 
 For convenience, you can also use the [`./scripts/tests`](scripts/tests) script as a wrapper around `make`. For

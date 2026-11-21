@@ -2070,6 +2070,69 @@ keccak_f1600_x1_native_aarch64_v84a/1024:
   - proofs/cbmc/keccak_f1600_x1_native_aarch64_v84a/Makefile
   - proofs/cbmc/keccak_f1600_x1_native_aarch64_v84a/keccak_f1600_x1_native_aarch64_v84a_harness.c
   - proofs/cbmc/mlkem_native_config_cbmc.h
+keccak_f1600_x1_native_avx512/512:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/context.h
+  - mlkem/src/fips202/native/api.h
+  - mlkem/src/fips202/native/x86_64/keccak_f1600_x1_avx512.h
+  - mlkem/src/fips202/native/x86_64/src/fips202_native_x86_64.h
+  - mlkem/src/fips202/native/x86_64/src/keccakf1600_constants.c
+  - mlkem/src/params.h
+  - mlkem/src/sys.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/keccak_f1600_x1_native_avx512/Makefile
+  - proofs/cbmc/keccak_f1600_x1_native_avx512/keccak_f1600_x1_native_avx512_harness.c
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+keccak_f1600_x1_native_avx512/768:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/context.h
+  - mlkem/src/fips202/native/api.h
+  - mlkem/src/fips202/native/x86_64/keccak_f1600_x1_avx512.h
+  - mlkem/src/fips202/native/x86_64/src/fips202_native_x86_64.h
+  - mlkem/src/fips202/native/x86_64/src/keccakf1600_constants.c
+  - mlkem/src/params.h
+  - mlkem/src/sys.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/keccak_f1600_x1_native_avx512/Makefile
+  - proofs/cbmc/keccak_f1600_x1_native_avx512/keccak_f1600_x1_native_avx512_harness.c
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+keccak_f1600_x1_native_avx512/1024:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/context.h
+  - mlkem/src/fips202/native/api.h
+  - mlkem/src/fips202/native/x86_64/keccak_f1600_x1_avx512.h
+  - mlkem/src/fips202/native/x86_64/src/fips202_native_x86_64.h
+  - mlkem/src/fips202/native/x86_64/src/keccakf1600_constants.c
+  - mlkem/src/params.h
+  - mlkem/src/sys.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/keccak_f1600_x1_native_avx512/Makefile
+  - proofs/cbmc/keccak_f1600_x1_native_avx512/keccak_f1600_x1_native_avx512_harness.c
+  - proofs/cbmc/mlkem_native_config_cbmc.h
 keccak_f1600_x4_native_aarch64_v84a/512:
   files:
   - mlkem/src/capability.h
@@ -2321,6 +2384,69 @@ keccak_f1600_x4_native_avx2/1024:
   - proofs/cbmc/include/LP64/string.h
   - proofs/cbmc/keccak_f1600_x4_native_avx2/Makefile
   - proofs/cbmc/keccak_f1600_x4_native_avx2/keccak_f1600_x4_native_avx2_harness.c
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+keccak_f1600_x4_native_avx512/512:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/context.h
+  - mlkem/src/fips202/native/api.h
+  - mlkem/src/fips202/native/x86_64/keccak_f1600_x4_avx512.h
+  - mlkem/src/fips202/native/x86_64/src/fips202_native_x86_64.h
+  - mlkem/src/fips202/native/x86_64/src/keccakf1600_constants.c
+  - mlkem/src/params.h
+  - mlkem/src/sys.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/keccak_f1600_x4_native_avx512/Makefile
+  - proofs/cbmc/keccak_f1600_x4_native_avx512/keccak_f1600_x4_native_avx512_harness.c
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+keccak_f1600_x4_native_avx512/768:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/context.h
+  - mlkem/src/fips202/native/api.h
+  - mlkem/src/fips202/native/x86_64/keccak_f1600_x4_avx512.h
+  - mlkem/src/fips202/native/x86_64/src/fips202_native_x86_64.h
+  - mlkem/src/fips202/native/x86_64/src/keccakf1600_constants.c
+  - mlkem/src/params.h
+  - mlkem/src/sys.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/keccak_f1600_x4_native_avx512/Makefile
+  - proofs/cbmc/keccak_f1600_x4_native_avx512/keccak_f1600_x4_native_avx512_harness.c
+  - proofs/cbmc/mlkem_native_config_cbmc.h
+keccak_f1600_x4_native_avx512/1024:
+  files:
+  - mlkem/src/capability.h
+  - mlkem/src/cbmc.h
+  - mlkem/src/common.h
+  - mlkem/src/context.h
+  - mlkem/src/fips202/native/api.h
+  - mlkem/src/fips202/native/x86_64/keccak_f1600_x4_avx512.h
+  - mlkem/src/fips202/native/x86_64/src/fips202_native_x86_64.h
+  - mlkem/src/fips202/native/x86_64/src/keccakf1600_constants.c
+  - mlkem/src/params.h
+  - mlkem/src/sys.h
+  - proofs/cbmc/Makefile.common
+  - proofs/cbmc/Makefile_params.common
+  - proofs/cbmc/include/LP64/stddef.h
+  - proofs/cbmc/include/LP64/stdint.h
+  - proofs/cbmc/include/LP64/stdlib.h
+  - proofs/cbmc/include/LP64/string.h
+  - proofs/cbmc/keccak_f1600_x4_native_avx512/Makefile
+  - proofs/cbmc/keccak_f1600_x4_native_avx512/keccak_f1600_x4_native_avx512_harness.c
   - proofs/cbmc/mlkem_native_config_cbmc.h
 keccak_squeeze_once/512:
   files:

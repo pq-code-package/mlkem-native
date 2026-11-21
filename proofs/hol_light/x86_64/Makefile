@@ -70,7 +70,9 @@ OBJ = mlkem/mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.o \
       mlkem/mlkem_poly_decompress_d10_avx2_asm.o \
       mlkem/mlkem_poly_compress_d11_avx2_asm.o \
       mlkem/mlkem_poly_decompress_d11_avx2_asm.o \
-      mlkem/keccak_f1600_x4_avx2_asm.o
+      mlkem/keccak_f1600_x4_avx2_asm.o \
+      mlkem/keccak_f1600_x1_avx512_asm.o \
+      mlkem/keccak_f1600_x4_avx512_asm.o
 
 # Build object files from assembly sources
 $(OBJ): %.o : %.S

@@ -174,6 +174,8 @@ The NTT and invNTT functions are super-optimized using SLOTHY[^SLOTHY].
   * x86_64 polynomial decompression: [mlkem_poly_decompress_d4_avx2_asm.S](x86_64/mlkem/mlkem_poly_decompress_d4_avx2_asm.S) [mlkem_poly_decompress_d5_avx2_asm.S](x86_64/mlkem/mlkem_poly_decompress_d5_avx2_asm.S) [mlkem_poly_decompress_d10_avx2_asm.S](x86_64/mlkem/mlkem_poly_decompress_d10_avx2_asm.S) [mlkem_poly_decompress_d11_avx2_asm.S](x86_64/mlkem/mlkem_poly_decompress_d11_avx2_asm.S)
 - FIPS202:
   * 4-fold Keccak-F1600 using AVX2: [keccak_f1600_x4_avx2_asm.S](x86_64/mlkem/keccak_f1600_x4_avx2_asm.S)
+  * Keccak-F1600 using AVX-512: [keccak_f1600_x1_avx512_asm.S](x86_64/mlkem/keccak_f1600_x1_avx512_asm.S)
+  * 4-fold Keccak-F1600 using AVX-512: [keccak_f1600_x4_avx512_asm.S](x86_64/mlkem/keccak_f1600_x4_avx512_asm.S)
 
 <!--- bibliography --->
 [^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)

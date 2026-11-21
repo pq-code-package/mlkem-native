@@ -6,4 +6,4 @@
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 # pin: hol_light https://github.com/jrh13/hol-light/commit/9b510bc76da4cecf6e509be44d327c9236ec273f
 # pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/d4518712d040485efe621caba1c723a07fbc549e
-# source: proofs/hol_light/x86_64/proofs/subroutine_signatures.ml a7756eb11fd26eaa8b9fdb0338656f04139722b0d1ab53eb9809ef7b5ade88ae
+# source: proofs/hol_light/x86_64/proofs/subroutine_signatures.ml b4a7ca7ae6bd4555b87e1e69f33b438301f1ecec97c0b6a9f1a99ccfab8c080a

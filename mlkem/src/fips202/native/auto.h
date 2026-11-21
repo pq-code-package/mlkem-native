@@ -15,8 +15,13 @@
 #include "aarch64/auto.h"
 #endif
 
-/* The x86_64 backend requires toolchain support for the SysV ABI */
-#if defined(MLK_SYS_X86_64_AVX2) && defined(MLK_SYSV_ABI_SUPPORTED)
+/* The x86_64 backends require toolchain support for the SysV ABI. With
+ * AVX-512 (F, VL and DQ), the AVX-512 backend provides both the x1 and the
+ * x4 permutation; otherwise, with AVX2, the AVX2 backend provides the x4
+ * permutation. */
+#if defined(MLK_SYS_X86_64_AVX512) && defined(MLK_SYSV_ABI_SUPPORTED)
+#include "x86_64/avx512.h"
+#elif defined(MLK_SYS_X86_64_AVX2) && defined(MLK_SYSV_ABI_SUPPORTED)
 #include "x86_64/keccak_f1600_x4_avx2.h"
 #endif
 

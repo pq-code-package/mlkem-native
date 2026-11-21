@@ -13,6 +13,8 @@
 # namespace-agnostic Keccak proofs). For routine foo_avx2_asm:
 #   FOO_SUBROUTINE_CORRECT, FOO_SUBROUTINE_SAFE,
 #   FOO_NOIBT_SUBROUTINE_CORRECT, FOO_NOIBT_SUBROUTINE_SAFE
+# The prefix of an AVX-512 routine keeps _avx512, as it would otherwise be
+# that of the AVX2 routine: FOO_AVX512 for foo_avx512_asm.
 # rej_uniform has no constant-time proof and uses MEMSAFE instead of SAFE.
 #
 # Usage: list_thms.sh [ROUTINE...]  (default: all routines of list_proofs.sh)
@@ -26,7 +28,8 @@ if [[ $# == 0 ]]; then
 fi
 
 for routine in "$@"; do
-  prefix=$(echo "${routine%_avx2_asm}" | tr '[:lower:]' '[:upper:]')
+  name=${routine%_avx2_asm}
+  prefix=$(echo "${name%_asm}" | tr '[:lower:]' '[:upper:]')
   safe=SAFE
   [[ $routine == mlkem_rej_uniform_* ]] && safe=MEMSAFE
   echo "${prefix}_SUBROUTINE_CORRECT"
