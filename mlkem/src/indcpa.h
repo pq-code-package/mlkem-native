@@ -32,16 +32,21 @@
  * @param[out] a          Output matrix A.
  * @param[in]  seed       Input seed.
  * @param      transposed Boolean deciding whether A or A^T is generated.
+ *
+ * @return 0 on success, or MLK_ERR_FIPS202_FAIL if a custom FIPS202
+ *         implementation (MLK_CONFIG_FIPS202_CAN_FAIL) reported a failure.
  */
 MLK_INTERNAL_API
-void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
-                    int transposed)
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
+                   int transposed)
 __contract__(
   requires(memory_no_alias(a, sizeof(mlk_polymat)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
   requires(transposed == 0 || transposed == 1)
   assigns(memory_slice(a, sizeof(mlk_polymat)))
-  ensures(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
+  ensures(return_value == 0 || return_value == MLK_ERR_FIPS202_FAIL)
+  ensures(return_value == 0 ==> forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K,
   array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
 );
 
@@ -66,6 +71,9 @@ __contract__(
  * @retval 0                     Success.
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
+ * @retval MLK_ERR_FIPS202_FAIL  MLK_CONFIG_FIPS202_CAN_FAIL was used and
+ *                               the custom FIPS202 implementation
+ *                               reported a failure.
  */
 MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
@@ -79,7 +87,8 @@ __contract__(
   requires(memory_no_alias(coins, MLKEM_SYMBYTES))
   assigns(memory_slice(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
   assigns(memory_slice(sk, MLKEM_INDCPA_SECRETKEYBYTES))
-  ensures(return_value == 0 || return_value == MLK_ERR_OUT_OF_MEMORY)
+  ensures(return_value == 0 || return_value == MLK_ERR_OUT_OF_MEMORY ||
+          return_value == MLK_ERR_FIPS202_FAIL)
   /* Output buffers on error, per API-CONVENTIONS.md */
   ensures(return_value != 0 ==>
           array_unchanged_or_zeroized_u8(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
@@ -109,6 +118,9 @@ __contract__(
  * @retval 0                     Success.
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
+ * @retval MLK_ERR_FIPS202_FAIL  MLK_CONFIG_FIPS202_CAN_FAIL was used and
+ *                               the custom FIPS202 implementation
+ *                               reported a failure.
  */
 MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
@@ -123,7 +135,8 @@ __contract__(
   requires(memory_no_alias(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
   requires(memory_no_alias(coins, MLKEM_SYMBYTES))
   assigns(memory_slice(c, MLKEM_INDCPA_BYTES))
-  ensures(return_value == 0 || return_value == MLK_ERR_OUT_OF_MEMORY)
+  ensures(return_value == 0 || return_value == MLK_ERR_OUT_OF_MEMORY ||
+          return_value == MLK_ERR_FIPS202_FAIL)
   /* Output buffers on error, per API-CONVENTIONS.md */
   ensures(return_value != 0 ==>
           array_unchanged_or_zeroized_u8(c, MLKEM_INDCPA_BYTES))

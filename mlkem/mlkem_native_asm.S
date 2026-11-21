@@ -192,6 +192,7 @@
 #undef MLK_API_NAMESPACE_PREFIX
 #undef MLK_API_QUALIFIER
 #undef MLK_ERR_FAIL
+#undef MLK_ERR_FIPS202_FAIL
 #undef MLK_ERR_INVALID_PK
 #undef MLK_ERR_INVALID_SK
 #undef MLK_ERR_OUT_OF_MEMORY
@@ -232,6 +233,7 @@
 #undef MLK_CT_TESTING_SECRET
 #undef MLK_EMPTY_CU
 #undef MLK_ERR_FAIL
+#undef MLK_ERR_FIPS202_FAIL
 #undef MLK_ERR_INVALID_PK
 #undef MLK_ERR_INVALID_SK
 #undef MLK_ERR_OUT_OF_MEMORY
@@ -377,6 +379,8 @@
 #undef mlk_poly_rej_uniform
 #undef mlk_poly_rej_uniform_x4
 /* mlkem/src/symmetric.h */
+#undef MLK_FIPS202X4_CALL
+#undef MLK_FIPS202_CALL
 #undef MLK_SYMMETRIC_H
 #undef MLK_XOF_RATE
 #undef mlk_hash_g

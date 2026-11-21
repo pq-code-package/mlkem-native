@@ -43,6 +43,7 @@ jobs:
           stack: false
           alloc: false
           rng_fail: false
+          fips202_fail: false
           check_namespace: false
       # Smoke only: QEMU doesn't model cycle counts (real numbers come from the
       # FPGA); this just exercises the bench build + run.

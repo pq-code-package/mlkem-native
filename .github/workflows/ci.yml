@@ -490,6 +490,7 @@ jobs:
           unit: true
           alloc: false
           rng_fail: false
+          fips202_fail: false
           check_namespace: false
           # Disable AArch64 SHA3 extension: valgrind cannot emulate it
           extra_env: "MK_COMPILER_SUPPORTS_SHA3=0"

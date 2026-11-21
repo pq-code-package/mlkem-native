@@ -119,32 +119,39 @@ __contract__(
 }
 
 MLK_INTERNAL_API
-void mlk_shake128x4_absorb_once(mlk_shake128x4ctx *state, const uint8_t *in0,
-                                const uint8_t *in1, const uint8_t *in2,
-                                const uint8_t *in3, size_t inlen)
+int mlk_shake128x4_absorb_once(mlk_shake128x4ctx *state, const uint8_t *in0,
+                               const uint8_t *in1, const uint8_t *in2,
+                               const uint8_t *in3, size_t inlen)
 {
   mlk_memset(state, 0, sizeof(mlk_shake128x4ctx));
   mlk_keccak_absorb_once_x4(state->ctx, SHAKE128_RATE, in0, in1, in2, in3,
                             inlen, 0x1F);
+  return 0;
 }
 
 MLK_INTERNAL_API
-void mlk_shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
-                                  uint8_t *out3, size_t nblocks,
-                                  mlk_shake128x4ctx *state)
+int mlk_shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
+                                 uint8_t *out3, size_t nblocks,
+                                 mlk_shake128x4ctx *state)
 {
   mlk_keccak_squeezeblocks_x4(out0, out1, out2, out3, nblocks, state->ctx,
                               SHAKE128_RATE);
+  return 0;
 }
 
 MLK_INTERNAL_API
-void mlk_shake128x4_init(mlk_shake128x4ctx *state) { (void)state; }
+int mlk_shake128x4_init(mlk_shake128x4ctx *state)
+{
+  (void)state;
+  return 0;
+}
 MLK_INTERNAL_API
-void mlk_shake128x4_release(mlk_shake128x4ctx *state)
+int mlk_shake128x4_release(mlk_shake128x4ctx *state)
 {
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(state, sizeof(mlk_shake128x4ctx));
+  return 0;
 }
 
 static void mlk_shake256x4_absorb_once(mlk_shake256x4_ctx *state,
@@ -167,9 +174,9 @@ static void mlk_shake256x4_squeezeblocks(uint8_t *out0, uint8_t *out1,
 }
 
 MLK_INTERNAL_API
-void mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
-                    size_t outlen, const uint8_t *in0, const uint8_t *in1,
-                    const uint8_t *in2, const uint8_t *in3, size_t inlen)
+int mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
+                   size_t outlen, const uint8_t *in0, const uint8_t *in1,
+                   const uint8_t *in2, const uint8_t *in3, size_t inlen)
 {
   mlk_shake256x4_ctx statex;
   size_t nblocks = outlen / SHAKE256_RATE;
@@ -204,6 +211,7 @@ void mlk_shake256x4(uint8_t *out0, uint8_t *out1, uint8_t *out2, uint8_t *out3,
   mlk_zeroize(tmp1, sizeof(tmp1));
   mlk_zeroize(tmp2, sizeof(tmp2));
   mlk_zeroize(tmp3, sizeof(tmp3));
+  return 0;
 }
 
 #else /* !MLK_CONFIG_MULTILEVEL_NO_SHARED && !MLK_CONFIG_SERIAL_FIPS202_ONLY \

@@ -100,8 +100,12 @@ int mlk_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
   MLK_CT_TESTING_DECLASSIFY(
       sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, MLKEM_SYMBYTES);
 
-  mlk_hash_h(test, sk + MLKEM_INDCPA_SECRETKEYBYTES,
-             MLKEM_INDCCA_PUBLICKEYBYTES);
+  ret = mlk_hash_h(test, sk + MLKEM_INDCPA_SECRETKEYBYTES,
+                   MLKEM_INDCCA_PUBLICKEYBYTES);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
   /* This doesn't have to be a constant-time memcmp, but it's the only place
    * in the library where a normal memcmp would be used otherwise, so for sake
    * of minimizing stdlib dependency, we use our constant-time one anyway. */
@@ -128,7 +132,8 @@ __contract__(
   requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
   ensures(return_value == 0 || return_value == MLK_ERR_OUT_OF_MEMORY ||
           return_value == MLK_ERR_RNG_FAIL ||
-          return_value == MLK_ERR_PCT_FAIL)
+          return_value == MLK_ERR_PCT_FAIL ||
+          return_value == MLK_ERR_FIPS202_FAIL)
 );
 
 #if defined(MLK_CONFIG_KEYGEN_PCT)
@@ -142,7 +147,10 @@ __contract__(
  * @retval MLK_ERR_OUT_OF_MEMORY MLK_CONFIG_CUSTOM_ALLOC_FREE was used and
  *                               MLK_CUSTOM_ALLOC returned NULL.
  * @retval MLK_ERR_RNG_FAIL      Random number generation failed.
- * @retval MLK_ERR_PCT_FAIL      The consistency check failed. */
+ * @retval MLK_ERR_PCT_FAIL      The consistency check failed.
+ * @retval MLK_ERR_FIPS202_FAIL  MLK_CONFIG_FIPS202_CAN_FAIL was used and
+ *                               the custom FIPS202 implementation
+ *                               reported a failure. */
 MLK_MUST_CHECK_RETURN_VALUE
 static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                          uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES],
@@ -243,8 +251,12 @@ int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
   }
 
   mlk_memcpy(sk + MLKEM_INDCPA_SECRETKEYBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
-  mlk_hash_h(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, pk,
-             MLKEM_INDCCA_PUBLICKEYBYTES);
+  ret = mlk_hash_h(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, pk,
+                   MLKEM_INDCCA_PUBLICKEYBYTES);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
   /* Value z for pseudo-random output on reject */
   mlk_memcpy(sk + MLKEM_INDCCA_SECRETKEYBYTES - MLKEM_SYMBYTES,
              coins + MLKEM_SYMBYTES, MLKEM_SYMBYTES);
@@ -337,8 +349,16 @@ int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   mlk_memcpy(buf, coins, MLKEM_SYMBYTES);
 
   /* Multitarget countermeasure for coins + contributory KEM */
-  mlk_hash_h(buf + MLKEM_SYMBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
-  mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
+  ret = mlk_hash_h(buf + MLKEM_SYMBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
+  ret = mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
 
   /* coins are in kr+MLKEM_SYMBYTES */
   ret = mlk_indcpa_enc(ct, buf, pk, kr + MLKEM_SYMBYTES, context);
@@ -435,7 +455,11 @@ int mlk_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   mlk_memcpy(buf + MLKEM_SYMBYTES,
              sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES,
              MLKEM_SYMBYTES);
-  mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
+  ret = mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
 
   /* Recompute and compare ciphertext */
   /* coins are in kr+MLKEM_SYMBYTES */
@@ -451,7 +475,11 @@ int mlk_kem_dec(uint8_t ss[MLKEM_SSBYTES],
   mlk_memcpy(tmp, sk + MLKEM_INDCCA_SECRETKEYBYTES - MLKEM_SYMBYTES,
              MLKEM_SYMBYTES);
   mlk_memcpy(tmp + MLKEM_SYMBYTES, ct, MLKEM_INDCCA_CIPHERTEXTBYTES);
-  mlk_hash_j(buf, tmp, MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES);
+  ret = mlk_hash_j(buf, tmp, MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
 
   /* Replace rejection key by true key if fail is 0 */
   mlk_ct_cmov_zero(buf, kr, MLKEM_SYMBYTES, fail);

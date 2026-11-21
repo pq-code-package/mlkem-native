@@ -8,6 +8,15 @@
 #include "../cbmc.h"
 #include "../common.h"
 
+/*
+ * All functions in this header and in fips202x4.h return 0 on success and a
+ * non-zero value on failure. The FIPS202 implementation shipped with
+ * mlkem-native never fails. A custom implementation may fail if
+ * MLK_CONFIG_FIPS202_CAN_FAIL is set. Whether a call fails must not depend on
+ * the contents of its input and output buffers or of the FIPS202 state, as
+ * these can be secret; it may depend on the lengths.
+ */
+
 #define SHAKE128_RATE 168
 #define SHAKE256_RATE 136
 #define SHA3_256_RATE 136
@@ -39,8 +48,9 @@ typedef struct
  * @param         inlen Length of input in bytes.
  */
 MLK_INTERNAL_API
-void mlk_shake128_absorb_once(mlk_shake128ctx *state, const uint8_t *input,
-                              size_t inlen)
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_shake128_absorb_once(mlk_shake128ctx *state, const uint8_t *input,
+                             size_t inlen)
 __contract__(
   requires(inlen <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(state, sizeof(mlk_shake128ctx)))
@@ -59,8 +69,9 @@ __contract__(
  * @param[in,out] state   Keccak state.
  */
 MLK_INTERNAL_API
-void mlk_shake128_squeezeblocks(uint8_t *output, size_t nblocks,
-                                mlk_shake128ctx *state)
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_shake128_squeezeblocks(uint8_t *output, size_t nblocks,
+                               mlk_shake128ctx *state)
 __contract__(
   requires(nblocks <= 8 /* somewhat arbitrary bound */)
   requires(memory_no_alias(state, sizeof(mlk_shake128ctx)))
@@ -70,11 +81,13 @@ __contract__(
 
 #define mlk_shake128_init MLK_NAMESPACE(shake128_init)
 MLK_INTERNAL_API
-void mlk_shake128_init(mlk_shake128ctx *state);
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_shake128_init(mlk_shake128ctx *state);
 
 #define mlk_shake128_release MLK_NAMESPACE(shake128_release)
 MLK_INTERNAL_API
-void mlk_shake128_release(mlk_shake128ctx *state);
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_shake128_release(mlk_shake128ctx *state);
 
 /* mlk_shake256 is only used
  * - in decapsulation, for the implicit rejection hash J,
@@ -100,8 +113,9 @@ void mlk_shake128_release(mlk_shake128ctx *state);
  * @param      inlen  Length of input in bytes.
  */
 MLK_INTERNAL_API
-void mlk_shake256(uint8_t *output, size_t outlen, const uint8_t *input,
-                  size_t inlen)
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_shake256(uint8_t *output, size_t outlen, const uint8_t *input,
+                 size_t inlen)
 __contract__(
   requires(inlen <= MLK_MAX_BUFFER_SIZE)
   requires(outlen <= MLK_MAX_BUFFER_SIZE)
@@ -126,7 +140,8 @@ __contract__(
  * @param      inlen  Length of input in bytes.
  */
 MLK_INTERNAL_API
-void mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
 __contract__(
   requires(inlen <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(input, inlen))
@@ -146,7 +161,8 @@ __contract__(
  * @param      inlen  Length of input in bytes.
  */
 MLK_INTERNAL_API
-void mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
 __contract__(
   requires(inlen <= MLK_MAX_BUFFER_SIZE)
   requires(memory_no_alias(input, inlen))

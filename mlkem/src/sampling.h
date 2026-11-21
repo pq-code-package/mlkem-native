@@ -69,11 +69,15 @@ void mlk_poly_cbd3(mlk_poly *r, const uint8_t buf[3 * MLKEM_N / 4]);
  * @param[out] vec3 Polynomial to be sampled.
  * @param[in]  seed Consecutive array of 4 seed buffers of size
  *                  MLKEM_SYMBYTES + 2 each, plus padding for alignment.
+ *
+ * @return 0 on success, or MLK_ERR_FIPS202_FAIL if a custom FIPS202
+ *         implementation (MLK_CONFIG_FIPS202_CAN_FAIL) reported a failure.
  */
 MLK_INTERNAL_API
-void mlk_poly_rej_uniform_x4(mlk_poly *vec0, mlk_poly *vec1, mlk_poly *vec2,
-                             mlk_poly *vec3,
-                             uint8_t seed[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)])
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_poly_rej_uniform_x4(mlk_poly *vec0, mlk_poly *vec1, mlk_poly *vec2,
+                            mlk_poly *vec3,
+                            uint8_t seed[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)])
 __contract__(
   requires(memory_no_alias(vec0, sizeof(mlk_poly)))
   requires(memory_no_alias(vec1, sizeof(mlk_poly)))
@@ -84,10 +88,11 @@ __contract__(
   assigns(memory_slice(vec1, sizeof(mlk_poly)))
   assigns(memory_slice(vec2, sizeof(mlk_poly)))
   assigns(memory_slice(vec3, sizeof(mlk_poly)))
-  ensures(array_bound(vec0->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
-  ensures(array_bound(vec1->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
-  ensures(array_bound(vec2->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
-  ensures(array_bound(vec3->coeffs, 0, MLKEM_N, 0, MLKEM_Q)));
+  ensures(return_value == 0 || return_value == MLK_ERR_FIPS202_FAIL)
+  ensures(return_value == 0 ==> array_bound(vec0->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  ensures(return_value == 0 ==> array_bound(vec1->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  ensures(return_value == 0 ==> array_bound(vec2->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
+  ensures(return_value == 0 ==> array_bound(vec3->coeffs, 0, MLKEM_N, 0, MLKEM_Q)));
 #endif /* !MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
 #define mlk_poly_rej_uniform MLK_NAMESPACE(poly_rej_uniform)
@@ -99,13 +104,18 @@ __contract__(
  *
  * @param[out] entry Polynomial to be sampled.
  * @param[in]  seed  Seed buffer of size MLKEM_SYMBYTES + 2.
+ *
+ * @return 0 on success, or MLK_ERR_FIPS202_FAIL if a custom FIPS202
+ *         implementation (MLK_CONFIG_FIPS202_CAN_FAIL) reported a failure.
  */
 MLK_INTERNAL_API
-void mlk_poly_rej_uniform(mlk_poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_poly_rej_uniform(mlk_poly *entry, uint8_t seed[MLKEM_SYMBYTES + 2])
 __contract__(
   requires(memory_no_alias(entry, sizeof(mlk_poly)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES + 2))
   assigns(memory_slice(entry, sizeof(mlk_poly)))
-  ensures(array_bound(entry->coeffs, 0, MLKEM_N, 0, MLKEM_Q)));
+  ensures(return_value == 0 || return_value == MLK_ERR_FIPS202_FAIL)
+  ensures(return_value == 0 ==> array_bound(entry->coeffs, 0, MLKEM_N, 0, MLKEM_Q)));
 
 #endif /* !MLK_SAMPLING_H */

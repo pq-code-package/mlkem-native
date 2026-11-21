@@ -185,27 +185,34 @@ __contract__(
 }
 
 MLK_INTERNAL_API
-void mlk_shake128_absorb_once(mlk_shake128ctx *state, const uint8_t *input,
-                              size_t inlen)
+int mlk_shake128_absorb_once(mlk_shake128ctx *state, const uint8_t *input,
+                             size_t inlen)
 {
   mlk_keccak_absorb_once(state->ctx, SHAKE128_RATE, input, inlen, 0x1F);
+  return 0;
 }
 
 MLK_INTERNAL_API
-void mlk_shake128_squeezeblocks(uint8_t *output, size_t nblocks,
-                                mlk_shake128ctx *state)
+int mlk_shake128_squeezeblocks(uint8_t *output, size_t nblocks,
+                               mlk_shake128ctx *state)
 {
   mlk_keccak_squeezeblocks(output, nblocks, state->ctx, SHAKE128_RATE);
+  return 0;
 }
 
 MLK_INTERNAL_API
-void mlk_shake128_init(mlk_shake128ctx *state) { (void)state; }
+int mlk_shake128_init(mlk_shake128ctx *state)
+{
+  (void)state;
+  return 0;
+}
 MLK_INTERNAL_API
-void mlk_shake128_release(mlk_shake128ctx *state)
+int mlk_shake128_release(mlk_shake128ctx *state)
 {
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(state, sizeof(mlk_shake128ctx));
+  return 0;
 }
 
 #if !defined(MLK_CONFIG_NO_DECAPS_API) ||                           \
@@ -217,8 +224,8 @@ void mlk_shake128_release(mlk_shake128ctx *state)
       !defined(MLK_CONFIG_NO_ENCAPS_API)))
 typedef mlk_shake128ctx mlk_shake256ctx;
 MLK_INTERNAL_API
-void mlk_shake256(uint8_t *output, size_t outlen, const uint8_t *input,
-                  size_t inlen)
+int mlk_shake256(uint8_t *output, size_t outlen, const uint8_t *input,
+                 size_t inlen)
 {
   mlk_shake256ctx state;
   /* Absorb input */
@@ -228,11 +235,12 @@ void mlk_shake256(uint8_t *output, size_t outlen, const uint8_t *input,
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(&state, sizeof(state));
+  return 0;
 }
 #endif /* !MLK_CONFIG_NO_DECAPS_API || (!MLK_CONFIG_NO_ENCAPS_API && (MLK_CONFIG_MULTILEVEL_WITH_SHARED || MLKEM_K == 2 || MLKEM_K == 4)) || (MLK_CONFIG_SERIAL_FIPS202_ONLY && (!MLK_CONFIG_NO_KEYPAIR_API || !MLK_CONFIG_NO_ENCAPS_API)) */
 
 MLK_INTERNAL_API
-void mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
+int mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
 {
   uint64_t ctx[25];
   /* Absorb input */
@@ -242,10 +250,11 @@ void mlk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen)
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(ctx, sizeof(ctx));
+  return 0;
 }
 
 MLK_INTERNAL_API
-void mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
+int mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
 {
   uint64_t ctx[25];
   /* Absorb input */
@@ -255,6 +264,7 @@ void mlk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen)
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(ctx, sizeof(ctx));
+  return 0;
 }
 
 #else /* !MLK_CONFIG_MULTILEVEL_NO_SHARED */

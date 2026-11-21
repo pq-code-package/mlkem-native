@@ -508,12 +508,16 @@ __contract__(
  * @param      nonce1 One-byte input nonce.
  * @param      nonce2 One-byte input nonce.
  * @param      nonce3 One-byte input nonce.
+ *
+ * @return 0 on success, or MLK_ERR_FIPS202_FAIL if a custom FIPS202
+ *         implementation (MLK_CONFIG_FIPS202_CAN_FAIL) reported a failure.
  */
 MLK_INTERNAL_API
-void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
-                               mlk_poly *r3, const uint8_t seed[MLKEM_SYMBYTES],
-                               uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
-                               uint8_t nonce3)
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
+                              mlk_poly *r3, const uint8_t seed[MLKEM_SYMBYTES],
+                              uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
+                              uint8_t nonce3)
 __contract__(
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
   requires(memory_no_alias(r0, sizeof(mlk_poly)))
@@ -524,10 +528,11 @@ __contract__(
   assigns(memory_slice(r1, sizeof(mlk_poly)))
   assigns(memory_slice(r2, sizeof(mlk_poly)))
   assigns(r3 != NULL: memory_slice(r3, sizeof(mlk_poly)))
-  ensures(array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1))
-  ensures(array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1))
-  ensures(array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1))
-  ensures(r3 != NULL ==> array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1))
+  ensures(return_value == 0 || return_value == MLK_ERR_FIPS202_FAIL)
+  ensures(return_value == 0 ==> array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1))
+  ensures(return_value == 0 ==> array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1))
+  ensures(return_value == 0 ==> array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1))
+  ensures((return_value == 0 && r3 != NULL) ==> array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1))
 );
 
 #if MLKEM_ETA1 == MLKEM_ETA2
@@ -557,15 +562,20 @@ __contract__(
  * @param[out] r     Output polynomial.
  * @param[in]  seed  Input seed (of length MLKEM_SYMBYTES bytes).
  * @param      nonce One-byte input nonce.
+ *
+ * @return 0 on success, or MLK_ERR_FIPS202_FAIL if a custom FIPS202
+ *         implementation (MLK_CONFIG_FIPS202_CAN_FAIL) reported a failure.
  */
 MLK_INTERNAL_API
-void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
-                            uint8_t nonce)
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
+                           uint8_t nonce)
 __contract__(
   requires(memory_no_alias(r, sizeof(mlk_poly)))
   requires(memory_no_alias(seed, MLKEM_SYMBYTES))
   assigns(memory_slice(r, sizeof(mlk_poly)))
-  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1))
+  ensures(return_value == 0 || return_value == MLK_ERR_FIPS202_FAIL)
+  ensures(return_value == 0 ==> array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_ETA2 + 1))
 );
 #endif /* (MLKEM_K == 2 || MLKEM_K == 4) && (!MLK_CONFIG_NO_ENCAPS_API || \
           !MLK_CONFIG_NO_DECAPS_API) */
@@ -594,13 +604,17 @@ __contract__(
  * @param      nonce1 One-byte input nonce.
  * @param      nonce2 One-byte input nonce.
  * @param      nonce3 One-byte input nonce.
+ *
+ * @return 0 on success, or MLK_ERR_FIPS202_FAIL if a custom FIPS202
+ *         implementation (MLK_CONFIG_FIPS202_CAN_FAIL) reported a failure.
  */
 MLK_INTERNAL_API
-void mlk_poly_getnoise_eta1122_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
-                                  mlk_poly *r3,
-                                  const uint8_t seed[MLKEM_SYMBYTES],
-                                  uint8_t nonce0, uint8_t nonce1,
-                                  uint8_t nonce2, uint8_t nonce3)
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_poly_getnoise_eta1122_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
+                                 mlk_poly *r3,
+                                 const uint8_t seed[MLKEM_SYMBYTES],
+                                 uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
+                                 uint8_t nonce3)
 __contract__(
   requires(memory_no_alias(r0, sizeof(mlk_poly)))
   requires(memory_no_alias(r1, sizeof(mlk_poly)))
@@ -611,10 +625,12 @@ __contract__(
   assigns(memory_slice(r1, sizeof(mlk_poly)))
   assigns(memory_slice(r2, sizeof(mlk_poly)))
   assigns(memory_slice(r3, sizeof(mlk_poly)))
-  ensures(array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
+  ensures(return_value == 0 || return_value == MLK_ERR_FIPS202_FAIL)
+  ensures(return_value == 0 ==>
+     (array_abs_bound(r0->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
        && array_abs_bound(r1->coeffs,0, MLKEM_N, MLKEM_ETA1 + 1)
        && array_abs_bound(r2->coeffs,0, MLKEM_N, MLKEM_ETA2 + 1)
-       && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA2 + 1))
+       && array_abs_bound(r3->coeffs,0, MLKEM_N, MLKEM_ETA2 + 1)))
 );
 #endif /* MLKEM_K == 2 && (!MLK_CONFIG_NO_ENCAPS_API || \
           !MLK_CONFIG_NO_DECAPS_API) */

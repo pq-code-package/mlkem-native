@@ -5,8 +5,8 @@
 #include <indcpa.h>
 
 #define mlk_enc_getnoise_eta1_eta2 MLK_NAMESPACE(enc_getnoise_eta1_eta2)
-void mlk_enc_getnoise_eta1_eta2(mlk_polyvec *sp, mlk_polyvec *ep, mlk_poly *epp,
-                                const uint8_t coins[MLKEM_SYMBYTES]);
+int mlk_enc_getnoise_eta1_eta2(mlk_polyvec *sp, mlk_polyvec *ep, mlk_poly *epp,
+                               const uint8_t coins[MLKEM_SYMBYTES]);
 
 void harness(void)
 {

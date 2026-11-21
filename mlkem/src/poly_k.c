@@ -344,13 +344,14 @@ __contract__(
  *              from the reference implementation, to leverage
  *              batched Keccak-f1600.*/
 MLK_INTERNAL_API
-void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
-                               mlk_poly *r3, const uint8_t seed[MLKEM_SYMBYTES],
-                               uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
-                               uint8_t nonce3)
+int mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
+                              mlk_poly *r3, const uint8_t seed[MLKEM_SYMBYTES],
+                              uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
+                              uint8_t nonce3)
 {
   MLK_ALIGN uint8_t buf[4][MLK_ALIGN_UP(MLKEM_ETA1 * MLKEM_N / 4)];
   MLK_ALIGN uint8_t extkey[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 1)];
+  int ret;
   mlk_memcpy(extkey[0], seed, MLKEM_SYMBYTES);
   mlk_memcpy(extkey[1], seed, MLKEM_SYMBYTES);
   mlk_memcpy(extkey[2], seed, MLKEM_SYMBYTES);
@@ -361,34 +362,44 @@ void mlk_poly_getnoise_eta1_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
   extkey[3][MLKEM_SYMBYTES] = nonce3;
 
 #if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
-  mlk_prf_eta1_x4(buf, extkey);
+  ret = mlk_prf_eta1_x4(buf, extkey);
 #else
-  mlk_prf_eta1(buf[0], extkey[0]);
-  mlk_prf_eta1(buf[1], extkey[1]);
-  mlk_prf_eta1(buf[2], extkey[2]);
-  if (r3 != NULL)
+  ret = mlk_prf_eta1(buf[0], extkey[0]);
+  if (ret == 0)
   {
-    mlk_prf_eta1(buf[3], extkey[3]);
+    ret = mlk_prf_eta1(buf[1], extkey[1]);
+  }
+  if (ret == 0)
+  {
+    ret = mlk_prf_eta1(buf[2], extkey[2]);
+  }
+  if (ret == 0 && r3 != NULL)
+  {
+    ret = mlk_prf_eta1(buf[3], extkey[3]);
   }
 #endif /* MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
-  mlk_poly_cbd_eta1(r0, buf[0]);
-  mlk_poly_cbd_eta1(r1, buf[1]);
-  mlk_poly_cbd_eta1(r2, buf[2]);
-  if (r3 != NULL)
+  if (ret == 0)
   {
-    mlk_poly_cbd_eta1(r3, buf[3]);
-    mlk_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA1 + 1);
-  }
+    mlk_poly_cbd_eta1(r0, buf[0]);
+    mlk_poly_cbd_eta1(r1, buf[1]);
+    mlk_poly_cbd_eta1(r2, buf[2]);
+    if (r3 != NULL)
+    {
+      mlk_poly_cbd_eta1(r3, buf[3]);
+      mlk_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA1 + 1);
+    }
 
-  mlk_assert_abs_bound(r0, MLKEM_N, MLKEM_ETA1 + 1);
-  mlk_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
-  mlk_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA1 + 1);
+    mlk_assert_abs_bound(r0, MLKEM_N, MLKEM_ETA1 + 1);
+    mlk_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
+    mlk_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA1 + 1);
+  }
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(buf, sizeof(buf));
   mlk_zeroize(extkey, sizeof(extkey));
+  return ret;
 }
 #endif /* !MLK_CONFIG_NO_KEYPAIR_API || (MLKEM_ETA1 == MLKEM_ETA2 && \
           (!MLK_CONFIG_NO_ENCAPS_API || !MLK_CONFIG_NO_DECAPS_API)) */
@@ -427,24 +438,28 @@ __contract__(
 /* Reference: `poly_getnoise_eta2()` in the reference implementation @[REF].
  *            - We include buffer zeroization. */
 MLK_INTERNAL_API
-void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
-                            uint8_t nonce)
+int mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
+                           uint8_t nonce)
 {
   MLK_ALIGN uint8_t buf[MLKEM_ETA2 * MLKEM_N / 4];
   MLK_ALIGN uint8_t extkey[MLKEM_SYMBYTES + 1];
+  int ret;
 
   mlk_memcpy(extkey, seed, MLKEM_SYMBYTES);
   extkey[MLKEM_SYMBYTES] = nonce;
-  mlk_prf_eta2(buf, extkey);
+  ret = mlk_prf_eta2(buf, extkey);
 
-  mlk_poly_cbd_eta2(r, buf);
-
-  mlk_assert_abs_bound(r, MLKEM_N, MLKEM_ETA2 + 1);
+  if (ret == 0)
+  {
+    mlk_poly_cbd_eta2(r, buf);
+    mlk_assert_abs_bound(r, MLKEM_N, MLKEM_ETA2 + 1);
+  }
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(buf, sizeof(buf));
   mlk_zeroize(extkey, sizeof(extkey));
+  return ret;
 }
 #endif /* (MLKEM_K == 2 || MLKEM_K == 4) && (!MLK_CONFIG_NO_ENCAPS_API || \
           !MLK_CONFIG_NO_DECAPS_API) */
@@ -459,17 +474,18 @@ void mlk_poly_getnoise_eta2(mlk_poly *r, const uint8_t seed[MLKEM_SYMBYTES],
  *              more random data than needed for the eta2 calls, to be
  *              be able to use a x4-batched Keccak-f1600. */
 MLK_INTERNAL_API
-void mlk_poly_getnoise_eta1122_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
-                                  mlk_poly *r3,
-                                  const uint8_t seed[MLKEM_SYMBYTES],
-                                  uint8_t nonce0, uint8_t nonce1,
-                                  uint8_t nonce2, uint8_t nonce3)
+int mlk_poly_getnoise_eta1122_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
+                                 mlk_poly *r3,
+                                 const uint8_t seed[MLKEM_SYMBYTES],
+                                 uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
+                                 uint8_t nonce3)
 {
 #if MLKEM_ETA2 >= MLKEM_ETA1
 #error mlk_poly_getnoise_eta1122_4x assumes MLKEM_ETA1 > MLKEM_ETA2
 #endif
   MLK_ALIGN uint8_t buf[4][MLK_ALIGN_UP(MLKEM_ETA1 * MLKEM_N / 4)];
   MLK_ALIGN uint8_t extkey[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 1)];
+  int ret;
 
   mlk_memcpy(extkey[0], seed, MLKEM_SYMBYTES);
   mlk_memcpy(extkey[1], seed, MLKEM_SYMBYTES);
@@ -484,28 +500,41 @@ void mlk_poly_getnoise_eta1122_4x(mlk_poly *r0, mlk_poly *r1, mlk_poly *r2,
    * even though that means generating more random data in buf[2] and buf[3]
    * than necessary. */
 #if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
-  mlk_prf_eta1_x4(buf, extkey);
+  ret = mlk_prf_eta1_x4(buf, extkey);
 #else
-  mlk_prf_eta1(buf[0], extkey[0]);
-  mlk_prf_eta1(buf[1], extkey[1]);
-  mlk_prf_eta2(buf[2], extkey[2]);
-  mlk_prf_eta2(buf[3], extkey[3]);
+  ret = mlk_prf_eta1(buf[0], extkey[0]);
+  if (ret == 0)
+  {
+    ret = mlk_prf_eta1(buf[1], extkey[1]);
+  }
+  if (ret == 0)
+  {
+    ret = mlk_prf_eta2(buf[2], extkey[2]);
+  }
+  if (ret == 0)
+  {
+    ret = mlk_prf_eta2(buf[3], extkey[3]);
+  }
 #endif /* MLK_CONFIG_SERIAL_FIPS202_ONLY */
 
-  mlk_poly_cbd_eta1(r0, buf[0]);
-  mlk_poly_cbd_eta1(r1, buf[1]);
-  mlk_poly_cbd_eta2(r2, buf[2]);
-  mlk_poly_cbd_eta2(r3, buf[3]);
+  if (ret == 0)
+  {
+    mlk_poly_cbd_eta1(r0, buf[0]);
+    mlk_poly_cbd_eta1(r1, buf[1]);
+    mlk_poly_cbd_eta2(r2, buf[2]);
+    mlk_poly_cbd_eta2(r3, buf[3]);
 
-  mlk_assert_abs_bound(r0, MLKEM_N, MLKEM_ETA1 + 1);
-  mlk_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
-  mlk_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA2 + 1);
-  mlk_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA2 + 1);
+    mlk_assert_abs_bound(r0, MLKEM_N, MLKEM_ETA1 + 1);
+    mlk_assert_abs_bound(r1, MLKEM_N, MLKEM_ETA1 + 1);
+    mlk_assert_abs_bound(r2, MLKEM_N, MLKEM_ETA2 + 1);
+    mlk_assert_abs_bound(r3, MLKEM_N, MLKEM_ETA2 + 1);
+  }
 
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(buf, sizeof(buf));
   mlk_zeroize(extkey, sizeof(extkey));
+  return ret;
 }
 #endif /* MLKEM_K == 2 && (!MLK_CONFIG_NO_ENCAPS_API || \
           !MLK_CONFIG_NO_DECAPS_API) */

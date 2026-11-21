@@ -369,6 +369,7 @@ class TEST_TYPES(Enum):
     WYCHEPROOF = 22
     ABICHECK = 23
     CONTEXT_PARAMETER = 24
+    FIPS202_FAIL = 25
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -452,6 +453,8 @@ class TEST_TYPES(Enum):
             return "Alloc Test"
         if self == TEST_TYPES.RNG_FAIL:
             return "RNG Failure Test"
+        if self == TEST_TYPES.FIPS202_FAIL:
+            return "FIPS202 Failure Test"
         if self == TEST_TYPES.ABICHECK:
             return "ABI Compliance Test"
 
@@ -529,6 +532,8 @@ class TEST_TYPES(Enum):
             return "alloc"
         if self == TEST_TYPES.RNG_FAIL:
             return "rng_fail"
+        if self == TEST_TYPES.FIPS202_FAIL:
+            return "fips202_fail"
         if self == TEST_TYPES.ABICHECK:
             return "abicheck"
 
@@ -913,6 +918,19 @@ class Tests:
 
         self.check_fail()
 
+    def fips202_fail(self):
+        def _fips202_fail(opt):
+            self._compile_schemes(TEST_TYPES.FIPS202_FAIL, opt)
+            if self.args.run:
+                self._run_schemes(TEST_TYPES.FIPS202_FAIL, opt)
+
+        if self.do_no_opt():
+            _fips202_fail(False)
+        if self.do_opt():
+            _fips202_fail(True)
+
+        self.check_fail()
+
     def acvp(self):
         def _acvp(opt):
             self._compile_schemes(TEST_TYPES.ACVP, opt)
@@ -1076,6 +1094,7 @@ class Tests:
         unit = self.args.unit
         alloc = self.args.alloc
         rng_fail = self.args.rng_fail
+        fips202_fail = self.args.fips202_fail
         abicheck = self.args.abicheck
 
         def _all(opt):
@@ -1095,6 +1114,8 @@ class Tests:
                 self._compile_schemes(TEST_TYPES.ALLOC, opt)
             if rng_fail is True:
                 self._compile_schemes(TEST_TYPES.RNG_FAIL, opt)
+            if fips202_fail is True:
+                self._compile_schemes(TEST_TYPES.FIPS202_FAIL, opt)
             if abicheck is True and opt:
                 self._compile_schemes(TEST_TYPES.ABICHECK, opt)
 
@@ -1126,6 +1147,8 @@ class Tests:
                 self._run_schemes(TEST_TYPES.ALLOC, opt)
             if rng_fail is True:
                 self._run_schemes(TEST_TYPES.RNG_FAIL, opt)
+            if fips202_fail is True:
+                self._run_schemes(TEST_TYPES.FIPS202_FAIL, opt)
             if abicheck is True and opt:
                 self._run_scheme(TEST_TYPES.ABICHECK, opt, None)
 
@@ -1598,6 +1621,21 @@ def cli():
         help="Do not run RNG failure tests",
     )
 
+    fips202_fail_group = all_parser.add_mutually_exclusive_group()
+    fips202_fail_group.add_argument(
+        "--fips202-fail",
+        action="store_true",
+        dest="fips202_fail",
+        help="Run FIPS202 failure tests",
+        default=True,
+    )
+    fips202_fail_group.add_argument(
+        "--no-fips202-fail",
+        action="store_false",
+        dest="fips202_fail",
+        help="Do not run FIPS202 failure tests",
+    )
+
     abicheck_group = all_parser.add_mutually_exclusive_group()
     abicheck_group.add_argument(
         "--abicheck",
@@ -1890,6 +1928,13 @@ def cli():
         parents=[common_parser],
     )
 
+    # fips202_fail arguments
+    cmd_subparsers.add_parser(
+        "fips202_fail",
+        help="Run the FIPS202 failure tests for all parameter sets",
+        parents=[common_parser],
+    )
+
     args = main_parser.parse_args()
 
     if args.cmd is not None:
@@ -1933,6 +1978,8 @@ def cli():
         Tests(args).alloc()
     elif args.cmd == "rng_fail":
         Tests(args).rng_fail()
+    elif args.cmd == "fips202_fail":
+        Tests(args).fips202_fail()
     elif args.cmd == "abicheck":
         Tests(args).abicheck()
 

@@ -23,6 +23,19 @@ See [`mlkem/src/fips202/fips202.h`](mlkem/src/fips202/fips202.h) and [`mlkem/src
 definitions may differ from those shipped with mlkem-native: In particular, you may fall back to an incremental hashing
 implementation which tracks the current offset in its state.
 
+## Implementations that can fail
+
+By default, the functions of a custom FIPS-202 implementation return `void` and cannot fail. If your implementation can
+fail, set `MLK_CONFIG_FIPS202_CAN_FAIL`. All functions listed above,
+including `*_init()` and `*_release()`, must then return an `int`: 0 on success, and any non-zero value on failure.
+mlkem-native checks every call. If one fails, the public API function returns `MLK_ERR_FIPS202_FAIL`, and its
+output buffers are left unmodified or zeroized. Whether a call fails must not depend on the contents
+of its input and output buffers or of the FIPS-202 state, as these can be secret. It may depend on the lengths of
+the inputs and outputs, which are public.
+
+The FIPS-202 implementation shipped with mlkem-native never fails. In the next major version (v3), custom
+implementations are planned to always return `int`, and `MLK_CONFIG_FIPS202_CAN_FAIL` will be removed.
+
 ## Example
 
 See [`examples/bring_your_own_fips202/`](examples/bring_your_own_fips202/) for an example how to use a custom FIPS-202
