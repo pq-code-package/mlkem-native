@@ -5,7 +5,7 @@
 # The axioms and definitions of HOL Light.
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 # pin: hol_light https://github.com/jrh13/hol-light/commit/9b510bc76da4cecf6e509be44d327c9236ec273f
-# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/bf75b6c61dae86bbb383785987bc316e20b7ebbf
+# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/1d097f630f0ca91cc2271491b9dd57dc9c9023a5
 
 # INFINITY_AX
 axiom 55f6eae0d279decd
