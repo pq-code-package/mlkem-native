@@ -25,8 +25,8 @@
  */
 
 /*
- * Test configuration: Test configuration with CPUID-based AVX2 capability
- * detection
+ * Test configuration: Test configuration with CPUID/XGETBV-based AVX2 and
+ * AVX-512 capability detection
  *
  * This configuration differs from the default mlkem/mlkem_native_config.h in
  * the following places:
@@ -489,34 +489,64 @@
 
 static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
 {
-  if (cap == MLK_SYS_CAP_X86_64_AVX2)
+  uint32_t eax, ebx, ecx, edx, xcr0, xcr0_hi;
+  /* XCR0 bits 1 and 2: the OS saves the SSE and AVX registers */
+  const uint32_t xcr0_avx = (1u << 1) | (1u << 2);
+  /* XCR0 bits 5, 6 and 7: the OS also saves the opmask registers
+   * and the upper halves of zmm0-15 and all of zmm16-31 */
+  const uint32_t xcr0_avx512 = xcr0_avx | (1u << 5) | (1u << 6) | (1u << 7);
+  /* CPUID leaf 7 EBX: AVX-512F (bit 16), AVX-512DQ (bit 17) and
+   * AVX-512VL (bit 31) */
+  const uint32_t ebx_avx512 = (1u << 16) | (1u << 17) | (1u << 31);
+
+  if (cap != MLK_SYS_CAP_X86_64_AVX2 && cap != MLK_SYS_CAP_X86_64_AVX512)
   {
-    uint32_t eax, ebx, ecx, edx;
-
-    /* AVX2 support is queried using `cpuid` with EAX=7, ECX=0.
-     * Check first if `cpuid` supports EAX=7 by calling it with
-     * EAX=0, which gives the maximum supported value of EAX in
-     * EAX. */
-
-    __asm__ volatile("cpuid"
-                     : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx)
-                     : "a"(0));
-
-    if (eax < 7)
-    {
-      return 0; /* Extended features not supported */
-    }
-
-    __asm__ volatile("cpuid"
-                     : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx)
-                     : "a"(7), "c"(0));
-
-    /* AVX2 is bit 5 in EBX */
-    return (ebx & (1 << 5)) ? 1 : 0;
+    /* Default to 0 (conservative) for unknown capabilities */
+    return 0;
   }
 
-  /* Default to 0 (conservative) for unknown capabilities */
-  return 0;
+  /* AVX2 and AVX-512 support is queried using `cpuid` with EAX=7,
+   * ECX=0. Check first if `cpuid` supports EAX=7 by calling it with
+   * EAX=0, which gives the maximum supported value of EAX in EAX. */
+  __asm__ volatile("cpuid"
+                   : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx)
+                   : "a"(0));
+
+  if (eax < 7)
+  {
+    return 0; /* Extended features not supported */
+  }
+
+  /* The CPU supporting AVX2 or AVX-512 is not enough: the OS must
+   * also save the respective registers on context switches. XCR0
+   * says which registers it saves; it can be read with `xgetbv`
+   * if OSXSAVE (bit 27 in ECX for `cpuid` with EAX=1) is set. */
+  __asm__ volatile("cpuid"
+                   : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx)
+                   : "a"(1), "c"(0));
+
+  if ((ecx & (1u << 27)) == 0)
+  {
+    return 0; /* XGETBV not enabled by the OS */
+  }
+
+  __asm__ volatile("xgetbv" : "=a"(xcr0), "=d"(xcr0_hi) : "c"(0));
+  (void)xcr0_hi;
+
+  __asm__ volatile("cpuid"
+                   : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx)
+                   : "a"(7), "c"(0));
+
+  if (cap == MLK_SYS_CAP_X86_64_AVX2)
+  {
+    /* AVX2 is bit 5 in EBX */
+    return ((xcr0 & xcr0_avx) == xcr0_avx && (ebx & (1u << 5)) != 0) ? 1 : 0;
+  }
+
+  return ((xcr0 & xcr0_avx512) == xcr0_avx512 &&
+          (ebx & ebx_avx512) == ebx_avx512)
+             ? 1
+             : 0;
 }
 #endif /* !__ASSEMBLER__ */
 

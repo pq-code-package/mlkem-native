@@ -600,14 +600,14 @@ jobs:
             ec2_volume_size: 30
             platform: native
             opt: all
-            config_variations: 'native-cap-CPUID_AVX2'
+            config_variations: 'native-cap-CPUID'
           - name: Intel Xeon 4th gen (t3)
             ec2_instance_type: t3.small
             ec2_ami: ubuntu (x86_64)
             ec2_volume_size: 30
             platform: native
             opt: all
-            config_variations: 'native-cap-CPUID_AVX2'
+            config_variations: 'native-cap-CPUID'
           - name: Graviton2 (c6g.medium)
             ec2_instance_type: c6g.medium
             ec2_ami: ubuntu (aarch64)
