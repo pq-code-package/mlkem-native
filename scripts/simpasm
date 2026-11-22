@@ -23,9 +23,28 @@ import re
 #
 # For vmovq between registers, the two agree. simpasm emits the memory forms
 # as their bytes, so that its output assembles to the same code with either
-# assembler, as scripts/check-binary requires of the proved code.
+# assembler, as scripts/check-binary requires of the proved code. The proofs
+# are about the GNU as bytes, so simpasm fails if its input was assembled to
+# the LLVM ones, instead of writing out bytes that check-binary would reject.
 # The pattern accepts AT&T and Intel syntax: a memory operand has `(` or `[`.
 X86_64_AS_BYTES = re.compile(r"^vmovq\s(?=.*[(\[])(?=.*\bxmm(1[6-9]|2[0-9]|3[01])\b)")
+
+
+def x86_64_as_bytes(inst, code):
+    """Whether to emit `inst`, assembled to the hex bytes `code`, as bytes"""
+    if not X86_64_AS_BYTES.search(inst):
+        return False
+    b = [int(x, 16) for x in code]
+    # b[0] is the EVEX escape 0x62, bits 1:0 of b[2] give the implied prefix
+    # (1 for 66, 2 for F3), and b[4] is the opcode.
+    if b[0] != 0x62 or b[2] & 3 != 1 or b[4] not in (0x6E, 0x7E):
+        raise Exception(
+            f'"{inst}" was assembled to {" ".join(code)}, not to the encoding of '
+            "GNU as (EVEX.66.0F.W1 6E/7E) that the HOL Light proofs are about. "
+            "LLVM chooses EVEX.F3.0F.W1 7E/EVEX.66.0F.W1 D6. "
+            "Run simpasm and autogen with GNU as (gcc) for x86_64."
+        )
+    return True
 
 
 def patchup_disasm(asm, cfify=False, as_bytes=None):
@@ -86,8 +105,9 @@ def patchup_disasm(asm, cfify=False, as_bytes=None):
                     f'The following does not seem to be an assembly line of the expected format `ADDRESS: BYTECODE INSTRUCTION`:\n"{line}"'
                 )
             inst = d.group("inst").expandtabs(1)
-            if as_bytes is not None and as_bytes.search(inst):
-                code = ", ".join("0x" + b for b in d.group("bytes").split())
+            code = d.group("bytes").split()
+            if as_bytes is not None and as_bytes(inst, code):
+                code = ", ".join("0x" + b for b in code)
                 yield " " * indentation + f".byte {code} /* {inst} */"
                 continue
             yield " " * indentation + inst
@@ -287,7 +307,7 @@ def simplify(logger, args, asm_input, asm_output=None):
         simplified = patchup_disasm(
             disasm,
             cfify=args.cfify,
-            as_bytes=X86_64_AS_BYTES if args.arch == "x86_64" else None,
+            as_bytes=x86_64_as_bytes if args.arch == "x86_64" else None,
         )
 
         # Mark stack as non-executable for ELF targets.
