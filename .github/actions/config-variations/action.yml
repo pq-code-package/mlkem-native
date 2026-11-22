@@ -132,6 +132,8 @@ runs:
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
         rng_fail: true
+    # On hosts with AVX-512, auto.mk enables it, so this tests the AVX-512
+    # Keccak code under runtime detection; elsewhere, the AVX2 Keccak x4.
     - name: "Custom native capability functions (CPUID detection)"
       if: ${{ (inputs.tests == 'all' || contains(inputs.tests, 'native-cap-CPUID')) && runner.os == 'Linux' && runner.arch == 'X64' }}
       uses: ./.github/actions/functest

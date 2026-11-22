@@ -452,6 +452,9 @@ jobs:
           examples: false
           stack: true
           check_namespace: false
+          # Stack analysis runs valgrind massif; disable x86_64 AVX-512, which
+          # valgrind cannot emulate
+          extra_env: "MK_COMPILER_SUPPORTS_AVX512=0"
   unit_valgrind:
     name: Unit tests + valgrind (${{ matrix.target.name }}, ${{ matrix.cflags }})
     strategy:
@@ -491,8 +494,9 @@ jobs:
           alloc: false
           rng_fail: false
           check_namespace: false
-          # Disable AArch64 SHA3 extension: valgrind cannot emulate it
-          extra_env: "MK_COMPILER_SUPPORTS_SHA3=0"
+          # Disable AArch64 SHA3 extension and x86_64 AVX-512: valgrind cannot
+          # emulate them
+          extra_env: "MK_COMPILER_SUPPORTS_SHA3=0 MK_COMPILER_SUPPORTS_AVX512=0"
           exec_wrapper: "valgrind --error-exitcode=1"
   config_variations:
     name: Non-standard configurations
