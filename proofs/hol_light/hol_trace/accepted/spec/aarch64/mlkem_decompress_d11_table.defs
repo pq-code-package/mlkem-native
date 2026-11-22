@@ -5,7 +5,7 @@
 # Definitions added by loading proofs/hol_light/aarch64/proofs/mlkem_decompress_d11_table.ml.
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 # pin: hol_light https://github.com/jrh13/hol-light/commit/9b510bc76da4cecf6e509be44d327c9236ec273f
-# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/bf75b6c61dae86bbb383785987bc316e20b7ebbf
+# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/1d097f630f0ca91cc2271491b9dd57dc9c9023a5
 # source: proofs/hol_light/aarch64/proofs/mlkem_decompress_d11_table.ml 546a26de3e28cace7f8919d18835b3a796c3e75fa52c5d6a5aa6c20e9033e820
 
 definition mlkem_decompress_d11_table
