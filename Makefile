@@ -276,6 +276,7 @@ ifeq ($(ARCH),x86_64)
 	@echo "AVX2: Host $(if $(filter 1,$(MK_HOST_SUPPORTS_AVX2)),✅,❌) Compiler $(if $(filter 1,$(MK_COMPILER_SUPPORTS_AVX2)),✅,❌)"
 	@echo "SSE2: Host $(if $(filter 1,$(MK_HOST_SUPPORTS_SSE2)),✅,❌) Compiler $(if $(filter 1,$(MK_COMPILER_SUPPORTS_SSE2)),✅,❌)"
 	@echo "BMI2: Host $(if $(filter 1,$(MK_HOST_SUPPORTS_BMI2)),✅,❌) Compiler $(if $(filter 1,$(MK_COMPILER_SUPPORTS_BMI2)),✅,❌)"
+	@echo "AVX-512 (F, VL, DQ): Host $(if $(filter 1,$(MK_HOST_SUPPORTS_AVX512)),✅,❌) Compiler $(if $(filter 1,$(MK_COMPILER_SUPPORTS_AVX512)),✅,❌)"
 else ifeq ($(ARCH),aarch64)
 	@echo "=== AArch64 Feature Support ==="
 	@echo "SHA3: Host $(if $(filter 1,$(MK_HOST_SUPPORTS_SHA3)),✅,❌) Compiler $(if $(filter 1,$(MK_COMPILER_SUPPORTS_SHA3)),✅,❌)"
