@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795382933416,
+  "lastUpdate": 1795382958605,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -30306,6 +30306,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 93922,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "a363bf76ed9e2208010297970fa02e2474320a6f",
+          "message": "CBMC: Enable ILP32 for every proof harness\n\nOnly `mlk_ct_get_optblocker_i32` listed an ILP32 configuration,\nso selecting ILP32 omitted the other 199 harnesses.\n\nAdd ILP32 Z3 to 197 harnesses and ILP32 CaDiCaL to\n`mlk_indcpa_enc` and `nttunpack_native_x86_64`. Omit ILP32 for\nthe ML-KEM-1024 keypair proof, which exceeds the CI timeout.\nRegenerate the proof dependency manifest for the new configurations.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-22T19:30:01Z",
+          "tree_id": "ab8cf1e4e2390a88ac0efecfe69c115389d803ba",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/a363bf76ed9e2208010297970fa02e2474320a6f"
+        },
+        "date": 1795382958224,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 28546,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 34185,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 43328,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 47206,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 53300,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 65482,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 70550,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 78299,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 93948,
             "unit": "cycles"
           }
         ]
