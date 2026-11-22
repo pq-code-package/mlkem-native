@@ -6046,13 +6046,15 @@ def gen_abicheck():
         yield f"#if defined({arch_guard})"
         yield ""
 
-        # Emit one row per function, consolidating consecutive functions that
-        # share the same feature_guards into a single #if/#endif block (rather
-        # than one block per function). This collapses a uniform-feature group
-        # (e.g. x86_64, where every kernel requires AVX2) into a single
-        # block, while still splitting where guards differ (e.g. aarch64, where
-        # SHA3 and non-SHA3 kernels are interleaved).
+        # Emit one row per function, consolidating functions that share the
+        # same feature_guards into a single #if/#endif block (rather than one
+        # block per function). Sort the functions by their guards first, so
+        # that each set of guards gets one block (e.g. x86_64, where some
+        # kernels require AVX2 and others AVX-512, or aarch64, where some
+        # kernels require SHA3). The sort is stable, so the functions in a
+        # block keep their order.
         def emit_feature_grouped(functions, render):
+            functions = sorted(functions, key=lambda f: list(f[1]))
             i = 0
             while i < len(functions):
                 guards = functions[i][1]
