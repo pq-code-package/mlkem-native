@@ -2301,12 +2301,12 @@ def gen_aarch64_keccak_constants_c_file():
     )
 
 
-def gen_avx2_keccak_constants_c_file():
+def gen_x86_64_keccak_constants_c_file():
     def gen_c():
         yield from gen_header()
         yield '#include "../../../../common.h"'
-        yield "#if (defined(MLK_FIPS202_X86_64_NEED_X4_AVX2) ||   \\"
-        yield "     defined(MLK_FIPS202_X86_64_NEED_X1_AVX512) || \\"
+        yield "#if (defined(MLK_FIPS202_X86_64_NEED_X4_AVX2) ||    \\"
+        yield "     defined(MLK_FIPS202_X86_64_NEED_X1_AVX512) ||  \\"
         yield "     defined(MLK_FIPS202_X86_64_NEED_X4_AVX512)) && \\"
         yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
         yield ""
@@ -2329,14 +2329,14 @@ def gen_avx2_keccak_constants_c_file():
         yield "#endif /* MLK_FIPS202_X86_64_NEED_X4_AVX2 */"
         yield ""
         yield "#else /* (MLK_FIPS202_X86_64_NEED_X4_AVX2 || MLK_FIPS202_X86_64_NEED_X1_AVX512 \\"
-        yield "         || MLK_FIPS202_X86_64_NEED_X4_AVX512) &&                          \\"
+        yield "         || MLK_FIPS202_X86_64_NEED_X4_AVX512) &&                              \\"
         yield "         !MLK_CONFIG_MULTILEVEL_NO_SHARED */"
         yield ""
         yield "MLK_EMPTY_CU(fips202_x86_64_constants)"
         yield ""
-        yield "#endif /* !((MLK_FIPS202_X86_64_NEED_X4_AVX2 ||                             \\"
-        yield "          MLK_FIPS202_X86_64_NEED_X1_AVX512 ||                            \\"
-        yield "          MLK_FIPS202_X86_64_NEED_X4_AVX512) &&                           \\"
+        yield "#endif /* !((MLK_FIPS202_X86_64_NEED_X4_AVX2 || \\"
+        yield "          MLK_FIPS202_X86_64_NEED_X1_AVX512 ||  \\"
+        yield "          MLK_FIPS202_X86_64_NEED_X4_AVX512) && \\"
         yield "          !MLK_CONFIG_MULTILEVEL_NO_SHARED) */"
         yield ""
 
@@ -6268,7 +6268,7 @@ def _main():
         gen_avx2_rej_uniform_table()
         gen_hol_light_keccak_constants_file()
         gen_aarch64_keccak_constants_c_file()
-        gen_avx2_keccak_constants_c_file()
+        gen_x86_64_keccak_constants_c_file()
         gen_avx2_keccak_hol_light_constants_file()
         gen_riscv64_zeta_files()
         gen_ppc64le_zeta_files()
