@@ -34,6 +34,14 @@ on:
         type: string
         description: Custom CFLAGS for compilation
         default: ""
+      ldflags:
+        type: string
+        description: Custom LDFLAGS for linking
+        default: ""
+      extra_args:
+        type: string
+        description: Additional arguments to pass to the tests script
+        default: ""
       verbose:
         description: Determine for the log verbosity
         type: boolean
@@ -53,6 +61,12 @@ on:
         type: boolean
         default: true
       acvptest:
+        type: boolean
+        default: true
+      examples:
+        type: boolean
+        default: true
+      check_namespace:
         type: boolean
         default: true
       lint:
@@ -208,11 +222,15 @@ jobs:
           nix-verbose: ${{ inputs.verbose }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
           cflags: ${{ inputs.cflags }}
+          ldflags: ${{ inputs.ldflags }}
           platform: ${{ inputs.platform }}
           opt: ${{ inputs.opt }}
           func: ${{ inputs.functest }}
           kat: ${{ inputs.kattest }}
           acvp: ${{ inputs.acvptest }}
+          examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
+          extra_args: ${{ inputs.extra_args }}
       - name: Config Variations
         if: ${{ inputs.config_variations != '' && (success() || failure()) }}
         uses: ./.github/actions/config-variations
