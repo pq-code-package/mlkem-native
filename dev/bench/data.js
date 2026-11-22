@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795361714546,
+  "lastUpdate": 1795361738642,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -3449,6 +3449,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 91572,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "bd84eced11a0af857bf8b2282953ca7e3a1e5f98",
+          "message": "bench: Add C8a and C8i to the EC2 benchmark matrix\n\nThe x86 EC2 benchmarks cover AMD and Intel instances through C7.\nAdd C8a and C8i so the same jobs also measure AMD EPYC Turin and\nIntel Xeon Granite Rapids.\n\nUse c8a.medium with -march=znver5, matching the single-core C7a\nsetup. Use c8i.metal-48xl with -march=graniterapids. This is the\nsmallest bare-metal C8i size and follows the C7i setup, which moved\nto bare metal after measurements varied on c7i.large.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-22T14:04:48Z",
+          "tree_id": "d3068270b375313df42f1b467ba9e55605c70a71",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/bd84eced11a0af857bf8b2282953ca7e3a1e5f98"
+        },
+        "date": 1795361410650,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 27928,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 32174,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 41471,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 46877,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 50849,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 63769,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 69003,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 74811,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 91574,
             "unit": "cycles"
           }
         ]
