@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795439006133,
+  "lastUpdate": 1795439024118,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -3725,6 +3725,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 91573,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "a9f7cb5f788ec99eaca3d07be2c62fd7760515d8",
+          "message": "CI: Report broken Markdown links in one PR comment\n\nThe Markdown link check failed whenever the checker marked a link\ndead. An unreachable external site could therefore block a pull\nrequest whose repository links all worked.\n\nRead the checker's JUnit report and fail the job for broken local\npaths and anchors. Report unreachable external links as warnings.\n\nFor a pull request from the same repository, write the report to\na temporary file and post it in a later step of the same job, even\nwhen the check found broken internal links. Verify the PR head and\nupdate the bot's marked comment on reruns. Fork pull requests run\nthe check and get a job summary.\n\nPorts https://github.com/pq-code-package/mldsa-native/pull/1581\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-23T10:53:58Z",
+          "tree_id": "4e89dac279ee66f0cfd8777e403f79f11f2344ff",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/a9f7cb5f788ec99eaca3d07be2c62fd7760515d8"
+        },
+        "date": 1795438694833,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 27929,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 32174,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 41470,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 46879,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 50846,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 63766,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 69002,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 74809,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 91575,
             "unit": "cycles"
           }
         ]
