@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795456484225,
+  "lastUpdate": 1795456505953,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -3863,6 +3863,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 91572,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "3979073e2137f59640560673de88c9949a2105ef",
+          "message": "AArch64: Load rejection sampler input by byte\n\nThe sampler reads packed pairs from a byte buffer. Its scalar tail\nloaded halfwords at offsets zero and one, so one load was always\nunaligned and faulted on the no-MMU AArch64 target. The vector loads\ncould also fault when the input started at an unaligned address.\n\nUse LD1 with byte lanes in the 48-byte and 24-byte blocks and three\nLDRB instructions to decode each pair in the tail. The output cursor\nadvances by two bytes per coefficient, which meets the alignment\nrequired by the halfword-lane and scalar halfword stores.\n\nUpdate the HOL Light proof for the new loads and exercise odd input\naddresses and halfword-aligned outputs in the AArch64 unit test.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-23T15:12:50Z",
+          "tree_id": "b36d860912ffbe55a8f1217742f4eff014e39c5f",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/3979073e2137f59640560673de88c9949a2105ef"
+        },
+        "date": 1795456093636,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 27775,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 31990,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 41271,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 46522,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 50446,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 63344,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 68327,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 74168,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 90970,
             "unit": "cycles"
           }
         ]
