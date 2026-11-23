@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795422737563,
+  "lastUpdate": 1795422758531,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -55367,6 +55367,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 59608,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "bf5e7d303495780b9dab7fec73a8e10a83cd77eb",
+          "message": "HOL-Light/AArch64: Reuse bit rewrites in Keccak x4\n\nThe two AArch64 Keccak x4 hybrid proofs expand word equalities into\nbit equalities. Several output bits share subterms, so bit-blasting\ncan prove the same rewrites many times in one goal.\n\nUse s2n-bignum's `MEMOIZED_BITBLAST_THEN` in `KECCAK_BITBLAST_TAC`.\nThe conversion reuses the proofs of repeated bit rewrites before the\ntactic normalizes Boolean equalities.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-23T05:52:50Z",
+          "tree_id": "3bd01e368bcb4341a57487a4332c9f09e015ae63",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/bf5e7d303495780b9dab7fec73a8e10a83cd77eb"
+        },
+        "date": 1795422533772,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 18272,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 20777,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 27016,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 30615,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 32866,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 41700,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 44350,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 47896,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 59606,
             "unit": "cycles"
           }
         ]
