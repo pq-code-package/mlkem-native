@@ -16,7 +16,7 @@
       size_bytes: 512
       permissions: write-only
       c_parameter: int16_t r[256]
-      description: Output buffer
+      description: Output buffer, disjoint from buf and table. The return value is its valid prefix length.
     x1:
       type: buffer
       size_bytes: x2
@@ -34,9 +34,6 @@
       permissions: read-only
       c_parameter: const uint8_t table[4096]
       description: Lookup table
-  Stack:
-    bytes: 576
-    description: register preservation and temporary storage
 */
 
 #include "../../../common.h"
@@ -45,42 +42,21 @@
     !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
-// We save the output on the stack first, and copy to the actual
-// output buffer only in the end. This is because the main loop can overwrite
-// by up to 62 bytes, which we account for here (we use 64 bytes for alignment).
-#define STACK_SIZE (2*MLKEM_N + 64)
-
-.macro push_stack
-        sub sp, sp, #STACK_SIZE
-.endm
-
-.macro pop_stack
-        add sp, sp, #STACK_SIZE
-.endm
-
     /* Parameters */
     output                      .req x0
     buf                         .req x1
     buflen                      .req x2
     table_idx                   .req x3
 
-    len                         .req x4
-
-    /* Temporary output on the stack */
-    xtmp                        .req x7
-    xtmp0                       .req x7
-    xtmp1                       .req x11
-    output_tmp                  .req x7
-    output_tmp_base             .req x8
-
     /* Number of coefficients sampled so far */
     count                       .req x9
-    buf_consumed                .req x10
 
     /* Temporary registers */
-    tmp                         .req w11
-    initial_zero_count          .req x11
-    final_copy_count            .req x11
+    xtmp0                       .req x7
+    xtmp1                       .req x11
+    q_scalar                    .req w4
+    sample0                     .req w5
+    sample1                     .req w6
 
     rec_idx_0                   .req x12
     rec_idx_1                   .req x13
@@ -126,13 +102,9 @@
     sign3                       .req v7
 
     val0                        .req v16
-    val0q                       .req q16
     val1                        .req v17
-    val1q                       .req q17
     val2                        .req v18
-    val2q                       .req q18
     val3                        .req v19
-    val3q                       .req q19
 
     t0                          .req s0
     t1                          .req s1
@@ -162,20 +134,18 @@
     .global MLK_ASM_NAMESPACE(rej_uniform_aarch64_asm)
     .balign 4
 MLK_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
-    push_stack
-
     // Load 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80
-    movz xtmp, 0x1
-    movk xtmp, 0x2, lsl 16
-    movk xtmp, 0x4, lsl 32
-    movk xtmp, 0x8, lsl 48
-    mov bits.d[0], xtmp
+    movz xtmp0, 0x1
+    movk xtmp0, 0x2, lsl 16
+    movk xtmp0, 0x4, lsl 32
+    movk xtmp0, 0x8, lsl 48
+    mov bits.d[0], xtmp0
 
-    movz xtmp, 0x10
-    movk xtmp, 0x20, lsl 16
-    movk xtmp, 0x40, lsl 32
-    movk xtmp, 0x80, lsl 48
-    mov bits.d[1], xtmp
+    movz xtmp0, 0x10
+    movk xtmp0, 0x20, lsl 16
+    movk xtmp0, 0x40, lsl 32
+    movk xtmp0, 0x80, lsl 48
+    mov bits.d[1], xtmp0
 
     // Expand [1, 4, 16, 64] and [2, 8, 32, 128] into 32-bit lanes whose
     // four bytes hold the same value.
@@ -186,8 +156,8 @@ MLK_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
     mul packed_bits_even.4s, packed_bits_even.4s, tmp0.4s
     mul packed_bits_odd.4s, packed_bits_odd.4s, tmp0.4s
 
-    movz tmp, #MLKEM_Q
-    dup  mlkem_q.8h, tmp
+    movz q_scalar, #MLKEM_Q
+    dup  mlkem_q.8h, q_scalar
 
     // Each 3-byte group b0,b1,b2 encodes two samples:
     // x0 = b0 | ((b1 & 0x0f) << 8), x1 = (b1 >> 4) | (b2 << 4).
@@ -212,35 +182,15 @@ MLK_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
     add unpack2.16b, unpack0.16b, tmp1.16b
     add unpack3.16b, unpack2.16b, tmp0.16b
 
-    mov output_tmp_base, sp
-    mov output_tmp, output_tmp_base
-
-    // The entire temporary stack buffer is copied to the output buffer
-    // at the end of this routine. To avoid leaking original stack contents
-    // in case not enough bytes have been sampled, zero the temporary buffer.
-    mov initial_zero_count, #0
-    eor val0.16b, val0.16b, val0.16b
-mlk_rej_uniform_initial_zero:
-        str val0q, [output_tmp], #64
-        str val0q, [output_tmp, #-48]
-        str val0q, [output_tmp, #-32]
-        str val0q, [output_tmp, #-16]
-        add initial_zero_count, initial_zero_count, #32
-        cmp initial_zero_count, #MLKEM_N
-        b.lt mlk_rej_uniform_initial_zero
-
-    mov output_tmp, output_tmp_base
-
     mov count, #0
-    mov len, #MLKEM_N
 
     cmp buflen, #48
-    b.lo mlk_rej_uniform_loop48_end
+    b.lo mlk_rej_uniform_block16
 
 mlk_rej_uniform_loop48:
-        // Finish once we've generated sufficiently many coefficients
-        cmp     count, len
-        b.hs    mlk_rej_uniform_memory_copy
+        // Four full vector stores need room for 32 coefficients.
+        cmp     count, #(MLKEM_N - 32)
+        b.hi    mlk_rej_uniform_block16
 
         sub     buflen, buflen, #48
 
@@ -329,17 +279,17 @@ mlk_rej_uniform_loop48:
         tbl     val2.16b, {val2.16b}, table2.16b
         tbl     val3.16b, {val3.16b}, table3.16b
 
-        st1     {val0.8h}, [output_tmp]
-        add     output_tmp, output_tmp, ctr0, lsl #1
+        st1     {val0.8h}, [output]
+        add     output, output, ctr0, lsl #1
 
-        st1     {val1.8h}, [output_tmp]
-        add     output_tmp, output_tmp, ctr1, lsl #1
+        st1     {val1.8h}, [output]
+        add     output, output, ctr1, lsl #1
 
-        st1     {val2.8h}, [output_tmp]
-        add     output_tmp, output_tmp, ctr2, lsl #1
+        st1     {val2.8h}, [output]
+        add     output, output, ctr2, lsl #1
 
-        st1     {val3.8h}, [output_tmp]
-        add     output_tmp, output_tmp, ctr3, lsl #1
+        st1     {val3.8h}, [output]
+        add     output, output, ctr3, lsl #1
 
         add     ctr01, ctr0, ctr1
         add     ctr23, ctr2, ctr3
@@ -348,15 +298,14 @@ mlk_rej_uniform_loop48:
 
         cmp buflen, #48
         b.hs mlk_rej_uniform_loop48
-mlk_rej_uniform_loop48_end:
+mlk_rej_uniform_block16:
+    // The half block needs 16 output slots and 24 input bytes.
+    cmp     buflen, #24
+    b.lo    mlk_rej_uniform_return
+    cmp     count, #(MLKEM_N - 16)
+    b.hi    mlk_rej_uniform_scalar_loop
 
-    // Finish once we've generated sufficiently many coefficients
-    cmp     count, len
-    b.hs    mlk_rej_uniform_memory_copy
-
-    cmp buflen, #24
-    b.lo mlk_rej_uniform_memory_copy
-
+        sub     buflen, buflen, #24
         // Load eight packed pairs of 12-bit samples and de-interleave them.
         ldr     buf0q, [buf]
         ldr     buf1d, [buf, #16]
@@ -398,41 +347,42 @@ mlk_rej_uniform_loop48_end:
         tbl     val0.16b, {val0.16b}, table0.16b
         tbl     val1.16b, {val1.16b}, table1.16b
 
-        st1     {val0.8h}, [output_tmp]
-        add     output_tmp, output_tmp, ctr0, lsl #1
+        st1     {val0.8h}, [output]
+        add     output, output, ctr0, lsl #1
 
-        st1     {val1.8h}, [output_tmp]
+        st1     {val1.8h}, [output]
+        add     output, output, ctr1, lsl #1
 
         add     count, count, ctr0
         add     count, count, ctr1
 
-mlk_rej_uniform_memory_copy:
-    // min = min(count,len)
-    cmp  count, len
-    csel count, count, len, lo
+mlk_rej_uniform_scalar_loop:
+    // Two overlapping halfword loads read one three-byte group.
+    cmp     count, #MLKEM_N
+    b.hs    mlk_rej_uniform_return
+    cbz     buflen, mlk_rej_uniform_return
+    ldrh    sample0, [buf]
+    ldurh   sample1, [buf, #1]
+    add     buf, buf, #3
+    sub     buflen, buflen, #3
+    and     sample0, sample0, #0xfff
+    lsr     sample1, sample1, #4
+    cmp     sample0, q_scalar
+    b.hs    mlk_rej_uniform_second_sample
+    strh    sample0, [output], #2
+    add     count, count, #1
+    cmp     count, #MLKEM_N
+    b.hs    mlk_rej_uniform_scalar_loop
 
-    // Always copy MLKEM_N coefficients from the stack to the destination,
-    // even if not all of them may be valid. This simplifies the loop and
-    // allows us to stick to vectorized code.
-    mov final_copy_count, #0
-    mov output_tmp, output_tmp_base
-mlk_rej_uniform_final_copy:
-        ldr val0q, [output_tmp], #64
-        ldr val1q, [output_tmp, #-48]
-        ldr val2q, [output_tmp, #-32]
-        ldr val3q, [output_tmp, #-16]
-        str val0q, [output], #64
-        str val1q, [output, #-48]
-        str val2q, [output, #-32]
-        str val3q, [output, #-16]
-        add final_copy_count, final_copy_count, #32
-        cmp final_copy_count, #MLKEM_N
-        b.lt mlk_rej_uniform_final_copy
-
-    mov x0, count
+mlk_rej_uniform_second_sample:
+    cmp     sample1, q_scalar
+    b.hs    mlk_rej_uniform_scalar_loop
+    strh    sample1, [output], #2
+    add     count, count, #1
+    b       mlk_rej_uniform_scalar_loop
 
 mlk_rej_uniform_return:
-    pop_stack
+    mov     x0, count
     ret
 
 
@@ -441,17 +391,12 @@ mlk_rej_uniform_return:
     .unreq buf
     .unreq buflen
     .unreq table_idx
-    .unreq len
-    .unreq output_tmp
-    .unreq output_tmp_base
     .unreq count
-    .unreq buf_consumed
-    .unreq tmp
-    .unreq xtmp
     .unreq xtmp0
     .unreq xtmp1
-    .unreq final_copy_count
-    .unreq initial_zero_count
+    .unreq q_scalar
+    .unreq sample0
+    .unreq sample1
     .unreq rec_idx_0
     .unreq rec_idx_1
     .unreq rec_idx_2
@@ -478,13 +423,9 @@ mlk_rej_uniform_return:
     .unreq sign2
     .unreq sign3
     .unreq val0
-    .unreq val0q
     .unreq val1
-    .unreq val1q
     .unreq val2
-    .unreq val2q
     .unreq val3
-    .unreq val3q
     .unreq t0
     .unreq t1
     .unreq t0d
@@ -513,10 +454,6 @@ mlk_rej_uniform_return:
     .unreq ctr1_w
     .unreq ctr2_w
     .unreq ctr3_w
-
-/* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
- * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef STACK_SIZE
 
 /* simpasm: footer-start */
 #endif /* MLK_SYS_AARCH64_NEON && MLK_ARITH_BACKEND_AARCH64 && \
