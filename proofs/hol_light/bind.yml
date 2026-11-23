@@ -263,7 +263,7 @@ rej_uniform_aarch64_asm:
   arch: aarch64
   function: mlkem_rej_uniform_aarch64_asm
   sha256:
-    mlkem_rej_uniform_mc: 99ce43edf75680d032ce1499fec91c21ad18975b8b1629e39cf3f1f09c05a16e
+    mlkem_rej_uniform_mc: 8bcfe422361868a47b7ad4aa134cb38c5fcdfe7c3f7949414e53c7559974d0a5
 rej_uniform_avx2_asm:
   arch: x86_64
   function: mlkem_rej_uniform_avx2_asm
