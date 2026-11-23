@@ -4,6 +4,7 @@
 name: Lint-Markdown
 permissions:
   contents: read
+  pull-requests: write
 on:
   workflow_call:
   workflow_dispatch:
@@ -11,12 +12,23 @@ on:
 jobs:
   lint-markdown-link:
     runs-on: ubuntu-latest
+    concurrency:
+      group: markdown-links-${{ github.event.pull_request.number || github.run_id }}
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.number || '' }}
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
-    - name: Check markdown links
+    - name: Install Markdown link checker
       # markdown-link-check is pinned to an exact version below.
       run: | # zizmor: ignore[adhoc-packages]
         npm install -g markdown-link-check@3.14.2
-        find . -name '*.md' -print0 | xargs -0 -P16 -n1 markdown-link-check -q -c .github/mlc_config.json
+    - name: Check Markdown links
+      run: python3 .github/scripts/markdown-links.py check "$RUNNER_TEMP/markdown-links.json"
+    - name: Update Markdown link comment
+      if: ${{ !cancelled() && env.PR_NUMBER != '' }}
+      env:
+        GH_TOKEN: ${{ github.token }}
+        PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      run: python3 .github/scripts/markdown-links.py comment "$RUNNER_TEMP/markdown-links.json"
