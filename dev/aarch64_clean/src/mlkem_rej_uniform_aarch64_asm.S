@@ -53,6 +53,7 @@
 
     /* Temporary registers */
     xtmp0                       .req x7
+    wtmp0                       .req w7
     xtmp1                       .req x11
     q_scalar                    .req w4
     sample0                     .req w5
@@ -84,12 +85,8 @@
     /* Vector registers */
 
     buf0                        .req v0
-    buf0q                       .req q0
     buf1                        .req v1
-    buf1q                       .req q1
-    buf1d                       .req d1
     buf2                        .req v2
-    buf2q                       .req q2
 
     tmp0                        .req v4
     tmp1                        .req v5
@@ -194,12 +191,11 @@ mlk_rej_uniform_loop48:
 
         sub     buflen, buflen, #48
 
-        // Load sixteen packed pairs of 12-bit samples. TBL de-interleaves
-        // the first and second samples from each 3-byte group into 16-bit
-        // lanes.
-        ldp     buf0q, buf1q, [buf]
-        ldr     buf2q, [buf, #32]
-        add     buf, buf, #48
+        // Load sixteen packed pairs of 12-bit samples using byte lanes
+        // because buf can have any alignment. TBL de-interleaves the
+        // first and second samples from each 3-byte group into 16-bit lanes.
+        ld1     {buf0.16b, buf1.16b}, [buf], #32
+        ld1     {buf2.16b}, [buf], #16
 
         tbl     tmp0.16b, {buf0.16b, buf1.16b}, unpack0.16b
         tbl     tmp1.16b, {buf1.16b, buf2.16b}, unpack2.16b
@@ -279,6 +275,8 @@ mlk_rej_uniform_loop48:
         tbl     val2.16b, {val2.16b}, table2.16b
         tbl     val3.16b, {val3.16b}, table3.16b
 
+        // The cursor advances one halfword per accepted coefficient.
+        // Use halfword lanes so a store needs only two-byte alignment.
         st1     {val0.8h}, [output]
         add     output, output, ctr0, lsl #1
 
@@ -307,9 +305,8 @@ mlk_rej_uniform_block16:
 
         sub     buflen, buflen, #24
         // Load eight packed pairs of 12-bit samples and de-interleave them.
-        ldr     buf0q, [buf]
-        ldr     buf1d, [buf, #16]
-        add     buf, buf, #24
+        ld1     {buf0.16b}, [buf], #16
+        ld1     {buf1.8b}, [buf], #8
 
         tbl     tmp0.16b, {buf0.16b, buf1.16b}, unpack0.16b
         tbl     tmp1.16b, {buf0.16b, buf1.16b}, unpack1.16b
@@ -357,16 +354,18 @@ mlk_rej_uniform_block16:
         add     count, count, ctr1
 
 mlk_rej_uniform_scalar_loop:
-    // Two overlapping halfword loads read one three-byte group.
+    // A three-byte group can start at either byte of a halfword.
     cmp     count, #MLKEM_N
     b.hs    mlk_rej_uniform_return
     cbz     buflen, mlk_rej_uniform_return
-    ldrh    sample0, [buf]
-    ldurh   sample1, [buf, #1]
+    ldrb    sample0, [buf]
+    ldrb    wtmp0, [buf, #1]
+    ldrb    sample1, [buf, #2]
     add     buf, buf, #3
     sub     buflen, buflen, #3
-    and     sample0, sample0, #0xfff
-    lsr     sample1, sample1, #4
+    bfi     sample0, wtmp0, #8, #4
+    lsr     wtmp0, wtmp0, #4
+    orr     sample1, wtmp0, sample1, lsl #4
     cmp     sample0, q_scalar
     b.hs    mlk_rej_uniform_second_sample
     strh    sample0, [output], #2
@@ -393,6 +392,7 @@ mlk_rej_uniform_return:
     .unreq table_idx
     .unreq count
     .unreq xtmp0
+    .unreq wtmp0
     .unreq xtmp1
     .unreq q_scalar
     .unreq sample0
@@ -408,12 +408,8 @@ mlk_rej_uniform_return:
     .unreq ctr01
     .unreq ctr23
     .unreq buf0
-    .unreq buf0q
     .unreq buf1
-    .unreq buf1q
-    .unreq buf1d
     .unreq buf2
-    .unreq buf2q
     .unreq tmp0
     .unreq tmp1
     .unreq tmp2

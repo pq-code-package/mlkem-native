@@ -1011,40 +1011,48 @@ static int test_native_rej_uniform(void)
   int i;
   MLK_ALLOC(r_test, int16_t, REJ_UNIFORM_TEST_WORDS, NULL);
   MLK_ALLOC(r_ref, int16_t, MLKEM_N, NULL);
-  MLK_ALLOC(buf, uint8_t, REJ_UNIFORM_BUFLEN, NULL);
+  MLK_ALLOC(buf, uint8_t, REJ_UNIFORM_BUFLEN + 1, NULL);
 
   if (r_test == NULL || r_ref == NULL || buf == NULL)
   {
     goto cleanup;
   }
 
-  r_test[MLKEM_N] = INT16_MIN;
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
+    /* Exercise the byte input and halfword output alignment on AArch64. */
+#if defined(MLK_ARITH_BACKEND_AARCH64)
+    const unsigned shift = (unsigned)i % 2;
+#else
+    const unsigned shift = 0;
+#endif
+    uint8_t *input = buf + shift;
+    int16_t *output = r_test + shift;
     int native_ret;
     unsigned c_ret;
-    randombytes(buf, REJ_UNIFORM_BUFLEN);
+    randombytes(input, REJ_UNIFORM_BUFLEN);
+    output[MLKEM_N] = INT16_MIN;
 
     native_ret =
-        mlk_rej_uniform_native(r_test, MLKEM_N, buf, REJ_UNIFORM_BUFLEN);
+        mlk_rej_uniform_native(output, MLKEM_N, input, REJ_UNIFORM_BUFLEN);
     if (native_ret == MLK_NATIVE_FUNC_FALLBACK)
     {
       ret = 0;
       goto cleanup;
     }
 
-    c_ret = mlk_rej_uniform_c(r_ref, MLKEM_N, 0, buf, REJ_UNIFORM_BUFLEN);
+    c_ret = mlk_rej_uniform_c(r_ref, MLKEM_N, 0, input, REJ_UNIFORM_BUFLEN);
 
-    CHECK(r_test[MLKEM_N] == INT16_MIN);
+    CHECK(output[MLKEM_N] == INT16_MIN);
     CHECK((unsigned)native_ret == c_ret);
-    CHECK(compare_i16_arrays(r_test, r_ref, (unsigned)native_ret, "rej_uniform",
+    CHECK(compare_i16_arrays(output, r_ref, (unsigned)native_ret, "rej_uniform",
                              NULL));
   }
 
   ret = 0;
 
 cleanup:
-  MLK_FREE(buf, uint8_t, REJ_UNIFORM_BUFLEN, NULL);
+  MLK_FREE(buf, uint8_t, REJ_UNIFORM_BUFLEN + 1, NULL);
   MLK_FREE(r_ref, int16_t, MLKEM_N, NULL);
   MLK_FREE(r_test, int16_t, REJ_UNIFORM_TEST_WORDS, NULL);
   return ret;
