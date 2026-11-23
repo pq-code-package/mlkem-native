@@ -1002,11 +1002,14 @@ cleanup:
 
 #ifdef MLK_USE_NATIVE_REJ_UNIFORM
 #define REJ_UNIFORM_BUFLEN 504 /* 3 * 168, divisible by 3 */
+/* A full SIMD block holds up to 32 coefficients. Guard the first word
+ * past the output to catch a full-width store in a partial final block. */
+#define REJ_UNIFORM_TEST_WORDS (MLKEM_N + 32)
 static int test_native_rej_uniform(void)
 {
   int ret = 1;
   int i;
-  MLK_ALLOC(r_test, int16_t, MLKEM_N, NULL);
+  MLK_ALLOC(r_test, int16_t, REJ_UNIFORM_TEST_WORDS, NULL);
   MLK_ALLOC(r_ref, int16_t, MLKEM_N, NULL);
   MLK_ALLOC(buf, uint8_t, REJ_UNIFORM_BUFLEN, NULL);
 
@@ -1015,6 +1018,7 @@ static int test_native_rej_uniform(void)
     goto cleanup;
   }
 
+  r_test[MLKEM_N] = INT16_MIN;
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
     int native_ret;
@@ -1031,6 +1035,7 @@ static int test_native_rej_uniform(void)
 
     c_ret = mlk_rej_uniform_c(r_ref, MLKEM_N, 0, buf, REJ_UNIFORM_BUFLEN);
 
+    CHECK(r_test[MLKEM_N] == INT16_MIN);
     CHECK((unsigned)native_ret == c_ret);
     CHECK(compare_i16_arrays(r_test, r_ref, (unsigned)native_ret, "rej_uniform",
                              NULL));
@@ -1041,9 +1046,10 @@ static int test_native_rej_uniform(void)
 cleanup:
   MLK_FREE(buf, uint8_t, REJ_UNIFORM_BUFLEN, NULL);
   MLK_FREE(r_ref, int16_t, MLKEM_N, NULL);
-  MLK_FREE(r_test, int16_t, MLKEM_N, NULL);
+  MLK_FREE(r_test, int16_t, REJ_UNIFORM_TEST_WORDS, NULL);
   return ret;
 }
+#undef REJ_UNIFORM_TEST_WORDS
 #undef REJ_UNIFORM_BUFLEN
 #endif /* MLK_USE_NATIVE_REJ_UNIFORM */
 
