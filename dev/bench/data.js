@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795437113112,
+  "lastUpdate": 1795437118761,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -24161,6 +24161,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 42038,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "9e75cf3afc007d300eeff6aecd061f44a4a911b8",
+          "message": "FIPS202: Write the AVX-512 Keccak rounds as shared macros\n\nThe dev/ sources of keccak_f1600_x{1,4}_avx512_asm, from which\nautogen derives mlkem/src and proofs/hol_light, spelled out the 448\ninstructions of the loop body with raw register numbers, the same in\nboth files apart from xmm/ymm and {1to2}/{1to4}. The reader had to\nwork out which register held which lane after pi, and the vmovq of\nxmm16-xmm25 were hand-written `.byte`.\n\nMove the loop body into keccak_f1600_avx512.inc, which both include,\nas macros that take the register class and numbers:\n\n- xor5, theta_col and chi_row: theta and chi on a column or row.\n- keccak_round: one round. pi is a renaming: lane i of the result is\n  in the register that held lane sigma(i).\n- keccak_f1600_4rounds: four rounds, with the registers permuted by\n  the identity, sigma, sigma^2 and sigma^3, then moves that undo\n  sigma^4.\n\nThe x4 file gets transpose4, load4 and store4. Lane loads and stores\nare plain vmovq, which simpasm writes as GNU as bytes where needed.\nThe comments explain the register allocation, the renaming, and why\nthe moves use VEX vmovdqa below register 16: only GNU as -O2 turns\nvmovdqa64 of such registers into vmovdqa.\n\nThe machine code does not change: after autogen with GNU as,\nmlkem/src and proofs/ are byte-identical. clang 22 differs only in\nthe 22 vmovq between memory and xmm16-xmm31. As fq.inc, the .inc\nlives only in dev/.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-23T10:37:56Z",
+          "tree_id": "e51ccb0acbf7a70a1eedd879a4648b325237833c",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/9e75cf3afc007d300eeff6aecd061f44a4a911b8"
+        },
+        "date": 1795436950515,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 11154,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 12636,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 17511,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 18953,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 20132,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 27287,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 25580,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 27690,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 37205,
             "unit": "cycles"
           }
         ]
