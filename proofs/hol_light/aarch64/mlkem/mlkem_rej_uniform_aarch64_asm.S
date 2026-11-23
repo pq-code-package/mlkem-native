@@ -94,9 +94,8 @@ Lmlk_rej_uniform_loop48:
         cmp x9, #0xe0
         b.hi Lmlk_rej_uniform_block16
         sub x2, x2, #0x30
-        ldp q0, q1, [x1]
-        ldr q2, [x1, #0x20]
-        add x1, x1, #0x30
+        ld1 { v0.16b, v1.16b }, [x1], #32
+        ld1 { v2.16b }, [x1], #16
         tbl v4.16b, { v0.16b, v1.16b }, v20.16b
         tbl v5.16b, { v1.16b, v2.16b }, v22.16b
         tbl v6.16b, { v0.16b, v1.16b }, v21.16b
@@ -162,9 +161,8 @@ Lmlk_rej_uniform_block16:
         cmp x9, #0xf0
         b.hi Lmlk_rej_uniform_scalar_loop
         sub x2, x2, #0x18
-        ldr q0, [x1]
-        ldr d1, [x1, #0x10]
-        add x1, x1, #0x18
+        ld1 { v0.16b }, [x1], #16
+        ld1 { v1.8b }, [x1], #8
         tbl v4.16b, { v0.16b, v1.16b }, v20.16b
         tbl v5.16b, { v0.16b, v1.16b }, v21.16b
         bic v4.8h, #0xf0, lsl #8
@@ -200,12 +198,14 @@ Lmlk_rej_uniform_scalar_loop:
         cmp x9, #0x100
         b.hs Lmlk_rej_uniform_return
         cbz x2, Lmlk_rej_uniform_return
-        ldrh w5, [x1]
-        ldurh w6, [x1, #0x1]
+        ldrb w5, [x1]
+        ldrb w7, [x1, #0x1]
+        ldrb w6, [x1, #0x2]
         add x1, x1, #0x3
         sub x2, x2, #0x3
-        and w5, w5, #0xfff
-        lsr w6, w6, #4
+        bfi w5, w7, #8, #4
+        lsr w7, w7, #4
+        orr w6, w7, w6, lsl #4
         cmp w5, w4
         b.hs Lmlk_rej_uniform_second_sample
         strh w5, [x0], #0x2
