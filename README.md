@@ -79,6 +79,8 @@ which some targets do not provide, e.g., cores without a hardware multiplier or 
 Absence of secret-dependent branches, memory-access patterns and variable-latency instructions is also tested using `valgrind`
 with various combinations of compilers and compilation options.
 
+**Stack zeroization.** mlkem-native zeroizes intermediate buffers before returning, but this does not eliminate leakage of secret data on the stack. If you need bullet-proof zeroization of the stack, you need to consider additional measures; see [API conventions](API-CONVENTIONS.md#secret-data-left-on-the-stack).
+
 **Other attacks.** mlkem-native targets resistance against timing side-channels only. Other attack classes, such as power and electromagnetic side-channels, microarchitectural side-channels (e.g. speculative execution), or fault-injection attacks, are currently out of scope.
 
 ## Design
