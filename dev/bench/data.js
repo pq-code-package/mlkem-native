@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795507643053,
+  "lastUpdate": 1795507687275,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -10560,6 +10560,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 31508,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "06682a44a30f46275368350a308ad1d667fa8765",
+          "message": "config: Complete the custom hook documentation\n\n- Document that MLK_CUSTOM_ALLOC and MLK_CUSTOM_FREE receive the\n  context as a fourth argument if MLK_CONFIG_CONTEXT_PARAMETER is set,\n  and point to this from MLK_CONFIG_CONTEXT_PARAMETER.\n- Give the MLK_CONFIG_CUSTOM_CAPABILITY_FUNC template the\n  __ASSEMBLER__ guard and the include of \"src/sys.h\" that it needs.\n\nThe configuration files of the examples and tests are regenerated.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-24T06:26:36Z",
+          "tree_id": "63443dfddd0222968b0c69d49b1ca83cb7b7c6e3",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/06682a44a30f46275368350a308ad1d667fa8765"
+        },
+        "date": 1795507675468,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 9526,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 10903,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 14912,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 15923,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 17240,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 23209,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 21631,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 23746,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 31515,
             "unit": "cycles"
           }
         ]
