@@ -9,6 +9,7 @@
 # on the command line:
 #   make MK_COMPILER_SUPPORTS_SHA3=0    # Disable SHA3 detection
 #   make MK_COMPILER_SUPPORTS_AVX2=0    # Disable AVX2 detection
+#   make MK_COMPILER_SUPPORTS_AVX512=0  # Disable AVX-512 detection
 #   make MK_COMPILER_SUPPORTS_BMI2=0    # Disable BMI2 detection
 #   make MK_COMPILER_SUPPORTS_SSE2=0    # Disable SSE2 detection
 
@@ -54,6 +55,15 @@ ifeq ($(ARCH),x86_64)
 # Test AVX2 support using C with inline assembly
 MK_COMPILER_SUPPORTS_AVX2 ?= $(shell echo 'int main() { __asm__("vpxor %%ymm0, %%ymm1, %%ymm2" ::: "ymm0", "ymm1", "ymm2"); return 0; }' | $(CC) -mavx2 -x c - -c -o /dev/null 2>/dev/null && echo 1 || echo 0)
 
+# Test AVX-512 (F, VL, DQ) support using C with inline assembly
+MK_COMPILER_SUPPORTS_AVX512 ?= $(shell echo 'int main() { __asm__("vpmullq %%ymm16, %%ymm17, %%ymm18" ::: "xmm16", "xmm17", "xmm18"); return 0; }' | $(CC) -mavx512f -mavx512vl -mavx512dq -x c - -c -o /dev/null 2>/dev/null && echo 1 || echo 0)
+
+# Test support for limiting auto-vectorization to 256-bit vectors
+# (gcc >= 8, clang >= 7), and for limiting inlined moves and stores to
+# 256 bits (gcc >= 12; gcc >= 14 derives them from -mprefer-vector-width)
+MK_COMPILER_SUPPORTS_PREFER_VECTOR_WIDTH ?= $(shell echo 'int main() { return 0; }' | $(CC) -mprefer-vector-width=256 -x c - -c -o /dev/null 2>/dev/null && echo 1 || echo 0)
+MK_COMPILER_SUPPORTS_MOVE_MAX ?= $(shell echo 'int main() { return 0; }' | $(CC) -mmove-max=256 -mstore-max=256 -x c - -c -o /dev/null 2>/dev/null && echo 1 || echo 0)
+
 # Test SSE2 support using C with inline assembly
 MK_COMPILER_SUPPORTS_SSE2 ?= $(shell echo 'int main() { __asm__("pxor %%xmm0, %%xmm1" ::: "xmm0", "xmm1"); return 0; }' | $(CC) -msse2 -x c - -c -o /dev/null 2>/dev/null && echo 1 || echo 0)
 
@@ -87,6 +97,12 @@ define check_host_feature
 $(shell $(2) 2>/dev/null | grep -q "$(1)" && echo 1 || echo 0)
 endef
 
+# Helper function to check if host CPU supports all of several features
+# Usage: $(call check_host_features,feature_pattern ...,source_command)
+define check_host_features
+$(if $(filter 0,$(foreach f,$(1),$(call check_host_feature,$(f),$(2)))),0,1)
+endef
+
 # x86_64 architecture detection
 ifeq ($(ARCH),x86_64)
 
@@ -96,13 +112,15 @@ ifeq ($(HOST_PLATFORM),Linux-x86_64)
 MK_HOST_SUPPORTS_AVX2 := $(call check_host_feature,avx2,cat /proc/cpuinfo)
 MK_HOST_SUPPORTS_SSE2 := $(call check_host_feature,sse2,cat /proc/cpuinfo)
 MK_HOST_SUPPORTS_BMI2 := $(call check_host_feature,bmi2,cat /proc/cpuinfo)
+MK_HOST_SUPPORTS_AVX512 := $(call check_host_features,avx512f avx512vl avx512dq,cat /proc/cpuinfo)
 else ifeq ($(HOST_PLATFORM),Darwin-x86_64)
 # macOS: Use sysctl
 MK_HOST_SUPPORTS_AVX2 := $(call check_host_feature,AVX2,sysctl -n machdep.cpu.leaf7_features)
 MK_HOST_SUPPORTS_SSE2 := $(call check_host_feature,SSE2,sysctl -n machdep.cpu.features)
 MK_HOST_SUPPORTS_BMI2 := $(call check_host_feature,BMI2,sysctl -n machdep.cpu.leaf7_features)
+MK_HOST_SUPPORTS_AVX512 := $(call check_host_features,AVX512F AVX512VL AVX512DQ,sysctl -n machdep.cpu.leaf7_features)
 else ifneq ($(CROSS_PREFIX),)
-# Cross-compilation: assume all features are supported
+# Cross-compilation: assume all features are supported, except AVX-512 (see below)
 MK_HOST_SUPPORTS_AVX2 := 1
 MK_HOST_SUPPORTS_SSE2 := 1
 MK_HOST_SUPPORTS_BMI2 := 1
@@ -111,7 +129,16 @@ else
 MK_HOST_SUPPORTS_AVX2 := 0
 MK_HOST_SUPPORTS_SSE2 := 0
 MK_HOST_SUPPORTS_BMI2 := 0
+MK_HOST_SUPPORTS_AVX512 := 0
 endif # HOST_PLATFORM x86_64
+
+# x86_64 cross builds run under QEMU user mode, which does not implement
+# AVX-512 (QEMU 10.2 raises SIGILL). Assume no AVX-512 support for any cross
+# build, also on an x86_64 host. Use `make MK_HOST_SUPPORTS_AVX512=1` to
+# enable it.
+ifneq ($(CROSS_PREFIX),)
+MK_HOST_SUPPORTS_AVX512 := 0
+endif
 
 endif # x86_64
 
@@ -168,6 +195,20 @@ endif
 
 ifeq ($(MK_COMPILER_SUPPORTS_BMI2)$(MK_HOST_SUPPORTS_BMI2),11)
 CFLAGS += -mbmi2
+endif
+
+ifeq ($(MK_COMPILER_SUPPORTS_AVX512)$(MK_HOST_SUPPORTS_AVX512),11)
+CFLAGS += -mavx512f -mavx512vl -mavx512dq
+# Keep the compiler from emitting 512-bit instructions in the C code: on some
+# Intel CPUs (e.g. Skylake-SP, Cascade Lake), they lower the clock frequency
+# of the core, which slows down the 256-bit code around them. The AVX-512
+# FIPS202 backend uses only 128-bit and 256-bit registers.
+ifeq ($(MK_COMPILER_SUPPORTS_PREFER_VECTOR_WIDTH),1)
+CFLAGS += -mprefer-vector-width=256
+endif
+ifeq ($(MK_COMPILER_SUPPORTS_MOVE_MAX),1)
+CFLAGS += -mmove-max=256 -mstore-max=256
+endif
 endif
 endif # x86_64
 

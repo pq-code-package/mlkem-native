@@ -20,14 +20,15 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/poly.c # Dummy because the Makefile wants _some_ project source
 
 CHECK_FUNCTION_CONTRACTS=mlk_ct_cmask_nonzero_u16
-USE_FUNCTION_CONTRACTS=mlk_value_barrier_u32
+USE_FUNCTION_CONTRACTS=mlk_value_barrier_i32
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = \
   LP64:z3 \
-  LP64:bitwuzla
+  LP64:bitwuzla \
+  ILP32:z3
 CBMC_DEFAULT_CONFIG = LP64:z3
 
 FUNCTION_NAME = mlk_ct_cmask_nonzero_u16

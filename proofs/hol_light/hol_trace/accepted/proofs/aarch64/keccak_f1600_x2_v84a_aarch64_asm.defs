@@ -1,0 +1,37 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# keccak_f1600_x2_v84a_aarch64_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# keccak_f1600_x2_v84a_mc: 648 bytes
+# sha256 9083fb5acd83da5c9aefb341d38af9653418d24974f55ada6f97815c4949d966
+definition keccak_f1600_x2_v84a_mc
+  |- keccak_f1600_x2_v84a_mc
+     = #x[ff 03 01 d1 e8 27 00 6d ea 2f 01 6d ec 37 02 6d ee 3f 03 6d 02 20 03 91 19 68 c1 ac 5b ac
+          df 4c 20 2b db 4e 21 6b db 4e 42 2b dc 4e 43 6b dc 4e 19 68 c1 ac 5b ac df 4c 24 2b db 4e
+          25 6b db 4e 46 2b dc 4e 47 6b dc 4e 19 68 c1 ac 5b ac df 4c 28 2b db 4e 29 6b db 4e 4a 2b
+          dc 4e 4b 6b dc 4e 19 68 c1 ac 5b ac df 4c 2c 2b db 4e 2d 6b db 4e 4e 2b dc 4e 4f 6b dc 4e
+          19 68 c1 ac 5b ac df 4c 30 2b db 4e 31 6b db 4e 52 2b dc 4e 53 6b dc 4e 19 68 c1 ac 5b ac
+          df 4c 34 2b db 4e 35 6b db 4e 56 2b dc 4e 57 6b dc 4e 19 00 40 fd 5b 00 40 fd 38 2b db 4e
+          02 03 80 d2 1e 28 05 ce 3d 2c 06 ce 5c 30 07 ce 7b 34 08 ce 9a 38 09 ce de 53 0f ce bd 57
+          10 ce 9c 5b 11 ce 7b 5f 12 ce 5a 63 13 ce d9 8f 7c ce 9c 8f 7a ce 5a 8f 7d ce bd 8f 7b ce
+          7b 8f 7e ce 1e 1c 3a 6e 40 08 9d ce 82 55 9d ce ac 9d 9c ce 6d e2 9b ce f3 22 9c ce f7 5d
+          9a ce 2f fc 99 ce 01 25 9c ce 08 4e 99 ce f0 e8 9d ce 47 f5 9a ce 6a 90 9c ce 43 ae 9c ce
+          32 c6 9d ce 71 d9 99 ce 2b b1 9b ce c9 0e 9d ce d6 65 9b ce 8e ba 9a ce 94 94 9b ce 04 cb
+          9b ce b8 fa 99 ce b5 70 9a ce db 50 99 ce 3f cc df 4d 45 2d 27 ce 66 1d 28 ce e7 20 29 ce
+          08 25 2a ce 29 29 2b ce ea 41 2c ce 0b 32 2d ce 8c 35 2e ce ad 39 2f ce ce 3d 30 ce 8f 56
+          31 ce b0 46 32 ce 31 4a 33 ce 52 4e 34 ce 73 52 35 ce 14 04 36 ce 35 58 37 ce d6 5e 38 ce
+          f7 62 20 ce 18 03 21 ce c0 6f 22 ce 61 0b 23 ce 42 0c 24 ce 63 10 3e ce 84 78 3b ce 00 1c
+          3f 6e 42 04 00 d1 82 f7 ff b5 00 00 03 d1 02 20 03 91 19 28 c1 4e 5a 28 c3 4e 19 68 81 ac
+          1b 68 c1 4e 5c 68 c3 4e 5b ac 9f 4c 99 28 c5 4e da 28 c7 4e 19 68 81 ac 9b 68 c5 4e dc 68
+          c7 4e 5b ac 9f 4c 19 29 c9 4e 5a 29 cb 4e 19 68 81 ac 1b 69 c9 4e 5c 69 cb 4e 5b ac 9f 4c
+          99 29 cd 4e da 29 cf 4e 19 68 81 ac 9b 69 cd 4e dc 69 cf 4e 5b ac 9f 4c 19 2a d1 4e 5a 2a
+          d3 4e 19 68 81 ac 1b 6a d1 4e 5c 6a d3 4e 5b ac 9f 4c 99 2a d5 4e da 2a d7 4e 19 68 81 ac
+          9b 6a d5 4e dc 6a d7 4e 5b ac 9f 4c 18 00 00 fd 19 6b d8 4e 59 00 00 fd e8 27 40 6d ea 2f
+          41 6d ec 37 42 6d ee 3f 43 6d ff 03 01 91 c0 03 5f d6]

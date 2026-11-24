@@ -189,6 +189,16 @@ CBMC_DM_LP64_INCLUDE := $(CBMC_ROOT)/cbmc/include/LP64
 CBMC_DM_ILP32_GOTO_CC_FLAG := --32
 CBMC_DM_ILP32_CBMC_FLAG := --ILP32
 CBMC_DM_ILP32_INCLUDE := $(CBMC_ROOT)/cbmc/include/ILP32
+# `goto-instrument --add-library` preprocesses CBMC's models of C library
+# functions, such as memcpy() and memset(), with gcc and the host's libc
+# headers. `--32` narrows int, long, and pointers but keeps the host
+# architecture. On an x86_64 host, gcc therefore runs with
+# `-m32 -D__x86_64__`, and glibc includes <gnu/stubs-x32.h>, which the
+# nix toolchain does not provide. goto-instrument prints an error but
+# exits successfully without the models, so every proof that calls
+# memcpy() or memset() fails. Put the ILP32 headers first on gcc's search
+# path, so the models see the same declarations as the proof code.
+CBMC_DM_ILP32_LIBRARY_ENV := env CPATH=$(CBMC_DM_ILP32_INCLUDE)
 
 # Solver profile IDs name the executable and all solver-specific options.
 CBMC_SOLVER_PROFILES_ALL := z3 z3_smt_only bitwuzla cvc5_arrays_exp cvc5_mbqi_enum cvc5_enum_inst cadical
@@ -229,6 +239,8 @@ CBMC_PROFILE_cadical_BACKEND :=
 CBMC_PROFILE_cadical_PROVER_NAME := CaDiCaL
 CBMC_PROFILE_cadical_SMT_FORMAT :=
 CBMC_PROFILE_cadical_FLAGS := --sat-solver cadical
+# SAT array expansion can consume many GiB before solving starts.
+CBMC_PROFILE_cadical_EXPENSIVE := true
 
 # Make evaluates the configuration checks below before running target recipes.
 # The runner queries these metadata targets before selecting CBMC_DM/CBMC_SOLVER.
@@ -269,6 +281,12 @@ ifneq ($(filter-out $(CBMC_SOLVER_PROFILES_ALL),$(CBMC_SUPPORTED_SOLVERS)),)
 $(error Unknown solver profile in CBMC_SUPPORTED_CONFIGS='$(CBMC_SUPPORTED_CONFIGS)')
 endif
 
+# Every proof must be discharged by at least two different 64-bit provers.
+CBMC_LP64_PROVERS := $(sort $(foreach config,$(filter LP64:%,$(CBMC_SUPPORTED_CONFIGS)),$(CBMC_PROFILE_$(word 2,$(subst :, ,$(config)))_PROVER_NAME)))
+ifeq ($(word 2,$(CBMC_LP64_PROVERS)),)
+$(error CBMC_SUPPORTED_CONFIGS='$(CBMC_SUPPORTED_CONFIGS)' must contain LP64 configurations for at least two different provers)
+endif
+
 CBMC_DM ?= $(CBMC_DEFAULT_DM)
 CBMC_SOLVER ?= $(CBMC_DEFAULT_SOLVER)
 CBMC_ACTIVE_CONFIG := $(CBMC_DM):$(CBMC_SOLVER)
@@ -288,6 +306,7 @@ endif
 GOTO_CC_DM_FLAG := $(CBMC_DM_$(CBMC_DM)_GOTO_CC_FLAG)
 CBMC_DM_FLAG := $(CBMC_DM_$(CBMC_DM)_CBMC_FLAG)
 PROOF_INCLUDE := $(CBMC_DM_$(CBMC_DM)_INCLUDE)
+LIBRARY_ENV := $(CBMC_DM_$(CBMC_DM)_LIBRARY_ENV)
 
 BACKEND_OPTION := $(CBMC_PROFILE_$(CBMC_SOLVER)_BACKEND)
 PROVER_NAME := $(CBMC_PROFILE_$(CBMC_SOLVER)_PROVER_NAME)
@@ -298,7 +317,7 @@ endif # CBMC_SKIP_CONFIG_RESOLUTION
 
 # Job pools
 # For version of Litani that are new enough (where `litani print-capabilities`
-# prints "pools"), proofs for which `EXPENSIVE = true` is set can be added to a
+# prints "pools"), proofs or solver profiles marked EXPENSIVE can be added to a
 # "job pool" that restricts how many expensive proofs are run at a time. All
 # other proofs will be built in parallel as usual.
 #
@@ -325,7 +344,7 @@ endif # CBMC_SKIP_CONFIG_RESOLUTION
 ifeq ($(strip $(ENABLE_POOLS)),)
   POOL =
   INIT_POOLS =
-else ifeq ($(strip $(EXPENSIVE)),)
+else ifeq ($(strip $(EXPENSIVE) $(CBMC_PROFILE_$(CBMC_SOLVER)_EXPENSIVE)),)
   POOL =
   INIT_POOLS =
 else
@@ -880,7 +899,7 @@ $(HARNESS_GOTO)0400.goto: $(HARNESS_GOTO)0300.goto
 ifneq ($(strip $(USE_DYNAMIC_FRAMES)),)
 	$(LITANI) add-job \
 	  --command \
-	    '$(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(ADD_LIBRARY_FLAG) $(CBMC_OPT_CONFIG_LIBRARY) $^ $@' \
+	    '$(LIBRARY_ENV) $(GOTO_INSTRUMENT) $(CBMC_VERBOSITY) $(ADD_LIBRARY_FLAG) $(CBMC_OPT_CONFIG_LIBRARY) $^ $@' \
 	  --inputs $^ \
 	  --outputs $@ \
 	  --stdout-file $(LOGDIR)/linking-library-models-log.txt \
@@ -1302,7 +1321,7 @@ veryclean: clean
 
 .PHONY: echo-proof-uid
 echo-proof-uid:
-	@echo $(PROOF_UID)
+	@printf '%s\n' "$(PROOF_UID)"
 
 .PHONY: echo-supported-configs
 echo-supported-configs:

@@ -24,14 +24,15 @@ CHECK_FUNCTION_CONTRACTS=mlk_poly_compress_d5_c
 else
 CHECK_FUNCTION_CONTRACTS=
 endif
-USE_FUNCTION_CONTRACTS=
+USE_FUNCTION_CONTRACTS=mlk_scalar_compress_d5
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = \
   LP64:z3 \
-  LP64:bitwuzla
+  LP64:bitwuzla \
+  ILP32:z3
 CBMC_DEFAULT_CONFIG = LP64:z3
 
 FUNCTION_NAME = mlk_poly_compress_d5_c

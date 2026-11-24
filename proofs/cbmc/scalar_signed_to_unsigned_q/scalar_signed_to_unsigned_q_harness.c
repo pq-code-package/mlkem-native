@@ -11,6 +11,6 @@ void harness(void)
 {
   int16_t u;
 
-  /* Contracts for this function are in poly.h */
+  /* Contracts for this function are in poly.c */
   int16_t d = mlk_scalar_signed_to_unsigned_q(u);
 }

@@ -59,7 +59,7 @@ jobs:
         - system: bpi
           name: SpacemiT K1 8 (Banana Pi F3) benchmarks
           bench_pmu: PERF
-          archflags: "-march=rv64imafdcv_zicsr_zifencei"
+          archflags: "-march=rv64imafdcv_zicsr_zifencei_zbb"
           cflags: ""
           ldflags: "-static"
           bench_extra_args: -w exec-on-bpi
@@ -156,6 +156,20 @@ jobs:
             cflags: "-flto -DMLK_FORCE_AARCH64"
             ldflags: "-flto"
             perf: PERF
+          - name: AMD EPYC 5th gen (c8a)
+            ec2_instance_type: c8a.medium
+            ec2_ami: ubuntu (x86_64)
+            archflags: -mavx2 -mbmi2 -mpopcnt -march=znver5
+            cflags: "-flto -DMLK_FORCE_X86_64"
+            ldflags: "-flto"
+            perf: PMU
+          - name: Intel Xeon 6 (c8i)
+            ec2_instance_type: c8i.metal-48xl
+            ec2_ami: ubuntu (x86_64)
+            archflags: -mavx2 -mbmi2 -mpopcnt -march=graniterapids
+            cflags: "-flto -DMLK_FORCE_X86_64"
+            ldflags: "-flto"
+            perf: PMU
           - name: AMD EPYC 4th gen (c7a)
             ec2_instance_type: c7a.medium
             ec2_ami: ubuntu (x86_64)

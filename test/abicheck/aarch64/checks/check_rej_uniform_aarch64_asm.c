@@ -29,7 +29,9 @@ int check_rej_uniform_aarch64_asm(void)
   int test_iter;
   reg_state input_state, output_state;
   int violations;
-  MLK_ALIGN uint8_t buf_x0[512];  /* Output buffer */
+  MLK_ALIGN uint8_t
+      buf_x0[512]; /* Output buffer, disjoint from buf and table. The return
+                      value is its valid prefix length. */
   MLK_ALIGN uint8_t buf_x1[504];  /* Input buffer */
   MLK_ALIGN uint8_t buf_x3[4096]; /* Lookup table */
 

@@ -19,7 +19,6 @@
 #define MLK_USE_NATIVE_POLY_TOMONT
 
 #if !defined(__ASSEMBLER__)
-#include <string.h>
 #include "../../common.h"
 #include "../../params.h"
 #include "../api.h"

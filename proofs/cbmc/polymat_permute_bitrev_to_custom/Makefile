@@ -19,14 +19,15 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/indcpa.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_polymat_permute_bitrev_to_custom
-USE_FUNCTION_CONTRACTS=
+USE_FUNCTION_CONTRACTS=mlk_polyvec_permute_bitrev_to_custom
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = \
   LP64:z3 \
-  LP64:cadical
+  LP64:cadical \
+  ILP32:z3
 CBMC_DEFAULT_CONFIG = LP64:z3
 
 FUNCTION_NAME = mlk_polymat_permute_bitrev_to_custom

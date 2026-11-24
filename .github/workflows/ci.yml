@@ -224,6 +224,42 @@ jobs:
           ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           check_namespace: 'false'
           extra_args: "--fips202-aarch64-backend ${{ matrix.backend }}"
+  backend_tests_x86_64:
+    name: x86_64 FIPS202 backends (${{ matrix.backend }})
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: [keccak_f1600_x1_avx512, keccak_f1600_x4_avx2, keccak_f1600_x4_avx512]
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    # GitHub-hosted x86_64 runners do not guarantee AVX-512. c7a.medium
+    # (AMD EPYC 4th gen, Zen 4) has AVX-512F, VL and DQ, so AUTO enables
+    # them and every backend file builds and runs.
+    # Other x86_64 jobs use the AVX-512 backend only where AUTO detects
+    # AVX-512: always on t3 in ec2_functests, never on t3a, and on
+    # GitHub-hosted runners only if the runner's CPU has it.
+    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
+    uses: ./.github/workflows/ci_ec2_reusable.yml
+    with:
+      name: AMD EPYC 4th gen (c7a)
+      ec2_instance_type: c7a.medium
+      ec2_ami: ubuntu (x86_64)
+      ec2_volume_size: 30
+      platform: native
+      opt: opt
+      examples: false
+      cflags: "-DMLKEM_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+      ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+      check_namespace: false
+      extra_args: "--fips202-x86_64-backend ${{ matrix.backend }}"
+      functest: true
+      kattest: true
+      acvptest: true
+      lint: false
+      verbose: true
+    secrets:
+      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
   compiler_tests:
     name: Compiler tests  (${{ matrix.compiler.family }}-${{ matrix.compiler.version }}, ${{ matrix.target.name }}, ${{ matrix.cflags }})
     strategy:
@@ -452,6 +488,9 @@ jobs:
           examples: false
           stack: true
           check_namespace: false
+          # Stack analysis runs valgrind massif; disable x86_64 AVX-512, which
+          # valgrind cannot emulate
+          extra_env: "MK_COMPILER_SUPPORTS_AVX512=0"
   unit_valgrind:
     name: Unit tests + valgrind (${{ matrix.target.name }}, ${{ matrix.cflags }})
     strategy:
@@ -491,8 +530,9 @@ jobs:
           alloc: false
           rng_fail: false
           check_namespace: false
-          # Disable AArch64 SHA3 extension: valgrind cannot emulate it
-          extra_env: "MK_COMPILER_SUPPORTS_SHA3=0"
+          # Disable AArch64 SHA3 extension and x86_64 AVX-512: valgrind cannot
+          # emulate them
+          extra_env: "MK_COMPILER_SUPPORTS_SHA3=0 MK_COMPILER_SUPPORTS_AVX512=0"
           exec_wrapper: "valgrind --error-exitcode=1"
   config_variations:
     name: Non-standard configurations
@@ -594,20 +634,24 @@ jobs:
       fail-fast: false
       matrix:
         target:
-          - name: AMD EPYC 4th gen (t3a)
+          # EPYC 7571: AVX2, no AVX-512, so AUTO builds use the AVX2
+          # FIPS202 backend
+          - name: AMD EPYC 1st gen (t3a)
             ec2_instance_type: t3a.small
             ec2_ami: ubuntu (x86_64)
             ec2_volume_size: 30
             platform: native
             opt: all
-            config_variations: 'native-cap-CPUID_AVX2'
-          - name: Intel Xeon 4th gen (t3)
+            config_variations: 'native-cap-CPUID'
+          # Xeon Platinum 8000 series (Skylake-SP or Cascade Lake): AVX-512,
+          # so AUTO builds use the AVX-512 FIPS202 backend
+          - name: Intel Xeon 1st/2nd gen (t3)
             ec2_instance_type: t3.small
             ec2_ami: ubuntu (x86_64)
             ec2_volume_size: 30
             platform: native
             opt: all
-            config_variations: 'native-cap-CPUID_AVX2'
+            config_variations: 'native-cap-CPUID'
           - name: Graviton2 (c6g.medium)
             ec2_instance_type: c6g.medium
             ec2_ami: ubuntu (aarch64)

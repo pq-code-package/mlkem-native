@@ -15,5 +15,6 @@
 
 arm/proofs/base.ml
 arm/proofs/consttime.ml
+common/misc.ml
 x86/proofs/base.ml
 x86/proofs/consttime.ml

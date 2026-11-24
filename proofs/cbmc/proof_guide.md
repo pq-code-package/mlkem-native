@@ -344,7 +344,7 @@ CBMC_DEFAULT_CONFIG = LP64:bitwuzla
 ```
 
 Examples include `LP64` and `ILP32` for data models, and `z3`,
-`z3_smt_only`, `bitwuzla`, and `cvc5_arrays_exp` for solver profiles. Data
+`z3_smt_only`, `bitwuzla`, `cvc5_arrays_exp`, and `cadical` for solver profiles. Data
 models and solver profiles, including any solver-specific command-line options,
 are defined centrally in `Makefile.common`. Do not put solver selection flags
 in `CBMC_CONFIG_FLAGS`.
@@ -366,7 +366,9 @@ SMT2 solver returned non-constant value for variable Bxxx
 
 This is not helpful when trying to understand a failed proof. Bitwuzla works better and produces reliable counter-examples.
 
-Once a proof is working, it can also be checked with Z3 or cvc5. Declare each
+Once a proof is working, it must also be checked with a second, different solver
+(e.g. Z3, cvc5, or CaDiCaL via `cadical`), so that every proof is discharged by at
+least two solvers. Declare each
 configuration in `CBMC_SUPPORTED_CONFIGS` only after it is known to work, and
 select one of those configurations as `CBMC_DEFAULT_CONFIG`.
 

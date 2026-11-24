@@ -224,8 +224,9 @@ let MLKEM_POLY_REDUCE_CORRECT = prove
 
   (*** Do a full simulation with no breakpoints, unrolling the loop ***)
 
-  MAP_UNTIL_TARGET_PC (fun n ->
-   ARM_STEPS_TAC MLKEM_POLY_REDUCE_EXEC [n] THEN (SIMD_SIMPLIFY_TAC [barred])) 1 THEN
+  (let step = ARM_STEPS_TAC MLKEM_POLY_REDUCE_EXEC
+   and simplify = SIMD_SIMPLIFY_TAC [barred] in
+   MAP_UNTIL_TARGET_PC (fun n -> step [n] THEN simplify) 1) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
   (*** Reverse the restructuring by splitting the 128-bit words up ***)

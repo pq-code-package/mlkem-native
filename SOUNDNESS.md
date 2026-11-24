@@ -92,7 +92,7 @@ stack.
                                    Gap C │        Gap C│
                                          │             │
                                    CBMC +│      HOL Light kernel
-                             SMT solvers │             │
+                         SMT/SAT solvers │             │
                                          │             │
   ┌─────────────────────┐          ┌─────┴─────────────┴─────┐
   │                     │          │                         │
@@ -310,13 +310,13 @@ faithfully expressed in CBMC's object model, and are currently omitted.
 
 **Example.** For the AArch64 NTT:
 
-- HOL Light proves: If the input coefficients satisfy `abs(ival(x i)) <= &8191`, then the output
-  satisfies `abs(ival zi) <= &23594` and `(ival zi == forward_ntt (ival o x) i) (mod &3329)`.
+- HOL Light proves: If the input coefficients satisfy `abs(ival(x i)) <= &3328` (i.e. `|x| < Q`), then the output
+  satisfies `abs(ival zi) <= &17389` and `(ival zi == forward_ntt (ival o x) i) (mod &3329)`.
   In other words, we provide a description of the underlying modular arithmetic function (here, the NTT),
   plus a bound on the concrete values being computed.
 - The CBMC contract on `mlk_ntt_aarch64_asm` simplifies this to the mere bounds assertions
-  `requires(array_abs_bound(p, 0, MLKEM_N, 8192))`
-  and `ensures(array_abs_bound(p, 0, MLKEM_N, 23595))`, omitting the description of the
+  `requires(array_abs_bound(p, 0, MLKEM_N, MLKEM_Q))`
+  and `ensures(array_abs_bound(p, 0, MLKEM_N, 17390))`, omitting the description of the
   functional behavior.
 - HOL Light assumes that auxiliary arguments point to pre-computed constant tables for
   the NTT: `C_ARGUMENTS [a; z_12345; z_67] s /\ ntt_constants z_12345 z_67 s`. CBMC similarly
@@ -398,17 +398,19 @@ C reference implementations, catching gross mismatches.
 
 See the s2n-bignum soundness doc[^s2n-bignum-soundness] for further details on the ELF loader.
 
-**Reassembly risk.** When mlkem-native's `.S` files are assembled on a different system --
-whether by mlkem-native's own build, by a downstream consumer such as AWS-LC, or by a
-cross-compilation toolchain -- there is currently no systematic check that the resulting
-object code matches the bytes the proofs were verified against.
-Assembler bugs, version differences, or different assembler dialects can and
-do produce different object code (for example, it has been observed that some x86
-assemblers swap operands of AVX2 `VPADD` instruction to reduce code size).
+With HOLTrace replay (see [C1](#c1-hol-light-kernel-and-ocaml-runtime)), the loader is no
+longer trusted: the accepted definitions fix each proof's machine code as a byte list, and
+`scripts/check-binary` checks that the proofs' object files contain exactly those bytes.
 
-**Potential improvements.**
-- Provide a tool to consumers for checking that assembly/compilation results contain
-  the expected byte code for all native functions covered by HOL Light proofs.  ([#1602](https://github.com/pq-code-package/mlkem-native/issues/1602))
+**Reassembly risk.** Every build reassembles the `.S` files: mlkem-native's own build, a
+downstream consumer such as AWS-LC, or a cross toolchain. The result can differ from the
+bytes the proofs are about. Assemblers do emit different code (for example, some x86
+assemblers swap the operands of AVX2 `VPADD` to shorten the encoding).
+
+Building with `make CHECK_BINARY=1` (see [BUILDING.md](BUILDING.md)) compares the backend
+kernels in a build with the proved bytes, and CI runs it on mlkem-native's own builds.
+Consumers should run `scripts/check-binary` on their own binaries. Kernels are found by
+symbol name, so stripped binaries cannot be checked.
 
 ### B3. Model omissions (assembly)
 
@@ -465,8 +467,8 @@ at the hardware or protocol level would be needed.
 
 ### B5. C semantics model fidelity
 
-CBMC gives meaning to C by translating C source into an internal representation and then into SMT formulas. Bugs in
-CBMC's C-to-SMT translation could cause it to miss undefined behavior and to accept incorrect code; this has happened in
+CBMC gives meaning to C by translating C source into an internal representation and then into SMT or SAT formulas. Bugs in
+CBMC's C-to-SMT/SAT translation could cause it to miss undefined behavior and to accept incorrect code; this has happened in
 the past. However, CBMC is a mature, widely-used tool with an active community and extensive test suite, and
 mlkem-native uses the latest CBMC version.
 
@@ -501,26 +503,49 @@ yet not true, because of an unsoundness in the underlying proof infrastructure.
 
 ### C1. HOL Light kernel and OCaml runtime
 
-HOL Light has a small trusted kernel (~400 lines of OCaml) implementing 10 primitive inference rules and 3 axioms. All
-proofs are ultimately constructed through this kernel. Higher level infrastructure such as proof automation cannot
-compromise soundness as it is built atop the kernel. This is a fundamental design property of the LCF architecture.
-No soundness bugs in the kernel have been found since 2003.
+HOL Light has a small trusted kernel (~400 lines of OCaml) implementing 10
+primitive inference rules and three ways to extend the logic: new axioms,
+and conservative constant and type definitions. HOL Light itself uses three
+axioms. All proofs are ultimately constructed through this kernel.
+Higher-level infrastructure such as proof automation cannot compromise
+soundness when it uses only the kernel interface. Code in the same OCaml
+process can bypass that interface, however, for example through unsafe
+runtime operations.
 
-HOL Light runs on OCaml, so the OCaml compiler and runtime are also part of the trusted computing base. A compiler or
-runtime bug could in principle allow construction of a spurious theorem. This is mitigated by OCaml's maturity and
-widespread use.
+To remove the proof scripts and the OCaml runtime from the TCB, we use the
+HOLTrace[^HOLTrace] approach: we capture the kernel inferences that the
+proof scripts emit and store them in a trace file. This trace file is then
+replayed independently against the HOL Light kernel or a re-implementation
+of it, in a process that loads neither s2n-bignum nor the proof scripts.
+During the replay, we record all definitions and theorems made. Finally, we
+check that no new axioms are introduced, and compare the definitions against
+trusted definitions generated from the pinned HOL Light and s2n-bignum, as
+well as against reviewed definitions and theorem statements expected from
+the proof at hand. See
+[`proofs/hol_light/hol_trace/README.md`](proofs/hol_light/hol_trace/README.md).
+
+We use HOL Light and [HolLean](https://github.com/hol-light-family/HolLean),
+a re-implementation of the HOL Light kernel in Lean, as replay kernels.
+
+**Residual risk:** CI records and replays every proof that a change affects,
+but runs the trace capture and the trace analysis in the same workflow. To
+keep the trace capture, which runs the untrusted proof scripts, from
+tampering with the replay environment, it should run in a sandbox that
+exports only the captured trace. Until then, a reviewer must check that a
+proof script only drives HOL Light; see "What is trusted" in the HOLTrace
+README.
 
 Independent reassurance can be provided by Candle[^Candle] and HOLTrace [^HOLTrace]. See the s2n-bignum soundness doc[^s2n-bignum-soundness] for full details.
 
-### C2. CBMC & SMT solver trusted computing base
+### C2. CBMC & SMT/SAT solver trusted computing base
 
 The CBMC trusted computing base is substantially larger than HOL Light's:
 
-- **CBMC itself**: The C frontend, GOTO program transformation, and SMT encoding are all
+- **CBMC itself**: The C frontend, GOTO program transformation, and SMT/SAT encoding are all
   part of the TCB. Unlike HOL Light's LCF architecture, there is no small kernel through
   which all results must pass. A bug anywhere in the CBMC pipeline could produce a false
   "verified" result.
-- **SMT solvers** (Z3, Bitwuzla): These are complex software systems. A solver bug
+- **SMT and SAT solvers** (Z3, Bitwuzla, cvc5, CaDiCaL): These are complex software systems. A solver bug
   directly compromises soundness. Unlike HOL Light's LCF architecture, where bugs in
   proof automation cannot compromise soundness, a solver bug in CBMC's backend directly
   invalidates the proof.
@@ -531,16 +556,13 @@ The CBMC trusted computing base is substantially larger than HOL Light's:
 
 - CBMC has been in development for more than 20 years and is widely used in industry (including
   at Amazon for AWS-LC and other projects).
-- The SMT solvers are independently developed and extensively tested.
+- The SMT and SAT solvers are independently developed and extensively tested.
+- Every CBMC proof is discharged by at least two independently developed solvers.
 - mlkem-native's proofs are run continuously in CI, providing regression testing.
 
 **Residual risks.** The CBMC TCB is orders of magnitude larger than HOL Light's. There is
 no independent proof-checking mechanism analogous to Candle or HOLTrace. The soundness
 guarantee for the C proofs is therefore fundamentally weaker than for the assembly proofs.
-
-**Potential improvements**:
-- Systematically introduce redundancy by employing more than one SMT solver backend
-  for CBMC functions, or use solvers with independently checkable results ([#1603](https://github.com/pq-code-package/mlkem-native/issues/1603)).
 
 <!--- bibliography --->
 [^CBMC]: Diffblue, Amazon Web Services: C Bounded Model Checker, [https://github.com/diffblue/cbmc](https://github.com/diffblue/cbmc)

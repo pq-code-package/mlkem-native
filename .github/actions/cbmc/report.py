@@ -5,7 +5,6 @@
 """CBMC proof results reporter for GitHub Actions."""
 
 import argparse
-import base64
 import json
 import os
 import subprocess
@@ -14,8 +13,6 @@ from collections import namedtuple
 
 # GitHub context
 GITHUB_REPOSITORY = os.environ.get("GITHUB_REPOSITORY", "")
-GITHUB_REF = os.environ.get("GITHUB_REF", "")
-GITHUB_SHA = os.environ.get("GITHUB_SHA", "")[:7]
 
 COMMENT_TAG = "cbmc-report"
 
@@ -31,7 +28,16 @@ ProofResult = namedtuple(
 
 def get_args():
     parser = argparse.ArgumentParser(description="CBMC proof results reporter")
-    parser.add_argument("--results-json", required=True)
+    results = parser.add_mutually_exclusive_group(required=True)
+    results.add_argument("--results-json")
+    results.add_argument(
+        "--no-affected-proofs",
+        action="store_true",
+        help=(
+            "the pull request affects no proof for this parameter set; "
+            "replace an existing report instead of leaving stale results"
+        ),
+    )
     parser.add_argument("--mlkem-k", required=True, choices=["2", "3", "4"])
     parser.add_argument("--min-runtime", type=int, default=20)
     parser.add_argument("--regression-threshold", type=float, default=1.5)
@@ -112,7 +118,11 @@ def index_baseline(baseline):
 def classify_proof(r, baseline_by_config, baseline_by_name, cfg):
     """Classify a single proof result, returning (ProofResult, is_alert)."""
     name, dm, solver = config_key(r)
-    base = baseline_by_config.get((name, dm, solver), baseline_by_name.get(name, {}))
+    base = baseline_by_config.get((name, dm, solver))
+    if base is None:
+        # Legacy baselines have one entry per proof, timed with the default
+        # configuration. Comparing other configurations with it is misleading.
+        base = baseline_by_name.get(name, {}) if r.get("default", False) else {}
     base_val, base_failed = base.get("value"), base.get("status") == "failed"
     base_omitted = base.get("status") == "omitted"
     base_inconclusive = base.get("status") == "inconclusive"
@@ -188,7 +198,7 @@ def is_default_result(result):
     return "dm" not in result and "solver" not in result
 
 
-def compute_total_runtime(data):
+def compute_total_runtime(data, selected_names=None):
     """Compute total runtime from successful default configurations."""
     if not data:
         return None
@@ -198,6 +208,7 @@ def compute_total_runtime(data):
         if r.get("status") not in ("failed", "omitted", "inconclusive")
         and "value" in r
         and is_default_result(r)
+        and (selected_names is None or r["name"] in selected_names)
     )
 
 
@@ -220,8 +231,9 @@ def build_comment(current, baseline, cfg):
     alerts.sort(key=sort_key)
 
     # Compute total runtimes and add as first row
-    cur_total = compute_total_runtime(current)
-    base_total = compute_total_runtime(baseline)
+    selected_names = {r["name"] for r in executed}
+    cur_total = compute_total_runtime(current, selected_names)
+    base_total = compute_total_runtime(baseline, selected_names)
     if base_total and base_total > 0:
         total_ratio = cur_total / base_total
         total_change = f"{(total_ratio - 1) * 100:+.1f}%"
@@ -272,8 +284,23 @@ def build_comment(current, baseline, cfg):
     return "\n".join(lines)
 
 
-def post_or_update_comment(pr_number, body, cfg):
-    """Post or update PR comment."""
+def build_no_proofs_comment(cfg):
+    """Build the PR comment for a parameter set without affected proofs."""
+    return "\n".join(
+        [
+            f"<!-- {COMMENT_TAG}(start): mlkem-{cfg.param_set} -->",
+            f"## CBMC Results (ML-KEM-{cfg.param_set})",
+            "",
+            f"This pull request no longer affects any ML-KEM-{cfg.param_set} "
+            "CBMC proof.",
+            "",
+            f"<!-- {COMMENT_TAG}(end): mlkem-{cfg.param_set} -->",
+        ]
+    )
+
+
+def post_or_update_comment(pr_number, body, cfg, create=True):
+    """Post or update PR comment. Without `create`, only update."""
     tag = f"<!-- {COMMENT_TAG}(start): mlkem-{cfg.param_set} -->"
     result = subprocess.run(
         [
@@ -291,6 +318,9 @@ def post_or_update_comment(pr_number, body, cfg):
         if result.returncode == 0 and result.stdout.strip()
         else None
     )
+    if not existing_id and not create:
+        print("No existing comment to update")
+        return
 
     with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
         f.write(body)
@@ -329,59 +359,28 @@ def post_or_update_comment(pr_number, body, cfg):
         os.unlink(tmp_path)
 
 
-def push_to_gh_pages(current, cfg):
-    """Push results to gh-pages branch using GitHub Contents API."""
-    file_path = f"{cfg.data_dir}/mlkem-{cfg.param_set}.json"
-    content_b64 = base64.b64encode(json.dumps(current, indent=2).encode()).decode()
-
-    result = subprocess.run(
-        [
-            "gh",
-            "api",
-            f"repos/{GITHUB_REPOSITORY}/contents/{file_path}?ref={cfg.gh_pages_branch}",
-            "--jq",
-            ".sha",
-        ],
-        capture_output=True,
-        text=True,
-    )
-    sha = result.stdout.strip() if result.returncode == 0 else ""
-
-    cmd = [
-        "gh",
-        "api",
-        f"repos/{GITHUB_REPOSITORY}/contents/{file_path}",
-        "-X",
-        "PUT",
-        "-F",
-        f"message=Update CBMC results for ML-KEM-{cfg.param_set} ({GITHUB_SHA})",
-        "-F",
-        f"content={content_b64}",
-        "-F",
-        f"branch={cfg.gh_pages_branch}",
-    ]
-    if sha:
-        cmd.extend(["-F", f"sha={sha}"])
-
-    subprocess.run(cmd, check=True)
-    print(f"Pushed results to {cfg.gh_pages_branch}")
-
-
 def main():
     args = get_args()
     args.param_set = {"2": "512", "3": "768", "4": "1024"}[args.mlkem_k]
+    pr_number = get_pr_number()
+
+    if args.no_affected_proofs:
+        if pr_number:
+            post_or_update_comment(
+                pr_number, build_no_proofs_comment(args), args, create=False
+            )
+        else:
+            print("Not a PR, skipping")
+        return
 
     with open(args.results_json) as f:
         current = json.load(f)
     baseline = fetch_baseline(args)
 
-    pr_number = get_pr_number()
     if pr_number:
         post_or_update_comment(pr_number, build_comment(current, baseline, args), args)
-    elif GITHUB_REF in ("refs/heads/main", "refs/heads/master"):
-        push_to_gh_pages(current, args)
     else:
-        print(f"Not a PR and not main branch ({GITHUB_REF}), skipping")
+        print("Not a PR, skipping")
 
 
 if __name__ == "__main__":

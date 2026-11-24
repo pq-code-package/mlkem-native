@@ -22,7 +22,11 @@
       perSystem = { config, pkgs, system, ... }:
         let
           pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
-          util = pkgs.callPackage ./nix/util.nix { };
+          # z3 for the CBMC tool bundle comes from nixos-unstable.
+          util = pkgs.callPackage ./nix/util.nix {
+            inherit pkgs-unstable;
+            inherit (pkgs-unstable) z3;
+          };
           holLightToolchain = builtins.attrValues {
             inherit (pkgs) ocaml ledit;
             inherit (pkgs.ocamlPackages) findlib camlp5 zarith;
@@ -49,14 +53,28 @@
             export PATH="$REPO_ROOT/scripts:$PATH"
             export PROOF_DIR="$REPO_ROOT/proofs/hol_light"
             # Namespaced imports root for HOL-Light proofs.
-            # See scripts/check-hol-light-imports for the enforced rule.
+            # See proofs/hol_light/scripts/deps for the enforced rule.
             export IMPORTS_DIR="$PROOF_DIR/.imports"
             mkdir -p "$IMPORTS_DIR"
             ln -sfn "$S2N_BIGNUM_DIR" "$IMPORTS_DIR/s2n_bignum"
             ln -sfn "$PROOF_DIR"      "$IMPORTS_DIR/mlkem_native"
             export HOLLIGHT_LOAD_PATH="$IMPORTS_DIR:$S2N_BIGNUM_DIR''${HOLLIGHT_LOAD_PATH:+:$HOLLIGHT_LOAD_PATH}"
             export HOLDIR="$HOLLIGHT_DIR"
+            # HOL Light with HOLTrace's library hook, for `hol-trace
+            # outline` and replay only. It is not a package of any shell,
+            # so it never becomes HOLLIGHT_DIR or the `hol.sh` on PATH.
+            export HOLTRACE_REPLAY_HOL=${config.packages.hol_trace.hol_light_replay}/lib/hol_light
+            # The upstream sources of HOL Light and s2n-bignum; `hol-trace
+            # outline` records their commits in the accepted files.
+            export HOL_LIGHT_SRC=${config.packages.hol_light.src.url}
+            export S2N_BIGNUM_SRC=${config.packages.s2n_bignum.src.url}
+            # hol-trace, appended to PATH.
+            export PATH="$PATH:$PROOF_DIR/hol_trace"
           '';
+          mkHolLightShell = packages: (util.mkShell {
+            inherit packages;
+          }).overrideAttrs (old: { shellHook = holLightShellHook; });
+          holLightCrossPackages = builtins.attrValues { inherit (config.packages) linters toolchains toolchain_ppc64le hol_light s2n_bignum gcc-arm-embedded hol_server; } ++ holLightToolchain;
 
         in
         {
@@ -75,6 +93,9 @@
           packages.cbmc = util.cbmc_pkgs;
           packages.hol_light = util.hol_light';
           packages.s2n_bignum = util.s2n_bignum;
+          packages.hol_trace = util.hol_trace;
+          packages.holtrace_prune = util.holtrace_prune;
+          packages.hol_lean = util.hol_lean;
           packages.valgrind_varlat = util.valgrind_varlat;
           packages.slothy = util.slothy;
           packages.toolchains = util.toolchains;
@@ -95,32 +116,27 @@
               } ++ holLightToolchain;
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
 
-          # arm-none-eabi-gcc + platform files from pqmx
-          packages.m55-an547 = util.m55-an547;
           packages.avr-toolchain = util.avr-toolchain;
           packages.openocd = util.openocd;
-          devShells.arm-embedded = util.mkShell {
-            packages = builtins.attrValues
-              {
-                inherit (config.packages) m55-an547;
-                inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
-              };
-          };
 
           devShells.avr = util.mkShell (import ./nix/avr { inherit pkgs; });
           packages.hol_server = util.hol_server.hol_server_start;
-          devShells.hol_light = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum hol_server; } ++ holLightToolchain;
-          }).overrideAttrs (old: { shellHook = holLightShellHook; });
-          devShells.hol_light-cross = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchains toolchain_ppc64le hol_light s2n_bignum gcc-arm-embedded hol_server; } ++ holLightToolchain;
-          }).overrideAttrs (old: { shellHook = holLightShellHook; });
-          devShells.hol_light-cross-aarch64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum hol_server; } ++ holLightToolchain;
-          }).overrideAttrs (old: { shellHook = holLightShellHook; });
-          devShells.hol_light-cross-x86_64 = (util.mkShell {
-            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum hol_server; } ++ holLightToolchain;
-          }).overrideAttrs (old: { shellHook = holLightShellHook; });
+          devShells.hol_light = mkHolLightShell (
+            builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum hol_server; } ++ holLightToolchain
+          );
+          devShells.hol_light-cross = mkHolLightShell holLightCrossPackages;
+          devShells.hol_light-cross-aarch64 = mkHolLightShell (
+            builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum hol_server; } ++ holLightToolchain
+          );
+          devShells.hol_light-cross-x86_64 = mkHolLightShell (
+            builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum hol_server; } ++ holLightToolchain
+          );
+          # hol_light-cross with HOLTrace's recording tools and HolLean.
+          devShells.hol_trace-cross = mkHolLightShell (holLightCrossPackages ++ [
+            config.packages.hol_trace
+            config.packages.holtrace_prune
+            config.packages.hol_lean
+          ]);
           devShells.ci = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains_native; };
           };

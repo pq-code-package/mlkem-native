@@ -26,9 +26,21 @@ on:
       ec2_volume_size:
         type: string
         default: ""
+      timeout_minutes:
+        type: number
+        description: Maximum time for the test job, in minutes
+        default: 360
       cflags:
         type: string
         description: Custom CFLAGS for compilation
+        default: ""
+      ldflags:
+        type: string
+        description: Custom LDFLAGS for linking
+        default: ""
+      extra_args:
+        type: string
+        description: Additional arguments to pass to the tests script
         default: ""
       verbose:
         description: Determine for the log verbosity
@@ -51,6 +63,12 @@ on:
       acvptest:
         type: boolean
         default: true
+      examples:
+        type: boolean
+        default: true
+      check_namespace:
+        type: boolean
+        default: true
       lint:
         type: boolean
         default: true
@@ -70,6 +88,14 @@ on:
       cbmc_mlkem_k:
         type: string
         default: 2
+      cbmc_proofs:
+        type: string
+        description: Space-separated CBMC proof directories, or empty for all proofs
+        default: ''
+      hol_trace_proofs:
+        type: string
+        description: Space-separated HOLTrace proofs as ARCH/FUNC, or empty to skip
+        default: ''
     secrets:
       AWS_GITHUB_TOKEN:
         description: Token for registering EC2 runners and reading the nix cache
@@ -176,6 +202,7 @@ jobs:
     name: Run tests
     needs: start-ec2-runner
     runs-on: ${{ needs.start-ec2-runner.outputs.label }}
+    timeout-minutes: ${{ inputs.timeout_minutes }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -195,11 +222,15 @@ jobs:
           nix-verbose: ${{ inputs.verbose }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
           cflags: ${{ inputs.cflags }}
+          ldflags: ${{ inputs.ldflags }}
           platform: ${{ inputs.platform }}
           opt: ${{ inputs.opt }}
           func: ${{ inputs.functest }}
           kat: ${{ inputs.kattest }}
           acvp: ${{ inputs.acvptest }}
+          examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
+          extra_args: ${{ inputs.extra_args }}
       - name: Config Variations
         if: ${{ inputs.config_variations != '' && (success() || failure()) }}
         uses: ./.github/actions/config-variations
@@ -214,6 +245,7 @@ jobs:
           nix-shell: cbmc
           nix-verbose: ${{ inputs.verbose }}
           mlkem_k: ${{ inputs.cbmc_mlkem_k }}
+          proofs: ${{ inputs.cbmc_proofs }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
       - name: SLOTHY
         if: ${{ inputs.slothy }}
@@ -223,16 +255,24 @@ jobs:
           nix-cache: true
           nix-shell: slothy
           script: |
+            # SLOTHY re-optimizes the AArch64 assembly, so its kernels no
+            # longer match the code that the HOL Light proofs are about.
             autogen --slothy
-            tests all --opt opt
+            tests all --no-check-binary --opt opt
             # Force testing of SLOTHY-optimized Keccak variants
             # We can't run the examples here because some of them also specify the backend
             make clean
-            tests all --no-examples --opt opt --cflags="-DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x1_scalar.h\\\""
+            tests all --no-check-binary --no-examples --opt opt --cflags="-DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x1_scalar.h\\\""
             make clean
-            tests all --no-examples --opt opt --cflags="-DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x4_v8a_scalar.h\\\""
+            tests all --no-check-binary --no-examples --opt opt --cflags="-DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x4_v8a_scalar.h\\\""
             make clean
-            tests all --no-examples --opt opt --cflags="-march=armv8.4-a+sha3 -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x4_v8a_v84a_scalar.h\\\""
+            tests all --no-check-binary --no-examples --opt opt --cflags="-march=armv8.4-a+sha3 -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x4_v8a_v84a_scalar.h\\\""
+      - name: HOLTrace
+        if: ${{ inputs.hol_trace_proofs != '' }}
+        uses: ./.github/actions/hol-trace
+        with:
+          proofs: ${{ inputs.hol_trace_proofs }}
+          gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
   stop-ec2-runner:
     name: Stop instance (${{ inputs.ec2_instance_type }})
     permissions:

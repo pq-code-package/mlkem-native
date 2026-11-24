@@ -1,0 +1,123 @@
+HOLTrace build: Parse strings and make install-worker importable
+
+Scope: build time for recording and replay. The import and worker-pool
+changes are also used by the standalone recording-side hashtt rewriter.
+
+The hashtt rewriter adds a `_` argument to constructor patterns with one
+comma, e.g. Comb(f,x) -> Comb(f,x,_). It counted commas inside string
+literals, so Const(",",_) was left with two arguments and the build
+failed (HOL Light Library/words.ml, s2n-bignum common/relational.ml and
+others). The tokenizer now reads a string literal as a single token.
+
+The main section is guarded by `if __name__ == '__main__'` so that the
+rewriting functions can be imported, and the worker pool uses fork:
+with spawn (the macOS default) every worker re-ran the main section.
+
+Trusted-base impact: `install-worker` constructs the HOLTrace wrappers
+loaded by the replay build, so it is part of the trusted build path.
+The tokenizer, main guard and worker-pool code do not execute while a
+trace is replayed and do not modify `fusion.ml`. The hashtt-rewritten
+proof and s2n-bignum sources are used only for recording and are outside
+the trusted base.
+
+--- a/install-worker
++++ b/install-worker
+@@ -59,7 +59,22 @@
+
+ def process(x):
+   W = [['','']]
+-  for c in x:
++  i = 0
++  while i < len(x):
++    c = x[i]
++    i += 1
++    # A string literal is one token, so that commas and parentheses inside
++    # it are not counted: Const(",",_) has two arguments, not three.
++    # A '"' between single quotes is a character literal, not a string.
++    if c == '"' and not (x[i-2:i-1] == "'" and x[i:i+1] == "'"):
++      j = i
++      while j < len(x) and x[j] != '"':
++        j += 2 if x[j] == '\\' else 1
++      if W[-1] != ['','']:
++        W += [['','']]
++      W[-1][0] += x[i-1:j+1]
++      i = j+1
++      continue
+     if c.isalpha():
+       if len(W[-1][1]) > 0 or (len(W[-1][0]) > 0 and not W[-1][0].isalpha()):
+         W += [['','']]
+@@ -294,7 +309,8 @@
+           os.rename(f'{subdir}/{fn}',f'{subdir}/{origfn}')
+     return
+
+-  with multiprocessing.Pool(16) as p:
++  # fork, not spawn (the macOS default): spawned workers re-import this file.
++  with multiprocessing.get_context('fork').Pool(16) as p:
+     for result in p.imap_unordered(hashtt_doit,hashtt_todo(dir),1):
+       pass
+
+@@ -314,33 +330,35 @@
+           return line[len(prefix):]
+   raise Exception('unable to find HOL Light directory via hol.sh; please specify HOL Light directory on the command line')
+
+-if len(sys.argv) <= 1:
+-  raise Exception('please specify command')
++# Guarded so that the rewriting functions above can be imported.
++if __name__ == '__main__':
++  if len(sys.argv) <= 1:
++    raise Exception('please specify command')
++
++  cmd = sys.argv[1]
++  assert cmd in ('uninstall','install','install+hashtt')
++  if len(sys.argv) <= 2:
++    dir = guessdir()
++  else:
++    dir = sys.argv[2]
++
++  fninstalled = f'{dir}/INSTALLED-HOLTrace'
++  fninstalledhashtt = f'{dir}/INSTALLED-HOLTrace+hashtt'
+
+-cmd = sys.argv[1]
+-assert cmd in ('uninstall','install','install+hashtt')
+-if len(sys.argv) <= 2:
+-  dir = guessdir()
+-else:
+-  dir = sys.argv[2]
+-
+-fninstalled = f'{dir}/INSTALLED-HOLTrace'
+-fninstalledhashtt = f'{dir}/INSTALLED-HOLTrace+hashtt'
+-
+-# remove existing installation first
+-# (even if we want to end up installed;
+-# maybe current installation is earlier version)
+-if os.path.exists(fninstalled):
+-  if os.path.exists(fninstalledhashtt):
+-    install_hashtt(dir,uninstall=True)
+-    os.remove(fninstalledhashtt)
+-  install_base(dir,uninstall=True)
+-  os.remove(fninstalled)
+-
+-if cmd in ('install','install+hashtt'):
+-  with open(fninstalled,'w') as f: pass
+-  install_base(dir)
+-
+-if cmd == 'install+hashtt':
+-  with open(fninstalledhashtt,'w') as f: pass
+-  install_hashtt(dir)
++  # remove existing installation first
++  # (even if we want to end up installed;
++  # maybe current installation is earlier version)
++  if os.path.exists(fninstalled):
++    if os.path.exists(fninstalledhashtt):
++      install_hashtt(dir,uninstall=True)
++      os.remove(fninstalledhashtt)
++    install_base(dir,uninstall=True)
++    os.remove(fninstalled)
++
++  if cmd in ('install','install+hashtt'):
++    with open(fninstalled,'w') as f: pass
++    install_base(dir)
++
++  if cmd == 'install+hashtt':
++    with open(fninstalledhashtt,'w') as f: pass
++    install_hashtt(dir)

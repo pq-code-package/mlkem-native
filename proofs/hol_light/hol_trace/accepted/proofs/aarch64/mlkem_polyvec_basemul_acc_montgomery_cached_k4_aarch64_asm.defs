@@ -1,0 +1,125 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+definition basemul4_even
+  |- basemul4_even
+     = (specification "basemul4_even" basemul4_even:((num -> int) -> (num -> int) -> (num -> int) ->
+           (num -> int) -> (num -> int) -> (num -> int) -> (num -> int) -> (num -> int) ->
+           (num -> int) -> (num -> int) -> (num -> int) -> (num -> int) -> num -> int).
+         !x0:(num -> int) y0:(num -> int) y0t:(num -> int) x1:(num -> int) y1:(num -> int)
+          y1t:(num -> int) x2:(num -> int) y2:(num -> int) y2t:(num -> int) x3:(num -> int)
+          y3:(num -> int) y3t:(num -> int).
+           basemul4_even x0 y0 y0t x1 y1 y1t x2 y2 y2t x3 y3 y3t
+           = (\i:num.
+               pmul_acc4 (x0 (2 * i)) (x0 (2 * i + 1)) (y0 (2 * i)) (y0t i) (x1 (2 * i))
+                 (x1 (2 * i + 1))
+                 (y1 (2 * i))
+                 (y1t i)
+                 (x2 (2 * i))
+                 (x2 (2 * i + 1))
+                 (y2 (2 * i))
+                 (y2t i)
+                 (x3 (2 * i))
+                 (x3 (2 * i + 1))
+                 (y3 (2 * i))
+                 (y3t i)))
+
+definition basemul4_odd
+  |- basemul4_odd
+     = (specification "basemul4_odd" basemul4_odd:((num -> int) -> (num -> int) -> (num -> int) ->
+           (num -> int) -> (num -> int) -> (num -> int) -> (num -> int) -> (num -> int) -> num ->
+           int).
+         !x0:(num -> int) y0:(num -> int) x1:(num -> int) y1:(num -> int) x2:(num -> int)
+          y2:(num -> int) x3:(num -> int) y3:(num -> int).
+           basemul4_odd x0 y0 x1 y1 x2 y2 x3 y3
+           = (\i:num.
+               pmul_acc4 (x0 (2 * i)) (x0 (2 * i + 1)) (y0 (2 * i + 1)) (y0 (2 * i)) (x1 (2 * i))
+                 (x1 (2 * i + 1))
+                 (y1 (2 * i + 1))
+                 (y1 (2 * i))
+                 (x2 (2 * i))
+                 (x2 (2 * i + 1))
+                 (y2 (2 * i + 1))
+                 (y2 (2 * i))
+                 (x3 (2 * i))
+                 (x3 (2 * i + 1))
+                 (y3 (2 * i + 1))
+                 (y3 (2 * i))))
+
+definition pmul_acc4
+  |- pmul_acc4
+     = (specification "pmul_acc4" pmul_acc4:(int -> int -> int -> int -> int -> int -> int -> int ->
+           int -> int -> int -> int -> int -> int -> int -> int -> int).
+         !x00:int x01:int y00:int y01:int x10:int x11:int y10:int y11:int x20:int x21:int y20:int
+          y21:int x30:int x31:int y30:int y31:int.
+           pmul_acc4 x00 x01 y00 y01 x10 x11 y10 y11 x20 x21 y20 y21 x30 x31 y30 y31
+           = (int_of_num (inverse_mod 3329 65536)
+             * pmull_acc4 x00 x01 y00 y01 x10 x11 y10 y11 x20 x21 y20 y21 x30 x31 y30 y31)
+             rem &3329)
+
+definition pmull
+  |- pmull
+     = (specification "pmull" pmull:(int -> int -> int -> int -> int).
+         !x0:int x1:int y0:int y1:int. pmull x0 x1 y0 y1 = x1 * y1 + x0 * y0)
+
+definition pmull_acc4
+  |- pmull_acc4
+     = (specification "pmull_acc4" pmull_acc4:(int -> int -> int -> int -> int -> int -> int ->
+           int -> int -> int -> int -> int -> int -> int -> int -> int -> int).
+         !x00:int x01:int y00:int y01:int x10:int x11:int y10:int y11:int x20:int x21:int y20:int
+          y21:int x30:int x31:int y30:int y31:int.
+           pmull_acc4 x00 x01 y00 y01 x10 x11 y10 y11 x20 x21 y20 y21 x30 x31 y30 y31
+           = pmull x30 x31 y30 y31
+             + pmull x20 x21 y20 y21
+             + pmull x10 x11 y10 y11
+             + pmull x00 x01 y00 y01)
+
+# poly_basemul_acc_montgomery_cached_k4_mc: 1096 bytes
+# sha256 136812d4a44b6f1706954756308a4ee524897e798381db2c034e1f6a9a38be63
+definition poly_basemul_acc_montgomery_cached_k4_mc
+  |- poly_basemul_acc_montgomery_cached_k4_mc
+     = #x[ff 03 01 d1 e8 27 00 6d ea 2f 01 6d ec 37 02 6d ee 3f 03 6d 2e a0 81 52 c0 0d 02 4e ee 9f
+          81 52 c2 0d 02 4e 24 00 08 91 45 00 08 91 66 00 04 91 27 00 10 91 48 00 10 91 69 00 08 91
+          2a 00 18 91 4b 00 18 91 6c 00 0c 91 0d 02 80 d2 3c 04 c2 3c 25 00 df 3c 5f 04 c2 3c 5b 00
+          df 3c a7 04 c2 3c 8a 04 c2 3c b2 00 df 3c 89 00 df 3c 8b 1b 45 4e 93 5b 45 4e e4 5b 5b 4e
+          e1 1b 5b 4e fd 04 c2 3c 1c 05 c0 3d 58 19 49 4e f1 18 52 4e e7 58 52 4e 15 05 c2 3c 5b 59
+          49 4e e6 00 df 3c 72 c1 64 0e 69 74 df 4c 68 c1 64 4e 70 05 c2 3c 68 82 61 4e 6e 01 df 3c
+          72 82 61 0e aa 1a 5c 4e 12 83 67 0e 44 05 c2 3c 08 83 67 4e cc 74 df 4c 77 c1 61 4e ad 5b
+          46 4e 7a c1 61 0e bd 1b 46 4e 7a 82 69 0e 4f 01 df 3c 77 82 69 4e a9 5a 5c 4e 72 83 71 0e
+          06 5a 4e 4e 15 1a 4e 4e 68 83 71 4e a8 83 69 4e 9e 18 4f 4e 90 58 4f 4e b2 83 69 0e a8 81
+          6a 4e 2f 75 df 4c b2 81 6a 0e 8b 04 c2 3c d2 83 66 0e 47 04 c2 3c c8 83 66 4e 89 75 df 4c
+          17 83 71 4e 44 00 df 3c 1a 83 71 0e 99 00 df 3c 08 82 75 4e a5 04 c2 3c 12 82 75 0e b6 00
+          df 3c 7a 83 6c 0e 33 04 c0 3d ba 83 6a 0e 74 74 df 4c ba 81 6f 0e f8 18 44 4e 77 83 6c 4e
+          5c 1a 48 4e da 83 75 0e 7b 59 59 4e b7 83 6a 4e ff 58 44 4e b7 81 6f 4e ae 18 56 4e 71 19
+          59 4e 1a 82 69 0e 9d 9f 62 4e ad 09 00 d1 d7 83 75 4e 2b 04 c2 3c af 58 56 4e b2 83 60 0e
+          ec 04 c2 3c a8 83 60 4e e3 00 df 3c 15 05 c2 3c 7d 19 53 4e 0d 01 df 3c 65 59 53 4e 17 82
+          69 4e 5c 5a 48 4e a8 c3 7f 4e a8 80 78 4e 87 19 43 4e 28 82 6f 4e ab 5a 4d 4e 44 1b 57 4e
+          68 83 6e 4e e8 80 6b 4e 86 9c 62 4e 73 05 c2 3c 99 59 43 4e 4c 05 c2 3c b2 c3 7f 0e 43 01
+          df 3c b2 80 78 0e a4 1a 4d 4e 32 82 6f 0e 6d 01 df 3c c1 74 df 4c da 80 60 0e d7 80 60 4e
+          2a 75 df 4c 72 83 6e 0e 9e 19 43 4e 28 83 64 4e 7f 5a 4d 4e f2 80 6b 0e 89 75 df 4c 32 83
+          64 0e 75 1a 4d 4e 90 59 43 4e d2 83 7f 0e c8 83 7f 4e 5f 5b 57 4e 08 82 75 4e 12 82 75 0e
+          ef 3b 5c 4e 33 04 c0 3d b7 c3 78 4e ba c3 78 0e 43 04 c0 3d ba 80 74 0e 4b 04 c2 3c 46 1a
+          48 4e 3a 82 6e 0e 7a 83 61 0e ed 7b 5c 4e fa 80 64 0e 0f 04 82 3c 3a 83 6a 0e 0d 00 9f 3c
+          dd 9c 62 4e 78 19 43 4e 7f 59 43 4e 8b 04 c2 3c b7 80 74 4e 9c 00 df 3c 37 82 6e 4e a5 04
+          c2 3c 77 83 61 4e b6 00 df 3c da 83 75 0e 74 74 df 4c 1a 82 69 0e 71 19 5c 4e f7 80 64 4e
+          7b 59 5c 4e 37 83 6a 4e ae 18 56 4e ad 05 00 f1 ad f5 ff b5 b2 83 60 0e 2b 04 c2 3c bc 58
+          56 4e d7 83 75 4e a8 83 60 4e 0f 05 c0 3d 17 82 69 4e 15 05 c2 3c 76 19 53 4e 6c 59 53 4e
+          e1 04 c0 3d c6 74 df 4c 43 5a 48 4e c9 c2 7f 0e d2 c2 7f 4e f0 04 c2 3c d3 c2 78 0e be 1a
+          4f 4e b9 5a 4f 4e c8 c2 78 4e 93 81 74 0e 4d 05 c0 3d 88 81 74 4e 1d 1a 41 4e 92 81 78 4e
+          45 05 c2 3c 89 81 78 0e 64 05 c2 3c 29 82 7c 0e 76 01 df 3c 32 82 7c 4e 10 5a 41 4e 33 82
+          6e 0e 3c 75 df 4c 28 82 6e 4e a7 18 4d 4e 69 83 6e 0e 91 18 56 4e 72 83 6e 4e ac 58 4d 4e
+          95 58 56 4e 73 83 66 0e 68 83 66 4e 8f 75 df 4c b3 83 7e 0e 54 1b 57 4e a9 83 79 0e b2 83
+          79 4e a8 83 7e 4e 13 82 7c 0e 08 82 7c 4e 12 82 7e 4e 09 82 7e 0e e9 80 75 0e f2 80 75 4e
+          e8 80 71 4e f3 80 71 0e 93 81 6f 0e 88 81 6f 4e 92 81 71 4e 89 81 71 0e 86 9e 62 4e 64 1a
+          48 4e 91 9c 62 4e 2c 19 52 4e da 80 60 0e 95 9d 62 4e d7 80 60 4e 28 82 60 4e 33 82 60 0e
+          b2 82 60 4e 57 5b 57 4e a9 82 60 0e ec 7a 43 4e f6 3a 43 4e 6e 5a 48 4e 32 59 52 4e 0c 04
+          80 3d 16 04 82 3c d8 79 52 4e d5 39 52 4e 18 04 80 3d 15 04 82 3c e8 27 40 6d ea 2f 41 6d
+          ec 37 42 6d ee 3f 43 6d ff 03 01 91 c0 03 5f d6]

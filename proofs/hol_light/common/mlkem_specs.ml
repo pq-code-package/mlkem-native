@@ -10,6 +10,7 @@
 
 needs "Library/words.ml";;
 needs "Library/isum.ml";;
+needs "s2n_bignum/common/misc.ml";;
 
 (* ------------------------------------------------------------------------- *)
 (* The pure forms of forward and inverse NTT with no reordering.             *)
@@ -1209,6 +1210,8 @@ let rec LOCAL_CONGBOUND_RULE lfn asms =
 (* ------------------------------------------------------------------------- *)
 (* Simplify SIMD cruft and fold relevant definitions when encountered.       *)
 (* The ABBREV form also introduces abbreviations for relevant subterms.      *)
+(* Prepare a tactic once outside an instruction loop and reuse that value.   *)
+(* Its conversion captures the basic rewrite rules at preparation time.      *)
 (* ------------------------------------------------------------------------- *)
 
 let SIMD_SIMPLIFY_CONV unfold_defs =
@@ -1242,13 +1245,15 @@ let SIMD_SIMPLIFY_ABBREV_TAC =
     can (term_match [] `read X (s:x86state):int256 = whatever`) in
   let simdable tm = arm_simdable tm || x86_simdable tm in
   fun unfold_defs unfold_aux ->
+    let simplify = RAND_CONV
+      (SIMD_SIMPLIFY_CONV (unfold_defs @ unfold_aux)) in
+    let local_definition = is_local_definition unfold_defs in
     let pats = map (lhand o snd o strip_forall o concl) unfold_defs in
     let pam t = exists (fun p -> can(term_match [] p) t) pats in
     let ttac th (asl,w) =
-      let th' = CONV_RULE(RAND_CONV
-                 (SIMD_SIMPLIFY_CONV (unfold_defs @ unfold_aux))) th in
+      let th' = CONV_RULE simplify th in
       let asms =
-        map snd (filter (is_local_definition unfold_defs o concl o snd) asl) in
+        map snd (filter (local_definition o concl o snd) asl) in
       let th'' = GEN_REWRITE_RULE (RAND_CONV o TOP_DEPTH_CONV) asms th' in
       let tms = sort free_in (find_terms pam (rand(concl th''))) in
       (MP_TAC th'' THEN MAP_EVERY AUTO_ABBREV_TAC tms THEN DISCH_TAC) (asl,w) in

@@ -1,0 +1,51 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_poly_decompress_d5_aarch64_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mlkem_poly_decompress_d5_aarch64_asm MLKEM_POLY_DECOMPRESS_D5_SUBROUTINE_CORRECT
+  |- !r:int64 a:int64 t:int64 l:((5 word) list) pc:num returnaddress:int64.
+       LENGTH l = 256
+       /\ ALL (nonoverlapping (r, 512)) [(word pc : int64), LENGTH mlkem_poly_decompress_d5_mc;
+                                         a, 160; t, 112]
+       ==> ensures arm
+             (\s:armstate.
+               aligned_bytes_loaded s (word pc : int64) mlkem_poly_decompress_d5_mc
+               /\ read PC s = (word pc : int64)
+               /\ read X30 s = returnaddress
+               /\ C_ARGUMENTS [r; a; t] s
+               /\ read (memory :> bytes (a, 160)) s = num_of_wordlist l
+               /\ read (memory :> bytes (t, 112)) s = num_of_wordlist mlkem_decompress_d5_table)
+             (\s:armstate.
+               read PC s = returnaddress
+               /\ read (memory :> bytes (r, 512)) s = num_of_wordlist (MAP decompress_d5 l)
+               /\ (!i:num.
+                    i < 256
+                    ==> &0 <= ival (EL i (MAP decompress_d5 l))
+                        /\ ival (EL i (MAP decompress_d5 l)) < &3329))
+             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,, MAYCHANGE [memory :> bytes (r, 512)])
+
+theorem mlkem_poly_decompress_d5_aarch64_asm MLKEM_POLY_DECOMPRESS_D5_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> int64 -> num -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) r:int64 a:int64 t:int64 l:((5 word) list) pc:num
+        returnaddress:int64.
+         LENGTH l = 256
+         /\ ALL (nonoverlapping (r, 512)) [(word pc : int64), LENGTH mlkem_poly_decompress_d5_mc;
+                                           a, 160; t, 112]
+         ==> ensures arm
+               (\s:armstate.
+                 aligned_bytes_loaded s (word pc : int64) mlkem_poly_decompress_d5_mc
+                 /\ read PC s = (word pc : int64)
+                 /\ read X30 s = returnaddress
+                 /\ C_ARGUMENTS [r; a; t] s
+                 /\ read events s = e)
+               (\s:armstate.
+                 read PC s = returnaddress
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events a t r pc returnaddress
+                      /\ memaccess_inbounds e2 [a, 160; t, 112; r, 512] [r, 512]))
+               (\s:armstate s':armstate. T)

@@ -1,0 +1,46 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_poly_reduce_aarch64_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mlkem_poly_reduce_aarch64_asm MLKEM_POLY_REDUCE_SUBROUTINE_CORRECT
+  |- !a:int64 x:(num -> int16) pc:num returnaddress:int64.
+       nonoverlapping ((word pc : int64), LENGTH mlkem_poly_reduce_mc) (a, 512)
+       ==> ensures arm
+             (\s:armstate.
+               aligned_bytes_loaded s (word pc : int64) mlkem_poly_reduce_mc
+               /\ read PC s = (word pc : int64)
+               /\ read X30 s = returnaddress
+               /\ C_ARGUMENTS [a] s
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes16 (word_add a (word (2 * i) : int64))) s = x i))
+             (\s:armstate.
+               read PC s = returnaddress
+               /\ (!i:num.
+                    i < 256
+                    ==> ival (read (memory :> bytes16 (word_add a (word (2 * i) : int64))) s)
+                        = ival (x i) rem &3329))
+             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,, MAYCHANGE [memory :> bytes (a, 512)])
+
+theorem mlkem_poly_reduce_aarch64_asm MLKEM_POLY_REDUCE_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> num -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) a:int64 pc:num returnaddress:int64.
+         nonoverlapping ((word pc : int64), LENGTH mlkem_poly_reduce_mc) (a, 512)
+         ==> ensures arm
+               (\s:armstate.
+                 aligned_bytes_loaded s (word pc : int64) mlkem_poly_reduce_mc
+                 /\ read PC s = (word pc : int64)
+                 /\ read X30 s = returnaddress
+                 /\ C_ARGUMENTS [a] s
+                 /\ read events s = e)
+               (\s:armstate.
+                 read PC s = returnaddress
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events a pc returnaddress
+                      /\ memaccess_inbounds e2 [a, 512] [a, 512]))
+               (\s:armstate s':armstate. T)

@@ -1,0 +1,427 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_NOIBT_SUBROUTINE_CORRECT
+  |- !src1:int64 src2:int64 src2t:int64 dst:int64 a0:(num -> num -> int16) b0:(num -> num -> int16)
+      c0:(num -> num -> int16) d0:(num -> num -> int16) dz0:(num -> num -> int16)
+      a1:(num -> num -> int16) b1:(num -> num -> int16) c1:(num -> num -> int16)
+      d1:(num -> num -> int16) dz1:(num -> num -> int16) pc:num stackpointer:int64
+      returnaddress:int64.
+       aligned 32 src1
+       /\ aligned 32 src2
+       /\ aligned 32 src2t
+       /\ aligned 32 dst
+       /\ ALL (nonoverlapping (dst, 512)) [src1, 1024; src2, 1024; src2t, 512]
+       /\ nonoverlapping (dst, 512) ((word pc : int64), LENGTH mlkem_basemul_k2_tmc)
+       /\ nonoverlapping (dst, 512) (stackpointer, 8)
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mlkem_basemul_k2_tmc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = stackpointer
+               /\ read (memory :> bytes64 stackpointer) s = returnaddress
+               /\ C_ARGUMENTS [dst; src1; src2; src2t] s
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory :> bytes16 (word_add src1 (word (64 * j + 2 * i) : int64)))
+                                s
+                              = a0 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory
+                                :> bytes16 (word_add src1 (word (64 * j + 32 + 2 * i) : int64)))
+                                s
+                              = b0 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory :> bytes16 (word_add src2 (word (64 * j + 2 * i) : int64)))
+                                s
+                              = c0 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory
+                                :> bytes16 (word_add src2 (word (64 * j + 32 + 2 * i) : int64)))
+                                s
+                              = d0 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory :> bytes16 (word_add src2t (word (32 * j + 2 * i) : int64)))
+                                s
+                              = dz0 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory
+                                :> bytes16 (word_add src1 (word (512 + 64 * j + 2 * i) : int64)))
+                                s
+                              = a1 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory
+                                :> bytes16 (word_add src1
+                                     (word (512 + 64 * j + 32 + 2 * i) : int64)))
+                                s
+                              = b1 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory
+                                :> bytes16 (word_add src2 (word (512 + 64 * j + 2 * i) : int64)))
+                                s
+                              = c1 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory
+                                :> bytes16 (word_add src2
+                                     (word (512 + 64 * j + 32 + 2 * i) : int64)))
+                                s
+                              = d1 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory
+                                :> bytes16 (word_add src2t (word (256 + 32 * j + 2 * i) : int64)))
+                                s
+                              = dz1 i j)))
+             (\s:x86state.
+               read RIP s = returnaddress
+               /\ read RSP s = word_add stackpointer (word 8 : int64)
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 4
+                          ==> (let j':num = 2 * j in
+                              abs (ival (a0 i j')) <= &2 pow 12
+                              /\ abs (ival (b0 i j')) <= &2 pow 12
+                              /\ abs (ival (a1 i j')) <= &2 pow 12
+                              /\ abs (ival (b1 i j')) <= &2 pow 12
+                              ==> (ival (read
+                                    (memory
+                                    :> bytes16 (word_add dst (word (64 * j' + 2 * i) : int64)))
+                                    s)
+                                  == pmulaccred0 (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j'))
+                                       (ival (d0 i j'))
+                                       (ival (dz0 i j'))
+                                       (ival (a1 i j'))
+                                       (ival (b1 i j'))
+                                       (ival (c1 i j'))
+                                       (ival (d1 i j'))
+                                       (ival (dz1 i j'))) (mod &3329))))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 4
+                          ==> (let j':num = 2 * j + 1 in
+                              abs (ival (a0 i j')) <= &2 pow 12
+                              /\ abs (ival (b0 i j')) <= &2 pow 12
+                              /\ abs (ival (a1 i j')) <= &2 pow 12
+                              /\ abs (ival (b1 i j')) <= &2 pow 12
+                              ==> (ival (read
+                                    (memory
+                                    :> bytes16 (word_add dst (word (64 * j' + 2 * i) : int64)))
+                                    s)
+                                  == pmulaccred0_odd (ival (a0 i j')) (ival (b0 i j'))
+                                       (ival (c0 i j'))
+                                       (ival (d0 i j'))
+                                       (ival (dz0 i j'))
+                                       (ival (a1 i j'))
+                                       (ival (b1 i j'))
+                                       (ival (c1 i j'))
+                                       (ival (d1 i j'))
+                                       (ival (dz1 i j'))) (mod &3329))))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> abs (ival (a0 i j)) <= &2 pow 12
+                              /\ abs (ival (b0 i j)) <= &2 pow 12
+                              /\ abs (ival (a1 i j)) <= &2 pow 12
+                              /\ abs (ival (b1 i j)) <= &2 pow 12
+                          ==> (ival (read
+                                (memory
+                                :> bytes16 (word_add dst (word (64 * j + 32 + 2 * i) : int64)))
+                                s)
+                              == pmulaccred1 (ival (a0 i j)) (ival (b0 i j)) (ival (c0 i j))
+                                   (ival (d0 i j))
+                                   (ival (dz0 i j))
+                                   (ival (a1 i j))
+                                   (ival (b1 i j))
+                                   (ival (c1 i j))
+                                   (ival (d1 i j))
+                                   (ival (dz1 i j))) (mod &3329))))
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (dst, 512)])
+
+theorem mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_NOIBT_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> int64 -> int64 -> num -> int64 -> int64 ->
+          (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) src1:int64 src2:int64 src2t:int64 dst:int64 pc:num
+        stackpointer:int64 returnaddress:int64.
+         aligned 32 src1
+         /\ aligned 32 src2
+         /\ aligned 32 src2t
+         /\ aligned 32 dst
+         /\ ALL (nonoverlapping (dst, 512)) [src1, 1024; src2, 1024; src2t, 512]
+         /\ nonoverlapping (dst, 512) ((word pc : int64), LENGTH mlkem_basemul_k2_tmc)
+         /\ nonoverlapping (stackpointer, 8) (dst, 512)
+         ==> ensures x86
+               (\s:x86state.
+                 bytes_loaded s (word pc : int64) mlkem_basemul_k2_tmc
+                 /\ read RIP s = (word pc : int64)
+                 /\ read RSP s = stackpointer
+                 /\ read (memory :> bytes64 stackpointer) s = returnaddress
+                 /\ C_ARGUMENTS [dst; src1; src2; src2t] s
+                 /\ read events s = e)
+               (\s:x86state.
+                 read RIP s = returnaddress
+                 /\ read RSP s = word_add stackpointer (word 8 : int64)
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events src1 src2 src2t dst pc stackpointer returnaddress
+                      /\ memaccess_inbounds e2
+                           [src1, 1024; src2, 1024; src2t, 512; dst, 512; stackpointer, 8]
+                           [dst, 512; stackpointer, 8]))
+               (\s:x86state s':x86state. T)
+
+theorem mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_SUBROUTINE_CORRECT
+  |- !src1:int64 src2:int64 src2t:int64 dst:int64 a0:(num -> num -> int16) b0:(num -> num -> int16)
+      c0:(num -> num -> int16) d0:(num -> num -> int16) dz0:(num -> num -> int16)
+      a1:(num -> num -> int16) b1:(num -> num -> int16) c1:(num -> num -> int16)
+      d1:(num -> num -> int16) dz1:(num -> num -> int16) pc:num stackpointer:int64
+      returnaddress:int64.
+       aligned 32 src1
+       /\ aligned 32 src2
+       /\ aligned 32 src2t
+       /\ aligned 32 dst
+       /\ ALL (nonoverlapping (dst, 512)) [src1, 1024; src2, 1024; src2t, 512]
+       /\ nonoverlapping (dst, 512) ((word pc : int64), LENGTH mlkem_basemul_k2_mc)
+       /\ nonoverlapping (dst, 512) (stackpointer, 8)
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mlkem_basemul_k2_mc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = stackpointer
+               /\ read (memory :> bytes64 stackpointer) s = returnaddress
+               /\ C_ARGUMENTS [dst; src1; src2; src2t] s
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory :> bytes16 (word_add src1 (word (64 * j + 2 * i) : int64)))
+                                s
+                              = a0 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory
+                                :> bytes16 (word_add src1 (word (64 * j + 32 + 2 * i) : int64)))
+                                s
+                              = b0 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory :> bytes16 (word_add src2 (word (64 * j + 2 * i) : int64)))
+                                s
+                              = c0 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory
+                                :> bytes16 (word_add src2 (word (64 * j + 32 + 2 * i) : int64)))
+                                s
+                              = d0 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory :> bytes16 (word_add src2t (word (32 * j + 2 * i) : int64)))
+                                s
+                              = dz0 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory
+                                :> bytes16 (word_add src1 (word (512 + 64 * j + 2 * i) : int64)))
+                                s
+                              = a1 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory
+                                :> bytes16 (word_add src1
+                                     (word (512 + 64 * j + 32 + 2 * i) : int64)))
+                                s
+                              = b1 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory
+                                :> bytes16 (word_add src2 (word (512 + 64 * j + 2 * i) : int64)))
+                                s
+                              = c1 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory
+                                :> bytes16 (word_add src2
+                                     (word (512 + 64 * j + 32 + 2 * i) : int64)))
+                                s
+                              = d1 i j))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> read
+                                (memory
+                                :> bytes16 (word_add src2t (word (256 + 32 * j + 2 * i) : int64)))
+                                s
+                              = dz1 i j)))
+             (\s:x86state.
+               read RIP s = returnaddress
+               /\ read RSP s = word_add stackpointer (word 8 : int64)
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 4
+                          ==> (let j':num = 2 * j in
+                              abs (ival (a0 i j')) <= &2 pow 12
+                              /\ abs (ival (b0 i j')) <= &2 pow 12
+                              /\ abs (ival (a1 i j')) <= &2 pow 12
+                              /\ abs (ival (b1 i j')) <= &2 pow 12
+                              ==> (ival (read
+                                    (memory
+                                    :> bytes16 (word_add dst (word (64 * j' + 2 * i) : int64)))
+                                    s)
+                                  == pmulaccred0 (ival (a0 i j')) (ival (b0 i j')) (ival (c0 i j'))
+                                       (ival (d0 i j'))
+                                       (ival (dz0 i j'))
+                                       (ival (a1 i j'))
+                                       (ival (b1 i j'))
+                                       (ival (c1 i j'))
+                                       (ival (d1 i j'))
+                                       (ival (dz1 i j'))) (mod &3329))))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 4
+                          ==> (let j':num = 2 * j + 1 in
+                              abs (ival (a0 i j')) <= &2 pow 12
+                              /\ abs (ival (b0 i j')) <= &2 pow 12
+                              /\ abs (ival (a1 i j')) <= &2 pow 12
+                              /\ abs (ival (b1 i j')) <= &2 pow 12
+                              ==> (ival (read
+                                    (memory
+                                    :> bytes16 (word_add dst (word (64 * j' + 2 * i) : int64)))
+                                    s)
+                                  == pmulaccred0_odd (ival (a0 i j')) (ival (b0 i j'))
+                                       (ival (c0 i j'))
+                                       (ival (d0 i j'))
+                                       (ival (dz0 i j'))
+                                       (ival (a1 i j'))
+                                       (ival (b1 i j'))
+                                       (ival (c1 i j'))
+                                       (ival (d1 i j'))
+                                       (ival (dz1 i j'))) (mod &3329))))
+               /\ (!i:num.
+                    i < 16
+                    ==> (!j:num.
+                          j < 8
+                          ==> abs (ival (a0 i j)) <= &2 pow 12
+                              /\ abs (ival (b0 i j)) <= &2 pow 12
+                              /\ abs (ival (a1 i j)) <= &2 pow 12
+                              /\ abs (ival (b1 i j)) <= &2 pow 12
+                          ==> (ival (read
+                                (memory
+                                :> bytes16 (word_add dst (word (64 * j + 32 + 2 * i) : int64)))
+                                s)
+                              == pmulaccred1 (ival (a0 i j)) (ival (b0 i j)) (ival (c0 i j))
+                                   (ival (d0 i j))
+                                   (ival (dz0 i j))
+                                   (ival (a1 i j))
+                                   (ival (b1 i j))
+                                   (ival (c1 i j))
+                                   (ival (d1 i j))
+                                   (ival (dz1 i j))) (mod &3329))))
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (dst, 512)])
+
+theorem mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm MLKEM_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED_K2_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> int64 -> int64 -> num -> int64 -> int64 ->
+          (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) src1:int64 src2:int64 src2t:int64 dst:int64 pc:num
+        stackpointer:int64 returnaddress:int64.
+         aligned 32 src1
+         /\ aligned 32 src2
+         /\ aligned 32 src2t
+         /\ aligned 32 dst
+         /\ ALL (nonoverlapping (dst, 512)) [src1, 1024; src2, 1024; src2t, 512]
+         /\ nonoverlapping (dst, 512) ((word pc : int64), LENGTH mlkem_basemul_k2_mc)
+         /\ nonoverlapping (stackpointer, 8) (dst, 512)
+         ==> ensures x86
+               (\s:x86state.
+                 bytes_loaded s (word pc : int64) mlkem_basemul_k2_mc
+                 /\ read RIP s = (word pc : int64)
+                 /\ read RSP s = stackpointer
+                 /\ read (memory :> bytes64 stackpointer) s = returnaddress
+                 /\ C_ARGUMENTS [dst; src1; src2; src2t] s
+                 /\ read events s = e)
+               (\s:x86state.
+                 read RIP s = returnaddress
+                 /\ read RSP s = word_add stackpointer (word 8 : int64)
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events src1 src2 src2t dst pc stackpointer returnaddress
+                      /\ memaccess_inbounds e2
+                           [src1, 1024; src2, 1024; src2t, 512; dst, 512; stackpointer, 8]
+                           [dst, 512; stackpointer, 8]))
+               (\s:x86state s':x86state. T)

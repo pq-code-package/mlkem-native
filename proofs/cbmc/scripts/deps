@@ -1,0 +1,491 @@
+#!/usr/bin/env python3
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+"""Which files each CBMC proof depends on.
+
+Usage:
+  deps gen
+      print the dependencies as YAML (in a repository nix shell;
+      autogen writes them to proofs/cbmc/deps.yml)
+  deps rev [--all] [--json] [--files-json JSON] FILE ...
+      print the proofs that a change to FILE can affect, as
+      PROOF/SECURITY_LEVEL, one per line, or, with --json, as
+      {"2": [PROOF, ...], "3": [...], "4": [...]}
+  deps check
+      check deps.yml against list_proofs.sh (run by lint)
+
+`gen` asks each proof Makefile for the sources, include paths and
+preprocessor definitions that goto-cc gives its native compiler. It
+removes goto-cc-only options, then runs the compiler selected by `CC`
+with `-M` for every parameter set and supported configuration. If `CC`
+is unset, it uses `gcc`. deps.yml records the union over the
+configurations. `gen` also fails if two proofs share a PROOF_UID.
+
+`rev` and `check` read deps.yml and need only Python with PyYAML.
+"""
+
+import concurrent.futures
+import functools
+import json
+import os
+import shlex
+import subprocess
+import sys
+import tempfile
+
+import yaml
+
+
+SCRIPTS = os.path.dirname(os.path.realpath(__file__))
+CBMC = os.path.dirname(SCRIPTS)
+ROOT = os.path.dirname(os.path.dirname(CBMC))
+DEPS_YAML = os.path.join(CBMC, "deps.yml")
+PARAMETER_SETS = (("2", "512"), ("3", "768"), ("4", "1024"))
+K_TO_LEVEL = dict(PARAMETER_SETS)
+SECURITY_LEVELS = tuple(level for _, level in PARAMETER_SETS)
+SECURITY_LEVEL_INDEX = {level: index for index, level in enumerate(SECURITY_LEVELS)}
+CBMC_REL = "proofs/cbmc/"
+DEPS_REL = CBMC_REL + "deps.yml"
+
+
+@functools.cache
+def proof_names():
+    return tuple(
+        subprocess.run(
+            [os.path.join(CBMC, "list_proofs.sh")],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.split()
+    )
+
+
+def proof_keys():
+    return tuple(
+        f"{proof}/{level}"
+        for proof in sorted(proof_names())
+        for level in SECURITY_LEVELS
+    )
+
+
+def all_proofs():
+    return set(proof_keys())
+
+
+def proof_sort_key(proof):
+    name, level = proof.rsplit("/", 1)
+    return (
+        name,
+        SECURITY_LEVEL_INDEX.get(level, len(SECURITY_LEVEL_INDEX)),
+    )
+
+
+def rel(path):
+    return os.path.relpath(os.path.realpath(path), ROOT)
+
+
+def within(path, directory):
+    path = os.path.realpath(path)
+    directory = os.path.realpath(directory)
+    return path == directory or path.startswith(directory + os.sep)
+
+
+def run_make(proof, args):
+    p = subprocess.run(
+        ["make", "--no-print-directory", *args],
+        cwd=os.path.join(CBMC, proof),
+        capture_output=True,
+        text=True,
+    )
+    if p.returncode != 0:
+        sys.exit(f"deps gen: {proof}: make {shlex.join(args)} failed:\n{p.stderr}")
+    return p.stdout
+
+
+def proof_configurations(proof, parameter_set):
+    configs = run_make(
+        proof, [f"MLKEM_K={parameter_set}", "echo-supported-configs"]
+    ).split()
+    if not configs:
+        sys.exit(f"deps gen: {parameter_set}/{proof}: CBMC_SUPPORTED_CONFIGS is empty")
+    result = set()
+    for config in configs:
+        try:
+            data_model, solver = config.split(":", 1)
+        except ValueError:
+            sys.exit(
+                f"deps gen: {parameter_set}/{proof}: invalid configuration {config!r}"
+            )
+        result.add((data_model, solver))
+    return sorted(result)
+
+
+MAKE_DUMP = r"""
+include Makefile
+
+CBMC_DEPENDENCY_SOURCES := \
+  $(PROJECT_SOURCES) \
+  $(PROOF_SOURCES) \
+  $(foreach source,$(REWRITTEN_SOURCES),$($(source)_SOURCE))
+
+$(file >$(CBMC_DEPS_OUT).flags,$(COMPILE_FLAGS))
+$(file >$(CBMC_DEPS_OUT).includes,$(INCLUDES))
+$(file >$(CBMC_DEPS_OUT).defines,$(DEFINES))
+$(file >$(CBMC_DEPS_OUT).sources,$(CBMC_DEPENDENCY_SOURCES))
+$(file >$(CBMC_DEPS_OUT).makefiles,$(MAKEFILE_LIST))
+$(file >$(CBMC_DEPS_OUT).uid,$(PROOF_UID))
+
+.PHONY: cbmc-dependency-dump
+cbmc-dependency-dump:
+        @:
+"""
+MAKE_DUMP = MAKE_DUMP.replace("        @:", "\t@:")
+
+
+def read_words(path):
+    with open(path, encoding="utf-8") as f:
+        return shlex.split(f.read())
+
+
+@functools.cache
+def dependency_compiler():
+    """Return the compiler command selected by CC, defaulting to gcc."""
+    command = shlex.split(os.environ.get("CC", "gcc"))
+    if not command:
+        sys.exit("deps gen: CC is empty")
+    return command
+
+
+def compiler_flags(flags, proof):
+    """Remove options that do not affect compiler dependencies."""
+    result = []
+    skip_next = False
+    for flag in flags:
+        if skip_next:
+            skip_next = False
+            continue
+        if flag == "--native-compiler":
+            skip_next = True
+        elif flag in ("--32", "--64"):
+            continue
+        elif flag == "-Werror" or flag.startswith("-Werror="):
+            continue
+        elif flag.startswith("--"):
+            sys.exit(
+                f"deps gen: {proof}: unsupported goto-cc option {flag!r} "
+                "in COMPILE_FLAGS"
+            )
+        else:
+            result.append(flag)
+    if skip_next:
+        sys.exit(f"deps gen: {proof}: --native-compiler has no argument")
+    return result
+
+
+def parse_dependencies(output, proof):
+    dependencies = set()
+    for line in output.replace("\\\n", " ").splitlines():
+        if not line.strip():
+            continue
+        try:
+            _, paths = line.split(":", 1)
+        except ValueError:
+            sys.exit(f"deps gen: {proof}: invalid compiler dependency line: {line}")
+        dependencies.update(shlex.split(paths))
+    return dependencies
+
+
+def dependency_inputs(configuration):
+    parameter_set, proof, data_model, solver = configuration
+    proof_dir = os.path.join(CBMC, proof)
+    with tempfile.TemporaryDirectory() as tmp:
+        out = os.path.join(tmp, "make")
+        dump_makefile = os.path.realpath(os.path.join(tmp, "Makefile"))
+        with open(dump_makefile, "w", encoding="utf-8") as f:
+            f.write(MAKE_DUMP)
+        run_make(
+            proof,
+            [
+                f"MLKEM_K={parameter_set}",
+                f"CBMC_DM={data_model}",
+                f"CBMC_SOLVER={solver}",
+                f"CBMC_DEPS_OUT={out}",
+                "-f",
+                dump_makefile,
+                "cbmc-dependency-dump",
+            ],
+        )
+        flags = compiler_flags(read_words(out + ".flags"), proof)
+        includes = read_words(out + ".includes")
+        defines = read_words(out + ".defines")
+        sources = read_words(out + ".sources")
+        with open(out + ".uid", encoding="utf-8") as f:
+            uid = f.read().strip()
+        makefiles = [
+            path
+            for path in read_words(out + ".makefiles")
+            if os.path.realpath(
+                path if os.path.isabs(path) else os.path.join(proof_dir, path)
+            )
+            != dump_makefile
+        ]
+
+    if not sources:
+        sys.exit(f"deps gen: {proof}: no proof or project sources")
+    return (
+        parameter_set,
+        proof,
+        tuple(flags),
+        tuple(includes),
+        tuple(defines),
+        tuple(sources),
+        frozenset(makefiles),
+        uid,
+    )
+
+
+def analyse(inputs):
+    parameter_set, proof, flags, includes, defines, sources, makefiles, uid = inputs
+    proof_dir = os.path.join(CBMC, proof)
+    p = subprocess.run(
+        [
+            *dependency_compiler(),
+            "-M",
+            *flags,
+            "-Wno-unused-command-line-argument",
+            *includes,
+            *defines,
+            *sources,
+        ],
+        cwd=proof_dir,
+        check=True,
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+    paths = parse_dependencies(p.stdout, proof)
+    paths.update(makefiles)
+
+    files = set()
+    for path in paths:
+        if path == "-":
+            continue
+        path = path if os.path.isabs(path) else os.path.join(proof_dir, path)
+        if not within(path, ROOT):
+            sys.exit(
+                f"deps gen: {parameter_set}/{proof}: dependency outside "
+                f"the repository: {os.path.realpath(path)}"
+            )
+        files.add(rel(path))
+    return parameter_set, proof, files, uid
+
+
+def gen():
+    proofs = sorted(proof_names())
+    dependencies = {
+        f"{proof}/{level}": set() for _, level in PARAMETER_SETS for proof in proofs
+    }
+    uids = {}
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        pairs = [(proof, k) for proof in proofs for k, _ in PARAMETER_SETS]
+        supported = executor.map(lambda pair: proof_configurations(*pair), pairs)
+        configurations = [
+            (k, proof, data_model, solver)
+            for (proof, k), pair_configurations in zip(pairs, supported)
+            for data_model, solver in pair_configurations
+        ]
+        scans = {}
+        for (
+            k,
+            proof,
+            flags,
+            includes,
+            defines,
+            sources,
+            makefiles,
+            uid,
+        ) in executor.map(dependency_inputs, configurations):
+            key = (k, proof, flags, includes, defines, sources, uid)
+            scans.setdefault(key, set()).update(makefiles)
+        unique_inputs = [
+            (k, proof, flags, includes, defines, sources, frozenset(makefiles), uid)
+            for (
+                k,
+                proof,
+                flags,
+                includes,
+                defines,
+                sources,
+                uid,
+            ), makefiles in scans.items()
+        ]
+        for k, proof, files, uid in executor.map(analyse, unique_inputs):
+            level = K_TO_LEVEL[k]
+            dependencies[f"{proof}/{level}"].update(files)
+            uids.setdefault((k, uid), set()).add(proof)
+    # CI selects proofs by directory, but results and baselines are keyed by
+    # PROOF_UID, so a copied proof that keeps its UID would replace the
+    # original's published results.
+    duplicates = [
+        f"MLKEM_K={k}: PROOF_UID {uid!r} is used by {', '.join(sorted(owners))}"
+        for (k, uid), owners in sorted(uids.items())
+        if len(owners) > 1
+    ]
+    if duplicates:
+        sys.exit("deps gen: duplicate PROOF_UIDs:\n  " + "\n  ".join(duplicates))
+    data = {
+        f"{proof}/{level}": {"files": sorted(dependencies[f"{proof}/{level}"])}
+        for proof in proofs
+        for _, level in PARAMETER_SETS
+    }
+    print(yaml.safe_dump(data, sort_keys=False), end="")
+
+
+def read_deps():
+    with open(DEPS_YAML, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    return data or {}
+
+
+def check():
+    deps = read_deps()
+    expected = all_proofs()
+    problems = [
+        f"{proof} is missing; run scripts/autogen"
+        for proof in sorted(expected - set(deps))
+    ]
+    problems += [
+        f"{proof} is no longer a proof; run scripts/autogen"
+        for proof in sorted(set(deps) - expected)
+    ]
+    if list(deps) != list(proof_keys()):
+        problems.append(
+            "entries are not ordered as PROOF/{512,768,1024}; run scripts/autogen"
+        )
+    for proof, entry in sorted(deps.items()):
+        files = entry.get("files") if isinstance(entry, dict) else None
+        if not isinstance(files, list) or not all(
+            isinstance(path, str) for path in files
+        ):
+            problems.append(f"{proof} has an invalid files list")
+            continue
+        if files != sorted(set(files)):
+            problems.append(f"{proof} has an unsorted or duplicate files list")
+        try:
+            name, level = proof.rsplit("/", 1)
+        except ValueError:
+            problems.append(f"{proof} is not PROOF/SECURITY_LEVEL")
+            continue
+        makefile = f"{CBMC_REL}{name}/Makefile"
+        if level in SECURITY_LEVELS and makefile not in files:
+            problems.append(f"{proof} does not list {makefile}")
+        for path in files:
+            if os.path.normpath(path) != path or os.path.isabs(path):
+                problems.append(f"{proof} has a non-normal path: {path}")
+            elif not os.path.exists(os.path.join(ROOT, path)):
+                problems.append(f"{proof} lists a missing file: {path}")
+    if problems:
+        sys.exit("deps check:\n  " + "\n  ".join(problems))
+
+
+EVERY_PROOF = (
+    "flake.nix",
+    "flake.lock",
+    "nix/",
+    ".github/actions/setup-nix/",
+    ".github/actions/setup-shell/",
+    ".github/actions/cbmc/",
+    ".github/workflows/all.yml",
+    ".github/workflows/cbmc.yml",
+    ".github/workflows/cbmc_publish.yml",
+    ".github/workflows/ci_ec2_reusable.yml",
+    "scripts/tests",
+)
+
+
+def affected(path, deps, proofs):
+    # deps.yml is not a proof input. lint keeps it current, so any change to
+    # a proof's inputs also changes a file that its entry lists.
+    if path.endswith(".md") or path == DEPS_REL:
+        return set()
+    full_path = os.path.join(ROOT, path)
+    if not os.path.exists(full_path):
+        return set(proofs)
+    # deps.yml records resolved paths, so it never lists a symlink under its
+    # own name. Include search also skips a directory that replaced a file.
+    if os.path.islink(full_path) or not os.path.isfile(full_path):
+        return set(proofs)
+    if path.startswith(EVERY_PROOF):
+        return set(proofs)
+    mapped = {
+        proof
+        for proof, entry in deps.items()
+        if proof in proofs and path in entry.get("files", ())
+    }
+    if path.startswith(CBMC_REL):
+        remainder = path[len(CBMC_REL) :]
+        name, separator, _ = remainder.partition("/")
+        if separator and name in proof_names():
+            return mapped | {proof for proof in proofs if proof.startswith(name + "/")}
+        return set(proofs)
+    return mapped
+
+
+def rev(args):
+    deps, proofs = read_deps(), all_proofs()
+    selected = set(proofs) if "--all" in args else proofs - set(deps)
+    files = []
+    index = 0
+    while index < len(args):
+        arg = args[index]
+        if arg == "--files-json":
+            try:
+                decoded = json.loads(args[index + 1])
+            except (IndexError, json.JSONDecodeError) as err:
+                sys.exit(f"deps rev: invalid --files-json: {err}")
+            if not isinstance(decoded, list) or not all(
+                isinstance(path, str) for path in decoded
+            ):
+                sys.exit("deps rev: --files-json must be an array of strings")
+            files.extend(decoded)
+            index += 2
+        elif arg in ("--all", "--json"):
+            index += 1
+        elif arg.startswith("--"):
+            sys.exit(f"deps rev: unknown option: {arg}")
+        else:
+            files.append(arg)
+            index += 1
+    for path in files:
+        selected |= affected(os.path.normpath(path), deps, proofs)
+    if "--json" in args:
+        print(
+            json.dumps(
+                {
+                    k: sorted(
+                        proof.rsplit("/", 1)[0]
+                        for proof in selected
+                        if proof.endswith("/" + level)
+                    )
+                    for k, level in PARAMETER_SETS
+                }
+            )
+        )
+    else:
+        print("\n".join(sorted(selected, key=proof_sort_key)))
+
+
+def main():
+    command, args = (sys.argv[1], sys.argv[2:]) if len(sys.argv) > 1 else (None, [])
+    if command == "gen" and not args:
+        gen()
+    elif command == "check" and not args:
+        check()
+    elif command == "rev":
+        rev(args)
+    else:
+        sys.exit(__doc__.strip())
+
+
+if __name__ == "__main__":
+    main()

@@ -9,9 +9,9 @@
 
 void harness(void)
 {
-  uint8_t *output0, output1, output2, output3;
+  uint8_t *output0, *output1, *output2, *output3;
   size_t outlen;
-  const uint8_t *input0, input1, input2, input3;
+  const uint8_t *input0, *input1, *input2, *input3;
   size_t inlen;
   mlk_shake256x4(output0, output1, output2, output3, outlen, input0, input1,
                  input2, input3, inlen);

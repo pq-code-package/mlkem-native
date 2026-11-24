@@ -6,6 +6,7 @@
 #define MLK_DEV_PPC64LE_SRC_ARITH_NATIVE_PPC64LE_H
 
 #include <stdint.h>
+
 #include "../../../common.h"
 #include "consts.h"
 

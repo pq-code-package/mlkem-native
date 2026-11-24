@@ -114,6 +114,7 @@ runs:
           "--cflags=$BENCH_CFLAGS $BENCH_ARCHFLAGS"
           "--ldflags=$BENCH_LDFLAGS"
           "--opt=$bench_opt"
+          --no-auto
           -v
         )
 

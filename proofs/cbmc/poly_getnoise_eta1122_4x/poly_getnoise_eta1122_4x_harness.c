@@ -6,7 +6,7 @@
 
 void harness(void)
 {
-  /* mlk_poly_getnoise_eta1122_4x is only defines for MLKEM_K == 2 */
+  /* mlk_poly_getnoise_eta1122_4x is only defined for MLKEM_K == 2 */
 #if MLKEM_K == 2
   uint8_t *seed;
   mlk_poly *r0, *r1, *r2, *r3;

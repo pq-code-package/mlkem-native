@@ -7,23 +7,35 @@
 # it can use $@ and target-specific variables like TEST_SRCS.
 LINK = $(if $(strip $(CUSTOM_BUILD)),$(CUSTOM_BUILD),echo "  LD      $@" && $(LD) $(LDFLAGS) -o $@ $(filter %.o,$^) $(LDLIBS))
 
+# With CHECK_BINARY=1, check each library and binary as it is built: the
+# backend kernels in it must match the bytecode that the HOL Light proofs
+# reason about; see scripts/check-binary. A file that fails is removed.
+# abicheck is not checked: its wrappers check_NAME look like namespaced
+# kernels.
+CHECK_BINARY_SCRIPT ?= scripts/check-binary
+CHECK = $(if $(filter 1,$(CHECK_BINARY)),echo "  CHECK   $@" && { CROSS_PREFIX="$(CROSS_PREFIX)" python3 $(CHECK_BINARY_SCRIPT) --quiet $(CHECK_BINARY_FLAGS) $@ >&2 || { rm -f $@; exit 1; }; },:)
+
 $(BUILD_DIR)/mlkem512/bin/%: $(CONFIG)
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(LINK)
+	$(Q)$(CHECK)
 
 $(BUILD_DIR)/mlkem768/bin/%: $(CONFIG)
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(LINK)
+	$(Q)$(CHECK)
 
 $(BUILD_DIR)/mlkem1024/bin/%: $(CONFIG)
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(LINK)
+	$(Q)$(CHECK)
 
 $(BUILD_DIR)/%.a: $(CONFIG)
 	$(Q)echo "  AR      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)rm -f $@
 	$(Q)$(CC_AR) rcs $@ $(filter %.o,$^)
+	$(Q)$(CHECK)
 
 $(BUILD_DIR)/mlkem512/%.c.o: %.c $(CONFIG)
 	$(Q)echo "  CC      $@"

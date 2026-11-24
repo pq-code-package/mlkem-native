@@ -1,0 +1,292 @@
+#!/usr/bin/env python3
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+"""Which files each HOL Light proof depends on.
+
+Usage:
+  deps gen                    print the dependencies as YAML (in a HOL
+                              Light nix shell; autogen writes them to
+                              proofs/hol_light/deps.yml)
+  deps rev [--all] [--json] FILE ...
+                              print the proofs that a change to FILE can
+                              affect, one per line or, with --json, as
+                              {"ARCH": [FUNC, ...]}; --all: every proof
+  deps check                  validate deps.yml entries, paths and
+                              s2n-bignum imports (run by lint)
+
+`gen` follows each proof's loads with HOL Light's own loader
+(hol_deps.ml), so it sees what the compiled proof loads. deps.yml lists,
+for each proof ARCH/FUNC, the files of this repository it depends on
+(its .S and every file it loads) and the s2n-bignum files that files of
+this repository load. `rev` and `check` read deps.yml and need only
+Python with PyYAML.
+"""
+
+import json
+import os
+import subprocess
+import sys
+
+import yaml
+
+SCRIPTS = os.path.dirname(os.path.realpath(__file__))
+HOL_LIGHT = os.path.dirname(SCRIPTS)  # proofs/hol_light
+ROOT = os.path.dirname(os.path.dirname(HOL_LIGHT))
+DEPS_YAML = os.path.join(HOL_LIGHT, "deps.yml")
+ALLOWLIST = os.path.join(HOL_LIGHT, "s2n_bignum_allowlist.txt")
+ARCHS = ("aarch64", "x86_64")
+HL = "proofs/hol_light/"
+
+
+def functions(arch):
+    script = os.path.join(HOL_LIGHT, arch, "list_proofs.sh")
+    return subprocess.run(
+        [script], check=True, capture_output=True, text=True
+    ).stdout.split()
+
+
+def all_proofs():
+    return {f"{a}/{f}" for a in ARCHS for f in functions(a)}
+
+
+def within(path, d):
+    return os.path.realpath(path).startswith(os.path.realpath(d) + os.sep)
+
+
+def rel(path):
+    return os.path.relpath(os.path.realpath(path), ROOT)
+
+
+def analyse(arch, func, namespaces):
+    """(files, s2n-bignum entry points, problems) of one proof."""
+    # Trace in the directory and with the load path that build-proof.sh
+    # gives HOL Light's inliner: the loader searches "." first, so both
+    # decide how a load resolves.
+    s2n = os.environ["S2N_BIGNUM_DIR"]
+    imports = os.environ.get("IMPORTS_DIR") or os.path.join(HOL_LIGHT, ".imports")
+    env = dict(
+        os.environ,
+        HOLLIGHT_DIR=os.environ["HOLDIR"],
+        HOLLIGHT_LOAD_PATH=f"{imports}:{s2n}",
+    )
+    p = subprocess.run(
+        [
+            "ocaml",
+            "-I",
+            os.environ["HOLDIR"],
+            os.path.join(SCRIPTS, "hol_deps.ml"),
+            os.path.join(HOL_LIGHT, arch, "proofs", func + ".ml"),
+        ],
+        cwd=s2n,
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    if p.returncode != 0:
+        sys.exit(f"deps: {arch}/{func}: hol_deps.ml failed:\n{p.stderr[-2000:]}")
+    files = {rel(os.path.join(HOL_LIGHT, arch, "mlkem", func + ".S"))}
+    entries, problems = set(), []
+    for line in p.stdout.splitlines():
+        frm, path, file = line.split("\t")  # `frm` loads `path`, resolved to `file`
+        if within(file, ROOT):
+            files.add(rel(file))
+        if not frm or not within(frm, ROOT):
+            continue
+        # A load in this repository names its source and resolves there, so
+        # that no file of one source can stand in for another's.
+        prefix = path.split("/", 1)[0] + "/"
+        if not within(file, namespaces.get(prefix, "/nonexistent")):
+            problems.append(
+                f"{rel(frm)}: `{path}` must start with "
+                + " or ".join(namespaces)
+                + f" and resolve there, but resolves to {file}"
+            )
+        elif prefix == "s2n_bignum/":
+            entries.add(path[len(prefix) :])
+    return sorted(files), sorted(entries), problems
+
+
+def gen():
+    if not (os.environ.get("HOLDIR") and os.environ.get("S2N_BIGNUM_DIR")):
+        sys.exit("deps gen: run in a HOL Light nix shell")
+    namespaces = {
+        "mlkem_native/": HOL_LIGHT,
+        "s2n_bignum/": os.environ["S2N_BIGNUM_DIR"],
+        "Library/": os.path.join(os.environ["HOLDIR"], "Library"),
+    }
+    deps, problems = {}, []
+    for proof in sorted(all_proofs()):
+        files, entries, bad = analyse(*proof.split("/"), namespaces)
+        deps[proof] = {"files": files, "s2n_bignum": entries}
+        problems += bad
+    if problems:
+        sys.exit("deps gen:\n  " + "\n  ".join(sorted(set(problems))))
+    print(yaml.safe_dump(deps, sort_keys=False), end="")
+
+
+def read_deps():
+    with open(DEPS_YAML, encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def check():
+    with open(ALLOWLIST, encoding="utf-8") as f:
+        allowed = {line.split("#", 1)[0].strip() for line in f} - {""}
+    deps = read_deps()
+    if not isinstance(deps, dict) or not all(isinstance(p, str) for p in deps):
+        sys.exit("deps check: expected a mapping keyed by proof name")
+    expected = sorted(all_proofs())
+    problems = [
+        f"{p} is missing; run scripts/autogen" for p in expected if p not in deps
+    ]
+    problems += [
+        f"{p} is no longer a proof; run scripts/autogen"
+        for p in sorted(set(deps) - set(expected))
+    ]
+    if list(deps) != sorted(deps):
+        problems.append("proof entries are not sorted; run scripts/autogen")
+    for proof, entry in deps.items():
+        if not isinstance(entry, dict) or set(entry) != {"files", "s2n_bignum"}:
+            problems.append(f"{proof} must have files and s2n_bignum lists")
+            continue
+        for field, paths in entry.items():
+            if not isinstance(paths, list) or not all(
+                isinstance(path, str) for path in paths
+            ):
+                problems.append(f"{proof} has an invalid {field} list")
+                continue
+            if paths != sorted(set(paths)):
+                problems.append(f"{proof} has an unsorted or duplicate {field} list")
+            if field == "s2n_bignum":
+                problems.extend(
+                    f"{proof} loads s2n_bignum/{path}, which {rel(ALLOWLIST)} does not list"
+                    for path in paths
+                    if path not in allowed
+                )
+                continue
+            for path in paths:
+                full_path = os.path.join(ROOT, path)
+                if (
+                    os.path.isabs(path)
+                    or os.path.normpath(path) != path
+                    or not within(full_path, ROOT)
+                ):
+                    problems.append(f"{proof} has a non-normal repository path: {path}")
+                elif not os.path.isfile(full_path):
+                    problems.append(f"{proof} lists a missing file: {path}")
+            if proof in expected:
+                arch, func = proof.split("/")
+                for required in (
+                    f"{HL}{arch}/proofs/{func}.ml",
+                    f"{HL}{arch}/mlkem/{func}.S",
+                ):
+                    if required not in paths:
+                        problems.append(f"{proof} does not list {required}")
+    if problems:
+        sys.exit("deps check:\n  " + "\n  ".join(problems))
+
+
+# Files that every proof depends on, beyond those that deps.yml lists.
+EVERY_PROOF = (
+    "flake.nix",
+    "flake.lock",
+    "nix/",
+    ".github/actions/setup-nix/",
+    ".github/actions/setup-shell/",
+    HL + "aarch64/proofs/build-proof.sh",  # used for both architectures
+    "scripts/check-binary",  # checks the proofs' object files
+    ".github/workflows/hol_trace.yml",
+    ".github/actions/hol-trace/",
+)
+# Nix packages that do not affect proof execution or trace checking.
+NO_PROOF = (
+    "nix/avr/",
+    "nix/cbmc/",
+    "nix/legacy/",
+    "nix/openocd/",
+    "nix/slothy/",
+    "nix/valgrind/",
+    "nix/zephyr/",
+)
+HT = HL + "hol_trace/"
+ACC = HT + "accepted/"
+S2N_LAYER = {"s2n_bignum_arm.defs": "aarch64", "s2n_bignum_x86.defs": "x86_64"}
+
+
+def affected(path, deps, proofs):
+    """The proofs that a change to path can affect, both for HOL-Light CI
+    and for HOLTrace CI."""
+    if path.endswith(".md") or path == HL + "s2n_bignum_allowlist.txt":
+        return set()  # documentation; the allowlist is read by `check` only
+    if path == HL + "deps.yml":
+        return set()  # generated map; Extended CI checks it independently
+    if path == HL + "bind.yml":
+        return set()  # derived from the accepted .defs, which select proofs
+    if path.startswith(NO_PROOF):
+        return set()
+    if path.startswith(EVERY_PROOF):
+        return set(proofs)
+    # An accepted HOLTrace file selects what the file it comes from selects.
+    if path.startswith(ACC + "base/"):  # HOL Light, or s2n-bignum for ARCH
+        arch = S2N_LAYER.get(os.path.basename(path))
+        return {p for p in proofs if p.startswith(f"{arch}/")} if arch else set(proofs)
+    if path.startswith(ACC + "spec/"):  # spec/[ARCH/]NAME.defs
+        arch, _, name = os.path.splitext(path[len(ACC + "spec/") :])[0].rpartition("/")
+        src = f"{arch}/proofs/{name}.ml" if arch else f"common/{name}.ml"
+        return affected(HL + src, deps, proofs)
+    if path.startswith(ACC + "proofs/"):  # proofs/ARCH/FUNC.{defs,thms}
+        arch, name = path[len(ACC + "proofs/") :].split("/", 1)
+        return affected(
+            f"{HL}{arch}/proofs/{os.path.splitext(name)[0]}.ml", deps, proofs
+        )
+    users = {p for p, d in deps.items() if path in d["files"]}
+    if users:
+        return users
+    # Not loaded by any proof: a Makefile, list_proofs.sh, a new file.
+    for arch in ARCHS:
+        if path.startswith(f"{HL}{arch}/"):
+            return {p for p in proofs if p.startswith(arch + "/")}
+    # Other files under proofs/hol_light, including these scripts and
+    # HOLTrace's tools, can affect every proof.
+    return set(proofs) if path.startswith(HL) else set()
+
+
+def rev(args):
+    deps, proofs = read_deps(), all_proofs()
+    if "--all" in args:
+        selected = proofs
+    else:
+        selected = proofs - set(deps)  # not analysed: always selected
+        for path in args:
+            if not path.startswith("--"):
+                selected |= affected(os.path.normpath(path), deps, proofs)
+    if "--json" in args:
+        print(
+            json.dumps(
+                {
+                    a: sorted(
+                        p.split("/")[1] for p in selected if p.startswith(a + "/")
+                    )
+                    for a in ARCHS
+                }
+            )
+        )
+    else:
+        print("\n".join(sorted(selected)))
+
+
+def main():
+    cmd, args = (sys.argv[1], sys.argv[2:]) if len(sys.argv) > 1 else (None, [])
+    if cmd == "gen" and not args:
+        gen()
+    elif cmd == "check" and not args:
+        check()
+    elif cmd == "rev":
+        rev(args)
+    else:
+        sys.exit(__doc__.strip())
+
+
+if __name__ == "__main__":
+    main()

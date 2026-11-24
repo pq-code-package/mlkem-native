@@ -1,0 +1,61 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# keccak_f1600_x2_v84a_aarch64_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem keccak_f1600_x2_v84a_aarch64_asm KECCAK_F1600_X2_V84A_SUBROUTINE_CORRECT
+  |- !a:int64 rc:int64 A:(int64 list) A':(int64 list) pc:num stackpointer:int64 returnaddress:int64.
+       aligned 16 stackpointer
+       /\ nonoverlapping (a, 400) (word_sub stackpointer (word 64 : int64), 64)
+       /\ ALLPAIRS (nonoverlapping : int64 # num -> int64 # num -> bool)
+            [a, 400; word_sub stackpointer (word 64 : int64), 64]
+            [(word pc : int64), LENGTH keccak_f1600_x2_v84a_mc; rc, 192]
+       ==> ensures arm
+             (\s:armstate.
+               aligned_bytes_loaded s (word pc : int64) keccak_f1600_x2_v84a_mc
+               /\ read PC s = (word pc : int64)
+               /\ read SP s = stackpointer
+               /\ read X30 s = returnaddress
+               /\ C_ARGUMENTS [a; rc] s
+               /\ (wordlist_from_memory (a, 25) s : int64 list) = A
+               /\ (wordlist_from_memory (word_add a (word 200 : int64), 25) s : int64 list) = A'
+               /\ (wordlist_from_memory (rc, 24) s : int64 list) = round_constants)
+             (\s:armstate.
+               read PC s = returnaddress
+               /\ (wordlist_from_memory (a, 25) s : int64 list) = keccak 24 A
+               /\ (wordlist_from_memory (word_add a (word 200 : int64), 25) s : int64 list)
+                  = keccak 24 A')
+             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (a, 400);
+                           memory :> bytes (word_sub stackpointer (word 64 : int64), 64)])
+
+theorem keccak_f1600_x2_v84a_aarch64_asm KECCAK_F1600_X2_V84A_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> num -> int64 -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) a:int64 rc:int64 pc:num stackpointer:int64
+        returnaddress:int64.
+         aligned 16 stackpointer
+         /\ nonoverlapping (a, 400) (word_sub stackpointer (word 64 : int64), 64)
+         /\ ALLPAIRS (nonoverlapping : int64 # num -> int64 # num -> bool)
+              [a, 400; word_sub stackpointer (word 64 : int64), 64]
+              [(word pc : int64), LENGTH keccak_f1600_x2_v84a_mc; rc, 192]
+         ==> ensures arm
+               (\s:armstate.
+                 aligned_bytes_loaded s (word pc : int64) keccak_f1600_x2_v84a_mc
+                 /\ read PC s = (word pc : int64)
+                 /\ read SP s = stackpointer
+                 /\ read X30 s = returnaddress
+                 /\ C_ARGUMENTS [a; rc] s
+                 /\ read events s = e)
+               (\s:armstate.
+                 read PC s = returnaddress
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2
+                         = f_events rc a pc (word_sub stackpointer (word 64 : int64)) returnaddress
+                      /\ memaccess_inbounds e2
+                           [a, 400; rc, 192; word_sub stackpointer (word 64 : int64), 64]
+                           [a, 400; word_sub stackpointer (word 64 : int64), 64]))
+               (\s:armstate s':armstate. T)

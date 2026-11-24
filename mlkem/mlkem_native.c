@@ -77,8 +77,13 @@
 #if defined(MLK_CONFIG_USE_NATIVE_BACKEND_ARITH)
 #if defined(MLK_SYS_AARCH64)
 #include "src/native/aarch64/src/aarch64_zetas.c"
+#include "src/native/aarch64/src/compress_d5_table.c"
+#include "src/native/aarch64/src/decompress_d10_table.c"
+#include "src/native/aarch64/src/decompress_d11_table.c"
+#include "src/native/aarch64/src/decompress_d4_table.c"
+#include "src/native/aarch64/src/decompress_d5_table.c"
 #include "src/native/aarch64/src/rej_uniform_table.c"
-#endif
+#endif /* MLK_SYS_AARCH64 */
 #if defined(MLK_SYS_X86_64)
 #include "src/native/x86_64/src/compress_consts.c"
 #include "src/native/x86_64/src/consts.c"
@@ -450,13 +455,25 @@
 /*
  * Undefine macros from native code (FIPS202, x86_64)
  */
+/* mlkem/src/fips202/native/x86_64/auto.h */
+#undef MLK_FIPS202_NATIVE_X86_64_AUTO_H
+/* mlkem/src/fips202/native/x86_64/keccak_f1600_x1_avx512.h */
+#undef MLK_FIPS202_NATIVE_X86_64_KECCAK_F1600_X1_AVX512_H
+#undef MLK_FIPS202_X86_64_NEED_X1_AVX512
+#undef MLK_USE_NATIVE_FIPS202_X1
 /* mlkem/src/fips202/native/x86_64/keccak_f1600_x4_avx2.h */
 #undef MLK_FIPS202_NATIVE_X86_64_KECCAK_F1600_X4_AVX2_H
 #undef MLK_FIPS202_X86_64_NEED_X4_AVX2
 #undef MLK_USE_NATIVE_FIPS202_X4
+/* mlkem/src/fips202/native/x86_64/keccak_f1600_x4_avx512.h */
+#undef MLK_FIPS202_NATIVE_X86_64_KECCAK_F1600_X4_AVX512_H
+#undef MLK_FIPS202_X86_64_NEED_X4_AVX512
+#undef MLK_USE_NATIVE_FIPS202_X4
 /* mlkem/src/fips202/native/x86_64/src/fips202_native_x86_64.h */
 #undef MLK_FIPS202_NATIVE_X86_64_SRC_FIPS202_NATIVE_X86_64_H
+#undef mlk_keccak_f1600_x1_avx512_asm
 #undef mlk_keccak_f1600_x4_avx2_asm
+#undef mlk_keccak_f1600_x4_avx512_asm
 #undef mlk_keccak_rho56
 #undef mlk_keccak_rho8
 #undef mlk_keccakf1600_round_constants
@@ -500,6 +517,15 @@
 #undef MLK_USE_NATIVE_INTT
 #undef MLK_USE_NATIVE_NTT
 #undef MLK_USE_NATIVE_POLYVEC_BASEMUL_ACC_MONTGOMERY_CACHED
+#undef MLK_USE_NATIVE_POLY_COMPRESS_D10
+#undef MLK_USE_NATIVE_POLY_COMPRESS_D11
+#undef MLK_USE_NATIVE_POLY_COMPRESS_D4
+#undef MLK_USE_NATIVE_POLY_COMPRESS_D5
+#undef MLK_USE_NATIVE_POLY_DECOMPRESS_D10
+#undef MLK_USE_NATIVE_POLY_DECOMPRESS_D11
+#undef MLK_USE_NATIVE_POLY_DECOMPRESS_D4
+#undef MLK_USE_NATIVE_POLY_DECOMPRESS_D5
+#undef MLK_USE_NATIVE_POLY_FROMBYTES
 #undef MLK_USE_NATIVE_POLY_MULCACHE_COMPUTE
 #undef MLK_USE_NATIVE_POLY_REDUCE
 #undef MLK_USE_NATIVE_POLY_TOBYTES
@@ -507,6 +533,11 @@
 #undef MLK_USE_NATIVE_REJ_UNIFORM
 /* mlkem/src/native/aarch64/src/arith_native_aarch64.h */
 #undef MLK_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H
+#undef mlk_aarch64_compress_d5_table
+#undef mlk_aarch64_decompress_d10_table
+#undef mlk_aarch64_decompress_d11_table
+#undef mlk_aarch64_decompress_d4_table
+#undef mlk_aarch64_decompress_d5_table
 #undef mlk_aarch64_invntt_zetas_layer12345
 #undef mlk_aarch64_invntt_zetas_layer67
 #undef mlk_aarch64_ntt_zetas_layer12345
@@ -515,6 +546,15 @@
 #undef mlk_aarch64_zetas_mulcache_twisted_native
 #undef mlk_intt_aarch64_asm
 #undef mlk_ntt_aarch64_asm
+#undef mlk_poly_compress_d10_aarch64_asm
+#undef mlk_poly_compress_d11_aarch64_asm
+#undef mlk_poly_compress_d4_aarch64_asm
+#undef mlk_poly_compress_d5_aarch64_asm
+#undef mlk_poly_decompress_d10_aarch64_asm
+#undef mlk_poly_decompress_d11_aarch64_asm
+#undef mlk_poly_decompress_d4_aarch64_asm
+#undef mlk_poly_decompress_d5_aarch64_asm
+#undef mlk_poly_frombytes_aarch64_asm
 #undef mlk_poly_mulcache_compute_aarch64_asm
 #undef mlk_poly_reduce_aarch64_asm
 #undef mlk_poly_tobytes_aarch64_asm
@@ -691,4 +731,5 @@
 #undef MLK_SYS_WINDOWS
 #undef MLK_SYS_X86_64
 #undef MLK_SYS_X86_64_AVX2
+#undef MLK_SYS_X86_64_AVX512
 #endif /* !MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */

@@ -16,6 +16,10 @@ functionally correct and memory-safe, but not constant-time. Rejection sampling 
 safely variable-time, so no constant-time proof is needed.
 
 See [SOUNDNESS.md](../../SOUNDNESS.md) for a detailed analysis of the scope, assumptions and risks of the formal verification efforts.
+Since proof scripts are OCaml code that could bypass HOL Light's kernel, the proofs can also be re-checked by replaying
+their kernel traces in a separate kernel and comparing definitions and statements with *accepted* copies: reviewed
+text files, checked into [hol_trace/accepted/](hol_trace/accepted), that record which definitions each proof may rely on
+and which theorems it claims. See [hol_trace/README.md](hol_trace/README.md).
 
 Each function is proved in a separate `.ml` file in [aarch64/proofs/](aarch64/proofs) and [x86_64/proofs/](x86_64/proofs). Each file
 contains the byte code being verified, as well as the specification that is being proved.
@@ -101,6 +105,17 @@ will build and run the proofs. Note that this make take hours even on powerful m
 
 For convenience, you can also use `tests hol_light` which wraps the `make` invocation above; see `tests hol_light --help`.
 
+Each proof's definitions and main theorems are also recorded in accepted files under
+[hol_trace/accepted/](hol_trace/accepted), which CI checks by replaying the proof in a separate HOL Light process
+that loads none of s2n-bignum or the proof scripts. **When you change or add a proof, update its accepted files**
+with `scripts/autogen --hol-trace-defs FUNC` in the `hol_light` nix shell, review the diff and commit it with the proof;
+see [Changing or adding a proof](hol_trace/README.md#changing-or-adding-a-proof).
+
+The proofs are about the machine code in these object files. To check that a build of
+mlkem-native contains the same code, build it with `make CHECK_BINARY=1`, or run
+`check-binary FILE ...` on any ELF object, library or executable; see
+[hol_trace/README.md](hol_trace/README.md#how-it-works) and [BUILDING.md](../../BUILDING.md).
+
 ## Interactive proof development
 
 For interactive proof development, start the HOL Light server:
@@ -132,7 +147,9 @@ All AArch64 and x86_64 assembly routines used in mlkem-native are covered.
   * AArch64 modular reduction: [mlkem_poly_reduce_aarch64_asm.S](aarch64/mlkem/mlkem_poly_reduce_aarch64_asm.S)
   * AArch64 'multiplication cache' computation: [mlkem_poly_mulcache_compute_aarch64_asm.S](aarch64/mlkem/mlkem_poly_mulcache_compute_aarch64_asm.S)
   * AArch64 rejection sampling: [mlkem_rej_uniform_aarch64_asm.S](aarch64/mlkem/mlkem_rej_uniform_aarch64_asm.S)
-  * AArch64 polynomial compression: [mlkem_poly_tobytes_aarch64_asm.S](aarch64/mlkem/mlkem_poly_tobytes_aarch64_asm.S)
+  * AArch64 polynomial compression: [mlkem_poly_tobytes_aarch64_asm.S](aarch64/mlkem/mlkem_poly_tobytes_aarch64_asm.S) [mlkem_poly_compress_d4_aarch64_asm.S](aarch64/mlkem/mlkem_poly_compress_d4_aarch64_asm.S) [mlkem_poly_compress_d5_aarch64_asm.S](aarch64/mlkem/mlkem_poly_compress_d5_aarch64_asm.S) [mlkem_poly_compress_d10_aarch64_asm.S](aarch64/mlkem/mlkem_poly_compress_d10_aarch64_asm.S) [mlkem_poly_compress_d11_aarch64_asm.S](aarch64/mlkem/mlkem_poly_compress_d11_aarch64_asm.S)
+  * AArch64 polynomial decompression: [mlkem_poly_decompress_d4_aarch64_asm.S](aarch64/mlkem/mlkem_poly_decompress_d4_aarch64_asm.S) [mlkem_poly_decompress_d5_aarch64_asm.S](aarch64/mlkem/mlkem_poly_decompress_d5_aarch64_asm.S) [mlkem_poly_decompress_d10_aarch64_asm.S](aarch64/mlkem/mlkem_poly_decompress_d10_aarch64_asm.S) [mlkem_poly_decompress_d11_aarch64_asm.S](aarch64/mlkem/mlkem_poly_decompress_d11_aarch64_asm.S)
+  * AArch64 polynomial deserialization: [mlkem_poly_frombytes_aarch64_asm.S](aarch64/mlkem/mlkem_poly_frombytes_aarch64_asm.S)
 - FIPS202:
   * Keccak-F1600 using lazy rotations[^HYBRID]: [keccak_f1600_x1_scalar_aarch64_asm.S](aarch64/mlkem/keccak_f1600_x1_scalar_aarch64_asm.S)
   * Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x1_v84a_aarch64_asm.S](aarch64/mlkem/keccak_f1600_x1_v84a_aarch64_asm.S)
@@ -157,6 +174,8 @@ The NTT and invNTT functions are super-optimized using SLOTHY[^SLOTHY].
   * x86_64 polynomial decompression: [mlkem_poly_decompress_d4_avx2_asm.S](x86_64/mlkem/mlkem_poly_decompress_d4_avx2_asm.S) [mlkem_poly_decompress_d5_avx2_asm.S](x86_64/mlkem/mlkem_poly_decompress_d5_avx2_asm.S) [mlkem_poly_decompress_d10_avx2_asm.S](x86_64/mlkem/mlkem_poly_decompress_d10_avx2_asm.S) [mlkem_poly_decompress_d11_avx2_asm.S](x86_64/mlkem/mlkem_poly_decompress_d11_avx2_asm.S)
 - FIPS202:
   * 4-fold Keccak-F1600 using AVX2: [keccak_f1600_x4_avx2_asm.S](x86_64/mlkem/keccak_f1600_x4_avx2_asm.S)
+  * Keccak-F1600 using AVX-512: [keccak_f1600_x1_avx512_asm.S](x86_64/mlkem/keccak_f1600_x1_avx512_asm.S)
+  * 4-fold Keccak-F1600 using AVX-512: [keccak_f1600_x4_avx512_asm.S](x86_64/mlkem/keccak_f1600_x4_avx512_asm.S)
 
 <!--- bibliography --->
 [^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)

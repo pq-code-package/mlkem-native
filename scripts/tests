@@ -8,6 +8,7 @@ building and running tests and benchmarks.
 See the command line interface for more information."""
 
 import platform
+import shutil
 import argparse
 import os
 import re
@@ -183,6 +184,21 @@ def github_log(msg):
     print(msg)
 
 
+def merge_output_lines(outputs):
+    """Merge the output lines of several runs into table rows. Lines
+    `name = value` are matched by name, all other lines by position."""
+    rows = {}
+    for run, lines in enumerate(outputs):
+        n = 0
+        for line in lines:
+            if "=" in line:
+                key = line.split("=")[0].strip()
+            else:
+                key, n = n, n + 1
+            rows.setdefault(key, [""] * len(outputs))[run] = line
+    return list(rows.values())
+
+
 def github_summary(title, test_label, results):
     """Generate summary for GitHub CI"""
     summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
@@ -190,17 +206,8 @@ def github_summary(title, test_label, results):
     res = list(results.values())
 
     if isinstance(results[SCHEME.MLKEM512], str):
-        summaries = list(
-            map(
-                lambda s: f" {s} |",
-                reduce(
-                    lambda acc, s: [
-                        line1 + " | " + line2 for line1, line2 in zip(acc, s)
-                    ],
-                    [s.splitlines() for s in res],
-                ),
-            )
-        )
+        rows = merge_output_lines([s.splitlines() for s in res])
+        summaries = [" " + " | ".join(row) + " |" for row in rows]
         summaries = [f"| {test_label} |" + summaries[0]] + [
             "| |" + x for x in summaries[1:]
         ]
@@ -542,6 +549,36 @@ class Tests:
         config_logger(args.verbose)
         self.args = args
         self.failed = []
+        self.check_binary = self.check_binary_supported()
+
+    def check_binary_supported(self):
+        """Whether builds can check the libraries and binaries that they
+        produce against the HOL Light proofs (CHECK_BINARY=1, see
+        scripts/check-binary): on Linux, which builds ELF files, with
+        readelf and PyYAML. --no-check-binary turns this off."""
+        if not getattr(self.args, "check_binary", True):
+            return False
+        if platform.system() != "Linux":
+            return False
+        prefix = self.args.cross_prefix or os.environ.get("CROSS_PREFIX", "")
+        if not (shutil.which(prefix + "readelf") or shutil.which("readelf")):
+            logging.warning("Not checking binaries: no readelf")
+            return False
+        p = subprocess.run(["python3", "-c", "import yaml"], capture_output=True)
+        if p.returncode != 0:
+            logging.warning("Not checking binaries: python3 has no PyYAML")
+        return p.returncode == 0
+
+    def expects_kernels(self, test_type, opt):
+        """Whether an opt build of test_type contains proved kernels: on
+        x86_64 and AArch64, with the native backends that AUTO enables."""
+        if test_type.is_example() or opt is not True or not self.args.auto:
+            return False
+        if self.args.extra_makefile or (self.args.cflags or "").strip():
+            return False
+        prefix = self.args.cross_prefix or os.environ.get("CROSS_PREFIX", "")
+        arch = prefix.split("-")[0] if prefix else platform.machine().lower()
+        return arch in ("x86_64", "aarch64", "arm64")
 
     def fail(self, info):
         self.failed.append(info)
@@ -615,6 +652,10 @@ class Tests:
             extra_make_args += [f"CYCLES={self.args.cycles}"]
         if self.args.extra_makefile and self.args.cross_prefix:
             extra_make_args += [f"CROSS_PREFIX={self.args.cross_prefix}"]
+        if self.check_binary:
+            extra_make_args += ["CHECK_BINARY=1"]
+            if self.expects_kernels(test_type, opt):
+                extra_make_args += ["CHECK_BINARY_FLAGS=--require-match"]
         if test_type.make_dir() != "":
             extra_make_args += ["-C", test_type.make_dir()]
         extra_make_args += self.make_j()
@@ -645,6 +686,17 @@ class Tests:
 
             # Specify the backend file
             cflags += f' -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\"fips202/native/aarch64/{self.args.fips202_aarch64_backend}.h\\"'
+
+        if self.args.fips202_x86_64_backend != "auto" and opt is True:
+            # Make sure we're forcing x86_64 architecture
+            if " -DMLK_FORCE_X86_64" not in cflags:
+                cflags += " -DMLK_FORCE_X86_64"
+
+            # Enable native backend for FIPS202
+            cflags += " -DMLK_CONFIG_USE_NATIVE_BACKEND_FIPS202"
+
+            # Specify the backend file
+            cflags += f' -DMLK_CONFIG_FIPS202_BACKEND_FILE=\\"fips202/native/x86_64/{self.args.fips202_x86_64_backend}.h\\"'
 
         env_update = {}
         if self.args.extra_makefile:
@@ -1357,7 +1409,23 @@ def cli():
         default="ALL",
     )
 
-    common_parser.add_argument(
+    # Each backend option selects MLK_CONFIG_FIPS202_BACKEND_FILE, so at most
+    # one of them can be given.
+    fips202_backend_group = common_parser.add_mutually_exclusive_group()
+    fips202_backend_group.add_argument(
+        "--fips202-x86_64-backend",
+        help="Select FIPS202 x86_64 backend",
+        choices=[
+            "auto",
+            "keccak_f1600_x1_avx512",
+            "keccak_f1600_x4_avx2",
+            "keccak_f1600_x4_avx512",
+        ],
+        default="auto",
+        type=str,
+    )
+
+    fips202_backend_group.add_argument(
         "--fips202-aarch64-backend",
         help="Select FIPS202 AArch64 backend",
         choices=[
@@ -1379,6 +1447,24 @@ def cli():
     )
     run_group.add_argument(
         "--no-run", action="store_false", dest="run", help="Do not run the binaries"
+    )
+
+    # --check-binary / --no-check-binary
+    check_binary_group = common_parser.add_mutually_exclusive_group()
+    check_binary_group.add_argument(
+        "--check-binary",
+        action="store_true",
+        dest="check_binary",
+        help="Build with CHECK_BINARY=1: check the proved kernels in each library "
+        "and binary against the HOL Light proofs (default, on Linux with readelf "
+        "and PyYAML)",
+        default=True,
+    )
+    check_binary_group.add_argument(
+        "--no-check-binary",
+        action="store_false",
+        dest="check_binary",
+        help="Do not check the built kernels against the HOL Light proofs",
     )
 
     common_parser.add_argument(

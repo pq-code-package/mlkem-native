@@ -58,6 +58,15 @@ OBJ = mlkem/mlkem_ntt_aarch64_asm.o \
       mlkem/mlkem_poly_mulcache_compute_aarch64_asm.o \
       mlkem/mlkem_poly_reduce_aarch64_asm.o \
       mlkem/mlkem_poly_tobytes_aarch64_asm.o \
+      mlkem/mlkem_poly_frombytes_aarch64_asm.o \
+      mlkem/mlkem_poly_compress_d4_aarch64_asm.o \
+      mlkem/mlkem_poly_compress_d5_aarch64_asm.o \
+      mlkem/mlkem_poly_compress_d10_aarch64_asm.o \
+      mlkem/mlkem_poly_compress_d11_aarch64_asm.o \
+      mlkem/mlkem_poly_decompress_d4_aarch64_asm.o \
+      mlkem/mlkem_poly_decompress_d5_aarch64_asm.o \
+      mlkem/mlkem_poly_decompress_d10_aarch64_asm.o \
+      mlkem/mlkem_poly_decompress_d11_aarch64_asm.o \
       mlkem/mlkem_polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.o \
       mlkem/mlkem_polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.o \
       mlkem/mlkem_polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.o \
@@ -80,8 +89,9 @@ $(OBJ): %.o : %.S
 	$(OBJDUMP) $@ | ( ( ! grep --ignore-case -E 'w18|[^0]x18' ) || ( rm $@ ; exit 1 ) )
 	cat $< | $(PREPROCESS) | $(SPLIT) | $(ASSEMBLE) -o $@ -
 	# MacOS may generate relocations in non-text sections that break
-	# the object file parser in HOL-Light
-	strip $@
+	# the object file parser in HOL-Light. Keep the function's symbol,
+	# which check-binary looks for; strips without --keep-symbol drop it.
+	strip $(patsubst %,--keep-symbol=%,$(shell sed -n 's/^\.global //p' $<)) $@ 2>/dev/null || strip $@
 
 clean:; rm -f */*.o */*/*.o */*.correct */*.native
 
@@ -99,6 +109,12 @@ clean:; rm -f */*.o */*/*.o */*.correct */*.native
 
 HOLDIR?=$(HOLLIGHTDIR)
 HOLLIGHT:=$(HOLDIR)/hol.sh
+
+# The proofs run on stock HOL Light. A build with HOLTrace installed (see
+# ../hol_trace) changes the library and is for `hol-trace` only.
+ifneq ($(wildcard $(HOLDIR)/INSTALLED-HOLTrace),)
+$(error HOLDIR=$(HOLDIR) has HOLTrace installed; use stock HOL Light)
+endif
 
 BASE?=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 

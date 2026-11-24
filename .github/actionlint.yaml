@@ -12,3 +12,9 @@ self-hosted-runner:
     # RISE RISC-V runner
     - ubuntu-24.04-riscv
     - self-hosted-nucleo-n657x0
+
+paths:
+  .github/workflows/cbmc_publish.yml:
+    ignore:
+      # actionlint 1.7.12 predates retained concurrency queues.
+      - 'unexpected key "queue" for "concurrency" section'

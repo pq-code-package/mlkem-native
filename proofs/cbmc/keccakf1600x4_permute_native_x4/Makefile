@@ -20,14 +20,15 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mlkem/src/fips202/keccakf1600.c
 
 CHECK_FUNCTION_CONTRACTS=mlk_keccakf1600x4_permute
-USE_FUNCTION_CONTRACTS=mlk_keccak_f1600_x4_native
+USE_FUNCTION_CONTRACTS=mlk_keccak_f1600_x4_native mlk_keccakf1600_permute
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = \
   LP64:bitwuzla \
-  LP64:z3
+  LP64:z3 \
+  ILP32:z3
 CBMC_DEFAULT_CONFIG = LP64:bitwuzla
 
 FUNCTION_NAME = keccakf1600x4_permute_native_x4

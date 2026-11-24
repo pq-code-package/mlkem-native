@@ -34,6 +34,7 @@
  *   - MLK_CONFIG_KEYGEN_PCT
  *   - MLK_CONFIG_CUSTOM_ALLOC_FREE
  *   - MLK_CONFIG_CUSTOM_ZEROIZE
+ *   - MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
  */
 
 
@@ -498,7 +499,7 @@ __contract__(
 */
 
 /**
- * MLK_CONFIG_CUSTOM_ALLOC_FREE [EXPERIMENTAL]
+ * MLK_CONFIG_CUSTOM_ALLOC_FREE
  *
  * Set this option and define `MLK_CUSTOM_ALLOC` and `MLK_CUSTOM_FREE` if
  * you want to use custom allocation for large local structures or buffers.
@@ -515,10 +516,6 @@ __contract__(
  *  - T* v: Target pointer to free. May be NULL.
  *  - T: Type of structure to be freed.
  *  - N: Number of elements to be freed.
- *
- * @warning This option is experimental. Its scope, configuration and
- *          function/macro signatures may change at any time. We expect a
- *          stable API in a future version.
  *
  * @note Even if this option is set, some allocations further down the call
  *       stack will still be made from the stack, consuming up to 3KB of
@@ -644,15 +641,20 @@ __contract__(
  *
  * This option only has an effect if MLK_CONFIG_KEYGEN_PCT is set.
  */
-/* #define MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
-   #if !defined(__ASSEMBLER__)
-   #include "src/sys.h"
-   static MLK_INLINE int mlk_break_pct(void)
-   {
-       ... return 0/1 depending on whether PCT should be broken ...
-   }
-   #endif
-*/
+#define MLK_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
+#if !defined(__ASSEMBLER__)
+#include "../../mlkem/src/cbmc.h"
+#include "../../mlkem/src/sys.h"
+static MLK_INLINE int mlk_break_pct(void)
+__contract__(
+  ensures(return_value == 0 || return_value == 1))
+{
+  /* Fail if we forget to invoke mlk_break_pct by contract. */
+  cassert(0);
+  return 0;
+}
+#endif /* !__ASSEMBLER__ */
+
 
 /**
  * MLK_CONFIG_SERIAL_FIPS202_ONLY

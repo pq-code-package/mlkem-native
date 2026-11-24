@@ -1,0 +1,41 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_poly_mulcache_compute_avx2_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+definition avx2_mulcache
+  |- avx2_mulcache
+     = (specification "avx2_mulcache" avx2_mulcache:((num -> int) -> num -> int).
+         !f:(num -> int) k:num.
+           avx2_mulcache f k
+           = (let r:num = k DIV 64 in
+             let q:num = k MOD 64 in
+             let s:num = r * 128 + 32 * q DIV 16 + q MOD 16 + 16 in
+             let t:num = 64 * r + 2 * q DIV 32 + 4 * q MOD 16 in
+             (f s * &17 pow (2 * bitreverse7 t + 1)) rem &3329))
+
+# mlkem_mulcache_compute_mc: 331 bytes
+# sha256 acbc0b0754b8003a6edb95bb3753ee1d9e68f16499ef419c2b1b7a9f7ec4957c
+definition mlkem_mulcache_compute_mc
+  |- mlkem_mulcache_compute_mc
+     = #x[f3 0f 1e fa b8 01 0d 01 0d c5 f9 6e c0 c4 e2 7d 58 c0 c5 fd 6f 56 20 c5 fd 6f 5e 60 c5 fd
+          6f a2 e0 03 00 00 c5 fd 6f 8a 60 04 00 00 c5 f5 d5 ea c5 f5 d5 f3 c5 dd e5 fa c5 5d e5 c3
+          c5 7d e5 cd c5 7d e5 d6 c4 c1 45 f9 f9 c4 41 3d f9 c2 c5 fd 7f 3f c5 7d 7f 47 20 c5 fd 6f
+          96 a0 00 00 00 c5 fd 6f 9e e0 00 00 00 c5 fd 6f a2 00 04 00 00 c5 fd 6f 8a 80 04 00 00 c5
+          f5 d5 ea c5 f5 d5 f3 c5 dd e5 fa c5 5d e5 c3 c5 7d e5 cd c5 7d e5 d6 c4 c1 45 f9 f9 c4 41
+          3d f9 c2 c5 fd 7f 7f 40 c5 7d 7f 47 60 c5 fd 6f 96 20 01 00 00 c5 fd 6f 9e 60 01 00 00 c5
+          fd 6f a2 20 04 00 00 c5 fd 6f 8a a0 04 00 00 c5 f5 d5 ea c5 f5 d5 f3 c5 dd e5 fa c5 5d e5
+          c3 c5 7d e5 cd c5 7d e5 d6 c4 c1 45 f9 f9 c4 41 3d f9 c2 c5 fd 7f bf 80 00 00 00 c5 7d 7f
+          87 a0 00 00 00 c5 fd 6f 96 a0 01 00 00 c5 fd 6f 9e e0 01 00 00 c5 fd 6f a2 40 04 00 00 c5
+          fd 6f 8a c0 04 00 00 c5 f5 d5 ea c5 f5 d5 f3 c5 dd e5 fa c5 5d e5 c3 c5 7d e5 cd c5 7d e5
+          d6 c4 c1 45 f9 f9 c4 41 3d f9 c2 c5 fd 7f bf c0 00 00 00 c5 7d 7f 87 e0 00 00 00 c5 f8 77
+          c3]
+
+definition mlkem_mulcache_compute_tmc
+  |- mlkem_mulcache_compute_tmc = TRIM_LIST (4, 0) mlkem_mulcache_compute_mc

@@ -26,19 +26,10 @@ buildEnv {
       });
       litani = callPackage ./litani.nix { }; # 1.29.0
       cbmc-viewer = callPackage ./cbmc-viewer.nix { }; # 3.12
-      z3 = z3.overrideAttrs (_: {
-        version = "4.15.3";
-        src = fetchFromGitHub {
-          owner = "Z3Prover";
-          repo = "z3";
-          rev = "z3-4.15.3";
-          hash = "sha256-Lw037Z0t0ySxkgMXkbjNW5CB4QQLRrrSEBsLJqiomZ4=";
-        };
-      });
-
       inherit
         bitwuzla# 0.9.0
         cvc5# 1.3.4 (from nixpkgs-26.05)
-        ninja; # 1.13.2
+        ninja# 1.13.2
+        z3; # 5.3.2 (from nixos-unstable, passed in via flake.nix)
     };
 }

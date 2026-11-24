@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 import subprocess
+import fnmatch
+import glob
 import tempfile
 import platform
 import argparse
@@ -113,9 +115,12 @@ def finalize_format_batch(batch):
             # Skip files scheduled for deletion
             if content is None:
                 continue
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".c", delete=False) as f:
+            # Keep the file name: clang-format uses it to identify the main
+            # include, which it sorts first.
+            temp_path = os.path.join(tempfile.mkdtemp(), os.path.basename(filename))
+            with open(temp_path, "w") as f:
                 f.write(content)
-                temp_files.append((f.name, filename))
+            temp_files.append((temp_path, filename))
 
         # Call clang-format with -i to update files in-place
         clang_format_file = os.path.join(
@@ -141,6 +146,7 @@ def finalize_format_batch(batch):
     finally:
         for temp_path, _ in temp_files:
             os.unlink(temp_path)
+            os.rmdir(os.path.dirname(temp_path))
 
 
 def finalize_file(item, dry_run):
@@ -997,6 +1003,12 @@ def _fmt_indexed_rows(data):
         yield ",".join(map(str, row)) + f" /* {i} */,"
 
 
+def _fmt_labelled_rows(data, labels):
+    """Format rows of bytes in hex, each followed by a comment."""
+    for label, row in zip(labels, data):
+        yield ", ".join(f"0x{b:02x}" for b in row) + f", /* {label} */"
+
+
 def gen_aarch64_hol_light_zeta_file():
     def gen():
         yield from gen_hol_light_header()
@@ -1169,6 +1181,438 @@ def gen_aarch64_rej_uniform_table():
     update_file("dev/aarch64_opt/src/rej_uniform_table.c", "\n".join(gen()))
 
     update_file("dev/aarch64_clean/src/rej_uniform_table.c", "\n".join(gen()))
+
+
+def gen_aarch64_decompress_d4_table_rows():
+    # TBL tables for Decompress_4(x) = round(x * MLKEM_Q / 16), x = 0..15,
+    # used by poly_decompress_d4_aarch64_asm: the first row holds the low
+    # bytes, the second row the high bytes of the 16-bit results.
+    vals = [(x * modulus + 8) >> 4 for x in range(16)]
+    yield [v & 0xFF for v in vals]
+    yield [v >> 8 for v in vals]
+
+
+AARCH64_DECOMPRESS_D4_GUARD = [
+    "#if defined(MLK_ARITH_BACKEND_AARCH64) && \\",
+    "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \\",
+    "    !defined(MLK_CONFIG_NO_DECAPS_API) && \\",
+    "    (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 2 || \\",
+    "     MLKEM_K == 3)",
+]
+
+
+def gen_aarch64_hol_light_decompress_d4_table():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Constant table used in the AArch64 decompression from 4 bits."
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let mlkem_decompress_d4_table = (REWRITE_RULE[MAP] o define)"
+        yield "  `mlkem_decompress_d4_table:byte list = MAP word ["
+        data = [i for row in gen_aarch64_decompress_d4_table_rows() for i in row]
+        yield from print_hol_light_array(data, as_int=False, entries_per_line=16, pad=3)
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/aarch64/proofs/mlkem_decompress_d4_table.ml",
+        "\n".join(gen()),
+    )
+
+
+def gen_aarch64_decompress_d4_table():
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield from AARCH64_DECOMPRESS_D4_GUARD
+        yield ""
+        yield '#include "arith_native_aarch64.h"'
+        yield ""
+        yield "/*"
+        yield " * Lookup tables for Decompress_4, used by"
+        yield " * poly_decompress_d4_aarch64_asm: row 0 holds the low bytes and"
+        yield " * row 1 the high bytes of Decompress_4(x) for x = 0, ..., 15."
+        yield " * See autogen for details."
+        yield " */"
+        yield from emit_c_array(
+            "const uint8_t",
+            "mlk_aarch64_decompress_d4_table",
+            gen_aarch64_decompress_d4_table_rows(),
+            formatter=lambda rows: _fmt_labelled_rows(
+                rows, ["low bytes", "high bytes"]
+            ),
+        )
+        yield ""
+        yield "#else"
+        yield ""
+        yield "MLK_EMPTY_CU(aarch64_decompress_d4_table)"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file("dev/aarch64_opt/src/decompress_d4_table.c", "\n".join(gen()))
+
+    update_file("dev/aarch64_clean/src/decompress_d4_table.c", "\n".join(gen()))
+
+
+def gen_aarch64_decompress_d5_table_rows():
+    # Constant vectors of poly_decompress_d5_aarch64_asm, one row of 16 bytes
+    # each. Coefficient j of a 5-byte group starts at bit s_j = 5*j % 8 of
+    # byte b_j = 5*j // 8.
+    def halfwords(vals):
+        return [b for v in vals for b in [v & 0xFF, v >> 8]]
+
+    idx0 = [b for j in range(8) for b in [5 * j // 8, 5 * j // 8 + 1]]
+    # TBL indices for groups starting at bytes 0, 5, 10 and 11
+    for off in [0, 5, 10, 11]:
+        yield [i + off for i in idx0]
+    # USHL shift amounts 7 - s_j, moving coefficient j to bit 7
+    yield halfwords([7 - (5 * j) % 8 for j in range(8)])
+    # AND mask 0x1f << 7
+    yield halfwords([0x1F << 7] * 8)
+    # SQRDMULH multiplier 3329 << 3
+    yield halfwords([modulus << 3] * 8)
+
+
+AARCH64_DECOMPRESS_D5_GUARD = [
+    "#if defined(MLK_ARITH_BACKEND_AARCH64) && \\",
+    "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \\",
+    "    !defined(MLK_CONFIG_NO_DECAPS_API) && \\",
+    "    (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4)",
+]
+
+
+def gen_aarch64_hol_light_decompress_d5_table():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Constant table used in the AArch64 decompression from 5 bits."
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let mlkem_decompress_d5_table = (REWRITE_RULE[MAP] o define)"
+        yield "  `mlkem_decompress_d5_table:byte list = MAP word ["
+        data = [i for row in gen_aarch64_decompress_d5_table_rows() for i in row]
+        yield from print_hol_light_array(data, as_int=False, entries_per_line=16, pad=3)
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/aarch64/proofs/mlkem_decompress_d5_table.ml",
+        "\n".join(gen()),
+    )
+
+
+def gen_aarch64_decompress_d5_table():
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield from AARCH64_DECOMPRESS_D5_GUARD
+        yield ""
+        yield '#include "arith_native_aarch64.h"'
+        yield ""
+        yield "/*"
+        yield " * Constant vectors used by poly_decompress_d5_aarch64_asm:"
+        yield " * TBL indices for groups starting at bytes 0, 5, 10 and 11 (rows"
+        yield " * 0..3), USHL shift amounts (row 4), AND mask (row 5) and"
+        yield " * SQRDMULH multiplier (row 6). See autogen for details."
+        yield " */"
+        yield from emit_c_array(
+            "const uint8_t",
+            "mlk_aarch64_decompress_d5_table",
+            gen_aarch64_decompress_d5_table_rows(),
+            formatter=lambda rows: _fmt_labelled_rows(
+                rows,
+                [
+                    "idx0",
+                    "idx5",
+                    "idx10",
+                    "idx11",
+                    "shifts (16-bit lanes)",
+                    "mask (16-bit lanes)",
+                    "mult (16-bit lanes)",
+                ],
+            ),
+        )
+        yield ""
+        yield "#else"
+        yield ""
+        yield "MLK_EMPTY_CU(aarch64_decompress_d5_table)"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file("dev/aarch64_opt/src/decompress_d5_table.c", "\n".join(gen()))
+
+    update_file("dev/aarch64_clean/src/decompress_d5_table.c", "\n".join(gen()))
+
+
+def gen_aarch64_decompress_d10_table_rows():
+    # Constant vectors of poly_decompress_d10_aarch64_asm, one row of 16 bytes
+    # each. Coefficient 4*g+k (k = 0..3) of a 10-byte pair of groups starts
+    # at bit 2*k of byte 5*g+k.
+    def halfwords(vals):
+        return [b for v in vals for b in [v & 0xFF, (v >> 8) & 0xFF]]
+
+    idx0 = [b for g in range(2) for k in range(4) for b in [5 * g + k, 5 * g + k + 1]]
+    # TBL indices for groups starting at bytes 0 and 6
+    for off in [0, 6]:
+        yield [i + off for i in idx0]
+    # USHL shift amounts 2 - 2*k, moving coefficient 4*g+k to bit 2; negative
+    # amounts shift right
+    yield halfwords([2 - 2 * k for g in range(2) for k in range(4)])
+    # AND mask 0x3ff << 2
+    yield halfwords([0x3FF << 2] * 8)
+    # SQRDMULH multiplier 3329 << 3
+    yield halfwords([modulus << 3] * 8)
+
+
+# Same condition as for poly_decompress_d4
+AARCH64_DECOMPRESS_D10_GUARD = AARCH64_DECOMPRESS_D4_GUARD
+
+
+def gen_aarch64_hol_light_decompress_d10_table():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Constant table used in the AArch64 decompression from 10 bits."
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let mlkem_decompress_d10_table = (REWRITE_RULE[MAP] o define)"
+        yield "  `mlkem_decompress_d10_table:byte list = MAP word ["
+        data = [i for row in gen_aarch64_decompress_d10_table_rows() for i in row]
+        yield from print_hol_light_array(data, as_int=False, entries_per_line=16, pad=3)
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/aarch64/proofs/mlkem_decompress_d10_table.ml",
+        "\n".join(gen()),
+    )
+
+
+def gen_aarch64_decompress_d10_table():
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield from AARCH64_DECOMPRESS_D10_GUARD
+        yield ""
+        yield '#include "arith_native_aarch64.h"'
+        yield ""
+        yield "/*"
+        yield " * Constant vectors used by poly_decompress_d10_aarch64_asm:"
+        yield " * TBL indices for groups starting at bytes 0 and 6 (rows 0, 1),"
+        yield " * USHL shift amounts (row 2), AND mask (row 3) and SQRDMULH"
+        yield " * multiplier (row 4). See autogen for details."
+        yield " */"
+        yield from emit_c_array(
+            "const uint8_t",
+            "mlk_aarch64_decompress_d10_table",
+            gen_aarch64_decompress_d10_table_rows(),
+            formatter=lambda rows: _fmt_labelled_rows(
+                rows,
+                [
+                    "idx0",
+                    "idx6",
+                    "shifts (16-bit lanes)",
+                    "mask (16-bit lanes)",
+                    "mult (16-bit lanes)",
+                ],
+            ),
+        )
+        yield ""
+        yield "#else"
+        yield ""
+        yield "MLK_EMPTY_CU(aarch64_decompress_d10_table)"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file("dev/aarch64_opt/src/decompress_d10_table.c", "\n".join(gen()))
+
+    update_file("dev/aarch64_clean/src/decompress_d10_table.c", "\n".join(gen()))
+
+
+def gen_aarch64_decompress_d11_table_rows():
+    # Constant vectors of poly_decompress_d11_aarch64_asm, one row of 16 bytes
+    # each. Coefficient k of an 11-byte group starts at bit o_k = 11*k % 8 of
+    # byte b_k = 11*k // 8.
+    def halfwords(vals):
+        return [b for v in vals for b in [v & 0xFF, (v >> 8) & 0xFF]]
+
+    b = [11 * k // 8 for k in range(8)]
+    o = [11 * k % 8 for k in range(8)]
+    # Bit A_k of lane k to which the code moves the lowest bit of
+    # coefficient k: 1 if the coefficient lies in bytes b_k and b_k + 1;
+    # otherwise SLI by 12 inserts byte b_k + 2 at bit 12, which forces
+    # A_k = 12 - (8 * (b_k + 2) - 11 * k).
+    A = [1 if o[k] + 11 <= 16 else 12 - (8 * (b[k] + 2) - 11 * k) for k in range(8)]
+    idx_lo = [i for k in range(8) for i in [b[k], b[k] + 1]]
+    idx_hi = [i + 2 for i in idx_lo]
+    # TBL indices: idx_lo, idx_hi, and both shifted by 5 for the group loaded
+    # from 5 bytes before its start
+    yield idx_lo
+    yield idx_hi
+    yield [i + 5 for i in idx_lo]
+    yield [i + 5 for i in idx_hi]
+    # USHL shift amounts A_k - o_k; negative amounts shift right
+    yield halfwords([A[k] - o[k] for k in range(8)])
+    # AND mask 0x7ff << A_k
+    yield halfwords([0x7FF << A[k] for k in range(8)])
+    # SQRDMULH multiplier 3329 << (4 - A_k)
+    yield halfwords([modulus << (4 - A[k]) for k in range(8)])
+
+
+# Same condition as for poly_decompress_d5
+AARCH64_DECOMPRESS_D11_GUARD = AARCH64_DECOMPRESS_D5_GUARD
+
+
+def gen_aarch64_hol_light_decompress_d11_table():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Constant table used in the AArch64 decompression from 11 bits."
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let mlkem_decompress_d11_table = (REWRITE_RULE[MAP] o define)"
+        yield "  `mlkem_decompress_d11_table:byte list = MAP word ["
+        data = [i for row in gen_aarch64_decompress_d11_table_rows() for i in row]
+        yield from print_hol_light_array(data, as_int=False, entries_per_line=16, pad=3)
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/aarch64/proofs/mlkem_decompress_d11_table.ml",
+        "\n".join(gen()),
+    )
+
+
+def gen_aarch64_decompress_d11_table():
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield from AARCH64_DECOMPRESS_D11_GUARD
+        yield ""
+        yield '#include "arith_native_aarch64.h"'
+        yield ""
+        yield "/*"
+        yield " * Constant vectors used by poly_decompress_d11_aarch64_asm:"
+        yield " * TBL indices idx_lo, idx_hi, idx_lo + 5 and idx_hi + 5 (rows"
+        yield " * 0..3), USHL shift amounts (row 4), AND mask (row 5) and"
+        yield " * SQRDMULH multiplier (row 6). See autogen for details."
+        yield " */"
+        yield from emit_c_array(
+            "const uint8_t",
+            "mlk_aarch64_decompress_d11_table",
+            gen_aarch64_decompress_d11_table_rows(),
+            formatter=lambda rows: _fmt_labelled_rows(
+                rows,
+                [
+                    "idx_lo",
+                    "idx_hi",
+                    "idx_lo5",
+                    "idx_hi5",
+                    "shifts (16-bit lanes)",
+                    "mask (16-bit lanes)",
+                    "mult (16-bit lanes)",
+                ],
+            ),
+        )
+        yield ""
+        yield "#else"
+        yield ""
+        yield "MLK_EMPTY_CU(aarch64_decompress_d11_table)"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file("dev/aarch64_opt/src/decompress_d11_table.c", "\n".join(gen()))
+
+    update_file("dev/aarch64_clean/src/decompress_d11_table.c", "\n".join(gen()))
+
+
+def gen_aarch64_compress_d5_table_rows():
+    # Constant vectors of poly_compress_d5_aarch64_asm, one row of 16 bytes
+    # each.
+    # SQRDMULH multiplier round(2^20 / MLKEM_Q) in 16-bit lanes
+    mult = (2**20 + modulus // 2) // modulus
+    yield [b for _ in range(8) for b in [mult & 0xFF, mult >> 8]]
+    # TBL indices: move bytes 0..4 and 8..12 of a vector to bytes 0..9 and
+    # repeat bytes 4..9 in bytes 10..15
+    yield [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 4, 8, 9, 10, 11, 12]
+
+
+AARCH64_COMPRESS_D5_GUARD = [
+    "#if defined(MLK_ARITH_BACKEND_AARCH64) && \\",
+    "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && \\",
+    "    (!defined(MLK_CONFIG_NO_ENCAPS_API) || \\",
+    "     !defined(MLK_CONFIG_NO_DECAPS_API)) && \\",
+    "    (defined(MLK_CONFIG_MULTILEVEL_WITH_SHARED) || MLKEM_K == 4)",
+]
+
+
+def gen_aarch64_hol_light_compress_d5_table():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Constant table used in the AArch64 compression to 5 bits."
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let mlkem_compress_d5_table = (REWRITE_RULE[MAP] o define)"
+        yield "  `mlkem_compress_d5_table:byte list = MAP word ["
+        data = [i for row in gen_aarch64_compress_d5_table_rows() for i in row]
+        yield from print_hol_light_array(data, as_int=False, entries_per_line=16, pad=3)
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/aarch64/proofs/mlkem_compress_d5_table.ml",
+        "\n".join(gen()),
+    )
+
+
+def gen_aarch64_compress_d5_table():
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield from AARCH64_COMPRESS_D5_GUARD
+        yield ""
+        yield '#include "arith_native_aarch64.h"'
+        yield ""
+        yield "/*"
+        yield " * Constant vectors used by poly_compress_d5_aarch64_asm:"
+        yield " * SQRDMULH multiplier (row 0) and TBL indices (row 1)."
+        yield " * See autogen for details."
+        yield " */"
+        yield from emit_c_array(
+            "const uint8_t",
+            "mlk_aarch64_compress_d5_table",
+            gen_aarch64_compress_d5_table_rows(),
+            formatter=lambda rows: _fmt_labelled_rows(
+                rows, ["mult (16-bit lanes)", "idx"]
+            ),
+        )
+        yield ""
+        yield "#else"
+        yield ""
+        yield "MLK_EMPTY_CU(aarch64_compress_d5_table)"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file("dev/aarch64_opt/src/compress_d5_table.c", "\n".join(gen()))
+
+    update_file("dev/aarch64_clean/src/compress_d5_table.c", "\n".join(gen()))
 
 
 def gen_avx2_hol_light_rej_uniform_table():
@@ -1857,11 +2301,13 @@ def gen_aarch64_keccak_constants_c_file():
     )
 
 
-def gen_avx2_keccak_constants_c_file():
+def gen_x86_64_keccak_constants_c_file():
     def gen_c():
         yield from gen_header()
         yield '#include "../../../../common.h"'
-        yield "#if defined(MLK_FIPS202_X86_64_NEED_X4_AVX2) && \\"
+        yield "#if (defined(MLK_FIPS202_X86_64_NEED_X4_AVX2) ||    \\"
+        yield "     defined(MLK_FIPS202_X86_64_NEED_X1_AVX512) ||  \\"
+        yield "     defined(MLK_FIPS202_X86_64_NEED_X4_AVX512)) && \\"
         yield "    !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)"
         yield ""
         yield "#include <stdint.h>"
@@ -1874,15 +2320,24 @@ def gen_avx2_keccak_constants_c_file():
             entries_per_line=3,
         )
         yield ""
+        yield "#if defined(MLK_FIPS202_X86_64_NEED_X4_AVX2)"
+        yield ""
         yield from print_c_uint64_array("mlk_keccak_rho8", gen_keccak_rho8())
         yield ""
         yield from print_c_uint64_array("mlk_keccak_rho56", gen_keccak_rho56())
         yield ""
-        yield "#else /* MLK_FIPS202_X86_64_NEED_X4_AVX2 && !MLK_CONFIG_MULTILEVEL_NO_SHARED */"
+        yield "#endif /* MLK_FIPS202_X86_64_NEED_X4_AVX2 */"
+        yield ""
+        yield "#else /* (MLK_FIPS202_X86_64_NEED_X4_AVX2 || MLK_FIPS202_X86_64_NEED_X1_AVX512 \\"
+        yield "         || MLK_FIPS202_X86_64_NEED_X4_AVX512) &&                              \\"
+        yield "         !MLK_CONFIG_MULTILEVEL_NO_SHARED */"
         yield ""
         yield "MLK_EMPTY_CU(fips202_x86_64_constants)"
         yield ""
-        yield "#endif /* !(MLK_FIPS202_X86_64_NEED_X4_AVX2 && !MLK_CONFIG_MULTILEVEL_NO_SHARED) */"
+        yield "#endif /* !((MLK_FIPS202_X86_64_NEED_X4_AVX2 || \\"
+        yield "          MLK_FIPS202_X86_64_NEED_X1_AVX512 ||  \\"
+        yield "          MLK_FIPS202_X86_64_NEED_X4_AVX512) && \\"
+        yield "          !MLK_CONFIG_MULTILEVEL_NO_SHARED) */"
         yield ""
 
     update_file(
@@ -2951,6 +3406,7 @@ def check_macro_typos_in_file(filename, macro_check):
 def get_syscaps():
     return [
         "MLK_SYS_CAP_X86_64_AVX2",
+        "MLK_SYS_CAP_X86_64_AVX512",
         "MLK_SYS_CAP_AARCH64_NEON",
         "MLK_SYS_CAP_AARCH64_SHA3",
         "MLK_SYS_CAP_ARMV81M_MVE",
@@ -3002,6 +3458,10 @@ def check_macro_typos():
         if is_autogen or filename.startswith("proofs/hol_light"):
             if filename.endswith(".ml"):
                 return True
+
+        # Exclude the HOL Light terms accepted by hol-trace
+        if filename.startswith("proofs/hol_light/hol_trace/accepted/"):
+            return True
 
         # Exclude regexp patterns in `autogen`
         if is_autogen:
@@ -3393,6 +3853,60 @@ def hol_light_asm_joblist():
             "aarch64",
         ),
         (
+            "mlkem_poly_frombytes_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_compress_d4_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_compress_d5_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_compress_d10_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_compress_d11_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_decompress_d4_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_decompress_d5_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_decompress_d10_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
+            "mlkem_poly_decompress_d11_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
+            "aarch64",
+        ),
+        (
             "mlkem_poly_reduce_aarch64_asm.S",
             "dev/aarch64_opt/src",
             "-march=armv8.4-a+sha3 -Imlkem/src/native/aarch64/src",
@@ -3461,6 +3975,7 @@ def hol_light_asm_joblist():
     ]
 
     x86_64_flags = "-mavx2 -mbmi2 -msse4 -fcf-protection=full"
+    x86_64_avx512_flags = f"{x86_64_flags} -mavx512f -mavx512vl -mavx512dq"
     joblist_x86_64 = [
         (
             "mlkem_polyvec_basemul_acc_montgomery_cached_k2_avx2_asm.S",
@@ -3586,6 +4101,18 @@ def hol_light_asm_joblist():
             "keccak_f1600_x4_avx2_asm.S",
             "dev/fips202/x86_64/src",
             f"-Idev/fips202/x86_64/src -Imlkem/src/fips202/native/x86_64/src {x86_64_flags}",
+            "x86_64",
+        ),
+        (
+            "keccak_f1600_x1_avx512_asm.S",
+            "dev/fips202/x86_64/src",
+            f"-Idev/fips202/x86_64/src -Imlkem/src/fips202/native/x86_64/src {x86_64_avx512_flags}",
+            "x86_64",
+        ),
+        (
+            "keccak_f1600_x4_avx512_asm.S",
+            "dev/fips202/x86_64/src",
+            f"-Idev/fips202/x86_64/src -Imlkem/src/fips202/native/x86_64/src {x86_64_avx512_flags}",
             "x86_64",
         ),
     ]
@@ -3980,6 +4507,106 @@ def gen_source_undefs(source_file):
 def gen_undefs():
     files = get_c_source_files(core_only=True) + get_asm_source_files(core_only=True)
     run_parallel(files, gen_source_undefs)
+
+
+def run_quietly(cmd):
+    """Run cmd, a long step, without printing its output unless it
+    fails."""
+    if _progress:
+        _progress.update(
+            _main_task,
+            description=f"[cyan]{_current_task}[/] [dim](this may take a few minutes)[/]",
+        )
+    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    if p.returncode != 0:
+        console.print(p.stdout, end="", markup=False, highlight=False)
+        raise subprocess.CalledProcessError(p.returncode, cmd)
+
+
+def gen_hol_trace_defs(selection):
+    """Regenerate accepted HOLTrace files. selection is "all" or a
+    comma-separated list of `base`, `specs` and function names, as for
+    `hol-trace outline -p`."""
+    hol_trace = "proofs/hol_light/hol_trace/hol-trace"
+    accepted = "proofs/hol_light/hol_trace/accepted"
+    machine = platform.machine().lower()
+    native = "aarch64" if machine in ["arm64", "aarch64"] else machine
+    funcs_of = {
+        arch: subprocess.run(
+            [hol_trace, "list", "--arch", arch],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.split()
+        for arch in ["aarch64", "x86_64"]
+    }
+    everything = selection == "all"
+    names = [] if everything else [n for n in selection.split(",") if n]
+    known = {"base", "specs"} | {f for fs in funcs_of.values() for f in fs}
+    unknown = [n for n in names if n not in known]
+    if unknown:
+        raise Exception(
+            "--hol-trace-defs: unknown "
+            + ", ".join(unknown)
+            + "; expected base, specs or functions listed by `hol-trace list`"
+        )
+    shared = [d for d in ("base", "specs") if everything or d in names]
+
+    def files(root, d, pattern):
+        found = pathlib.Path(root, d).glob(pattern)
+        return {str(p.relative_to(root)) for p in found if p.is_file()}
+
+    def sync(out, scope):
+        # Update the files in scope like any other generated file, so that
+        # --dry-run fails if one of them is stale.
+        for d, pattern in scope:
+            new = files(out, d, pattern)
+            for f in sorted(files(accepted, d, pattern) | new):
+                content = pathlib.Path(out, f).read_text() if f in new else None
+                update_file(os.path.join(accepted, f), content)
+
+    with tempfile.TemporaryDirectory(prefix="hol-trace-accepted-") as out:
+        # hol-trace writes to `out`. Each outline is one HOL Light process
+        # that loads definitions only.
+        if shared:
+            run_quietly(
+                [hol_trace, "outline", "--out", out] + [f"--{d}" for d in shared]
+            )
+            # Read the shared files before any proof outline runs: those
+            # run proof code, which must not change what is compared.
+            scope = {"base": ("base", "*"), "specs": ("spec", "**/*")}
+            sync(out, [scope[d] for d in shared])
+        for arch in ["aarch64", "x86_64"]:
+            funcs = [f for f in funcs_of[arch] if everything or f in names]
+            if not funcs:
+                continue
+            # The proofs read their object files; as the proof Makefiles do,
+            # assemble other architectures with the cross assembler.
+            if arch != native and shutil.which(f"{arch}-unknown-linux-gnu-as") is None:
+                message = (
+                    f"no {arch} assembler for the HOLTrace outlines of the "
+                    f"{arch} proofs. Use `nix develop .#hol_light-cross` to "
+                    "write those of both architectures."
+                )
+                if not everything:
+                    raise Exception(message)
+                print(f"Skipping: {message}", flush=True)
+                continue
+            run_quietly(
+                [hol_trace, "outline", "--arch", arch, "--out", out, "-p"] + funcs
+            )
+            if everything:
+                # Also remove the files of functions that no longer exist.
+                sync(out, [(f"proofs/{arch}", "*.defs"), (f"proofs/{arch}", "*.thms")])
+            else:
+                sync(
+                    out,
+                    [
+                        (f"proofs/{arch}", f"{f}.{e}")
+                        for f in funcs
+                        for e in ("defs", "thms")
+                    ],
+                )
 
 
 def gen_slothy(funcs):
@@ -4479,9 +5106,122 @@ def update_hol_light_bytecode_for_arch(arch, force_cross=()):
     bytecode_dict = extract_bytecode_from_output(output_text)
 
     # Update each .ml file
-    for obj_name, bytecode in bytecode_dict.items():
-        ml_file = "proofs/hol_light/" + arch + "/proofs/" + obj_name + ".ml"
-        update_bytecode_in_proof_script(ml_file, bytecode)
+    proof_dir = "proofs/hol_light/" + arch + "/proofs"
+    asm_dir = "proofs/hol_light/" + arch + "/mlkem"
+    for asm_file in sorted(pathlib.Path(asm_dir).glob("*.S")):
+        ml_file = f"{proof_dir}/{asm_file.stem}.ml"
+        if not os.path.isfile(ml_file):
+            raise Exception(f"{asm_file} has no proof {ml_file}")
+        if asm_file.stem not in bytecode_dict:
+            raise Exception(
+                f"{proof_dir}/dump_bytecode.ml does not dump {asm_file.stem}.o"
+            )
+        update_bytecode_in_proof_script(ml_file, bytecode_dict[asm_file.stem])
+
+
+def gen_hol_light_bind():
+    """Write proofs/hol_light/bind.yml: the SHA-256 of the code of each
+    proved function, from the accepted .defs. `hol-trace bind` reads the
+    .defs and the proofs' assembly as this run of autogen leaves them,
+    including what earlier steps changed but have not yet written."""
+    hol_trace = "proofs/hol_light/hol_trace/hol-trace"
+    if not os.path.exists(hol_trace):
+        return
+    patterns = [
+        "proofs/hol_light/hol_trace/accepted/proofs/*/*.defs",
+        "proofs/hol_light/*/mlkem/*.S",
+    ]
+    with _file_cache_lock:
+        cached = list(_file_cache)
+    paths = {p for pat in patterns for p in glob.glob(pat)}
+    paths |= {p for p in cached if any(fnmatch.fnmatch(p, pat) for pat in patterns)}
+    with tempfile.TemporaryDirectory(prefix="autogen-bind-") as root:
+        for path in sorted(paths):
+            content = read_file(path)
+            if content is None:  # deleted in this run
+                continue
+            os.makedirs(os.path.join(root, os.path.dirname(path)), exist_ok=True)
+            with open(os.path.join(root, path), "w") as f:
+                f.write(content)
+        out = subprocess.run(
+            [hol_trace, "bind", "--root", root],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+    header = [
+        "# Copyright (c) The mlkem-native project authors",
+        "# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT",
+        "#",
+        "# WARNING: This file is auto-generated from scripts/autogen",
+        "#          in the mlkem-native repository.",
+        "#          Do not modify it directly.",
+        "#",
+        "# Hashes of the assembled kernels that HOL Light proofs reason about.",
+        "# Use scripts/check-binary to check if a given binary contains matching",
+        "# function symbols and machine code.",
+        "#",
+        "# Each entry is keyed by a kernel's symbol without the `mlk_` prefix,",
+        "# and names the architecture and function of its proof,",
+        "# proofs/hol_light/ARCH/proofs/FUNC.ml. `sha256` maps each byte list in",
+        "# the proof's accepted FUNC.defs to its hash:",
+        "# - FUNC_mc is the kernel's code as the proof assembles it. On x86_64,",
+        "#   it starts with ENDBR64, which builds emit only with CET enabled.",
+        "# - FUNC_tmc, on x86_64 only, is that code without ENDBR64. The proofs'",
+        "#   NOIBT theorems are about it, and builds without CET contain it.",
+        "# A kernel matches if its code has either hash.",
+    ]
+    update_file("proofs/hol_light/bind.yml", "\n".join(header) + "\n" + out)
+
+
+def gen_hol_light_deps():
+    """Write proofs/hol_light/deps.yml: each proof's dependencies, as
+    proofs/hol_light/scripts/deps finds them with HOL Light's loader."""
+    if not os.environ.get("HOLDIR"):
+        print(
+            "Skipping proofs/hol_light/deps.yml: HOL Light is not available. "
+            "Run in `nix develop` or `nix develop .#hol_light`.",
+            flush=True,
+        )
+        return
+    out = subprocess.run(
+        ["proofs/hol_light/scripts/deps", "gen"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    header = [
+        "# Copyright (c) The mlkem-native project authors",
+        "# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT",
+        "#",
+        "# WARNING: This file is auto-generated from scripts/autogen",
+        "#          in the mlkem-native repository.",
+        "#          Do not modify it directly.",
+        "#",
+        "# See proofs/hol_light/scripts/deps.",
+    ]
+    update_file("proofs/hol_light/deps.yml", "\n".join(header) + "\n" + out)
+
+
+def gen_cbmc_deps():
+    """Write proofs/cbmc/deps.yml: the preprocessor inputs of each proof."""
+    out = subprocess.run(
+        ["proofs/cbmc/scripts/deps", "gen"],
+        check=True,
+        stdout=subprocess.PIPE,
+        text=True,
+    ).stdout
+    header = [
+        "# Copyright (c) The mlkem-native project authors",
+        "# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT",
+        "#",
+        "# WARNING: This file is auto-generated from scripts/autogen",
+        "#          in the mlkem-native repository.",
+        "#          Do not modify it directly.",
+        "#",
+        "# See proofs/cbmc/scripts/deps.",
+    ]
+    update_file("proofs/cbmc/deps.yml", "\n".join(header) + "\n" + out)
 
 
 def update_hol_light_bytecode(force_cross=()):
@@ -4859,6 +5599,11 @@ ABI_CAPS = {
         "guard": "MLK_SYS_X86_64_AVX2",
         "syscap": "MLK_SYS_CAP_X86_64_AVX2",
         "description": "AVX2",
+    },
+    "AVX512": {
+        "guard": "MLK_SYS_X86_64_AVX512",
+        "syscap": "MLK_SYS_CAP_X86_64_AVX512",
+        "description": "AVX-512F, AVX-512VL and AVX-512DQ",
     },
     "NEON": {
         "guard": "MLK_SYS_AARCH64_NEON",
@@ -5304,13 +6049,15 @@ def gen_abicheck():
         yield f"#if defined({arch_guard})"
         yield ""
 
-        # Emit one row per function, consolidating consecutive functions that
-        # share the same feature_guards into a single #if/#endif block (rather
-        # than one block per function). This collapses a uniform-feature group
-        # (e.g. x86_64, where every kernel requires AVX2) into a single
-        # block, while still splitting where guards differ (e.g. aarch64, where
-        # SHA3 and non-SHA3 kernels are interleaved).
+        # Emit one row per function, consolidating functions that share the
+        # same feature_guards into a single #if/#endif block (rather than one
+        # block per function). Sort the functions by their guards first, so
+        # that each set of guards gets one block (e.g. x86_64, where some
+        # kernels require AVX2 and others AVX-512, or aarch64, where some
+        # kernels require SHA3). The sort is stable, so the functions in a
+        # block keep their order.
         def emit_feature_grouped(functions, render):
+            functions = sorted(functions, key=lambda f: list(f[1]))
             i = 0
             while i < len(functions):
                 guards = functions[i][1]
@@ -5378,6 +6125,15 @@ def _main():
         "ntt_aarch64_asm",
         "intt_aarch64_asm",
         "poly_tobytes_aarch64_asm",
+        "poly_frombytes_aarch64_asm",
+        "poly_compress_d4_aarch64_asm",
+        "poly_compress_d5_aarch64_asm",
+        "poly_compress_d10_aarch64_asm",
+        "poly_compress_d11_aarch64_asm",
+        "poly_decompress_d4_aarch64_asm",
+        "poly_decompress_d5_aarch64_asm",
+        "poly_decompress_d10_aarch64_asm",
+        "poly_decompress_d11_aarch64_asm",
         "poly_tomont_aarch64_asm",
         "poly_reduce_aarch64_asm",
         "poly_mulcache_compute_aarch64_asm",
@@ -5427,6 +6183,18 @@ def _main():
         help="Extra CFLAGS prepended to ppc64le simpasm invocations",
     )
     parser.add_argument(
+        "--hol-trace-defs",
+        nargs="?",
+        const="all",
+        default=None,
+        metavar="LIST",
+        help="Regenerate the trusted HOL definitions of the HOL Light and "
+        "s2n-bignum proof infrastructure, and of our own specifications and "
+        "proofs, in proofs/hol_light/hol_trace/accepted/. LIST, "
+        "comma-separated, selects `base`, `specs` and functions; without "
+        "it, everything. See proofs/hol_light/hol_trace/accepted/README.md.",
+    )
+    parser.add_argument(
         "--test-vectors",
         default=False,
         action="store_true",
@@ -5474,14 +6242,29 @@ def _main():
             lambda: gen_slothy(args.slothy),
             args.slothy is not None and not args.dry_run,
         ),
+        (
+            "Generate HOLTrace accepted files (outlines)",
+            lambda: gen_hol_trace_defs(args.hol_trace_defs),
+            args.hol_trace_defs is not None,
+        ),
     ]
 
     def gen_zeta_tables():
         gen_c_zeta_file()
         gen_aarch64_hol_light_zeta_file()
         gen_aarch64_hol_light_rej_uniform_table()
+        gen_aarch64_hol_light_decompress_d4_table()
+        gen_aarch64_hol_light_decompress_d5_table()
+        gen_aarch64_hol_light_decompress_d10_table()
+        gen_aarch64_hol_light_decompress_d11_table()
+        gen_aarch64_hol_light_compress_d5_table()
         gen_aarch64_zeta_file()
         gen_aarch64_rej_uniform_table()
+        gen_aarch64_decompress_d4_table()
+        gen_aarch64_decompress_d5_table()
+        gen_aarch64_decompress_d10_table()
+        gen_aarch64_decompress_d11_table()
+        gen_aarch64_compress_d5_table()
         gen_avx2_hol_light_zeta_file()
         gen_avx2_hol_light_rej_uniform_table()
         gen_avx2_zeta_file()
@@ -5490,7 +6273,7 @@ def _main():
         gen_avx2_rej_uniform_table()
         gen_hol_light_keccak_constants_file()
         gen_aarch64_keccak_constants_c_file()
-        gen_avx2_keccak_constants_c_file()
+        gen_x86_64_keccak_constants_c_file()
         gen_avx2_keccak_hol_light_constants_file()
         gen_riscv64_zeta_files()
         gen_ppc64le_zeta_files()
@@ -5523,6 +6306,9 @@ def _main():
             lambda: update_hol_light_bytecode(force_cross),
             args.update_hol_light_bytecode,
         ),
+        ("Generate HOL Light proof dependencies", gen_hol_light_deps),
+        ("Generate HOL Light machine-code bindings", gen_hol_light_bind),
+        ("Generate CBMC proof dependencies", gen_cbmc_deps),
         ("Generate monolithic source files", gen_monolithic),
         ("Generate undefs", gen_undefs),
         ("Generate test configs", gen_test_configs),

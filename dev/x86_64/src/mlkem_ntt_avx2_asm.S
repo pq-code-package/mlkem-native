@@ -55,19 +55,60 @@
 #include "consts.h"
 #include "shuffle.inc"
 
+/*
+ * Note on operand order: if a commutative VEX instruction such as vpaddw
+ * has one source register in ymm8-15 and the other in ymm0-7, the one in
+ * ymm8-15 comes second. Only then do all assemblers emit the same bytes:
+ * clang's assembler would swap the operands itself to use the 2-byte VEX
+ * prefix, while GNU as keeps the order. The HOL Light proofs are about
+ * these bytes. Where the registers are macro parameters, .if chooses.
+ */
+
 /* Compute steps 1,2 / 3 of Montgomery multiplication */
 .macro mul rh0, rh1, rh2, rh3, zl0=15, zl1=15, zh0=2, zh1=2
+.if \zl0 >= 8 && \rh0 < 8 /* see the note on operand order */
+vpmullw %ymm\rh0,%ymm\zl0,%ymm12
+.else
 vpmullw %ymm\zl0,%ymm\rh0,%ymm12
+.endif
+.if \zl0 >= 8 && \rh1 < 8 /* see the note on operand order */
+vpmullw %ymm\rh1,%ymm\zl0,%ymm13
+.else
 vpmullw %ymm\zl0,%ymm\rh1,%ymm13
+.endif
 
+.if \zl1 >= 8 && \rh2 < 8 /* see the note on operand order */
+vpmullw %ymm\rh2,%ymm\zl1,%ymm14
+.else
 vpmullw %ymm\zl1,%ymm\rh2,%ymm14
+.endif
+.if \zl1 >= 8 && \rh3 < 8 /* see the note on operand order */
+vpmullw %ymm\rh3,%ymm\zl1,%ymm15
+.else
 vpmullw %ymm\zl1,%ymm\rh3,%ymm15
+.endif
 
+.if \zh0 >= 8 && \rh0 < 8 /* see the note on operand order */
+vpmulhw %ymm\rh0,%ymm\zh0,%ymm\rh0
+.else
 vpmulhw %ymm\zh0,%ymm\rh0,%ymm\rh0
+.endif
+.if \zh0 >= 8 && \rh1 < 8 /* see the note on operand order */
+vpmulhw %ymm\rh1,%ymm\zh0,%ymm\rh1
+.else
 vpmulhw %ymm\zh0,%ymm\rh1,%ymm\rh1
+.endif
 
+.if \zh1 >= 8 && \rh2 < 8 /* see the note on operand order */
+vpmulhw %ymm\rh2,%ymm\zh1,%ymm\rh2
+.else
 vpmulhw %ymm\zh1,%ymm\rh2,%ymm\rh2
+.endif
+.if \zh1 >= 8 && \rh3 < 8 /* see the note on operand order */
+vpmulhw %ymm\rh3,%ymm\zh1,%ymm\rh3
+.else
 vpmulhw %ymm\zh1,%ymm\rh3,%ymm\rh3
+.endif
 .endm
 
 /* Compute step 3 / 3 of Montgomery multiplication */
@@ -99,23 +140,55 @@ vpmulhw %ymm0,%ymm15,%ymm15
  * by q in absolute value, the coefficients overall grow by not
  * more than q in absolute value per layer. */
 .macro update rln, rl0, rl1, rl2, rl3, rh0, rh1, rh2, rh3
+.if \rh0 >= 8 && \rl0 < 8 /* see the note on operand order */
+vpaddw %ymm\rl0,%ymm\rh0,%ymm\rln /* rln = rl0 + rh0 */
+.else
 vpaddw %ymm\rh0,%ymm\rl0,%ymm\rln /* rln = rl0 + rh0 */
+.endif
 vpsubw %ymm\rh0,%ymm\rl0,%ymm\rh0 /* rh0 = rl0 - rh0 */
+.if \rh1 >= 8 && \rl1 < 8 /* see the note on operand order */
+vpaddw %ymm\rl1,%ymm\rh1,%ymm\rl0 /* rl0 = rl1 + rh1 */
+.else
 vpaddw %ymm\rh1,%ymm\rl1,%ymm\rl0 /* rl0 = rl1 + rh1 */
+.endif
 vpsubw %ymm\rh1,%ymm\rl1,%ymm\rh1 /* rh1 = rl1 - rh1 */
+.if \rh2 >= 8 && \rl2 < 8 /* see the note on operand order */
+vpaddw %ymm\rl2,%ymm\rh2,%ymm\rl1 /* rl1 = rl2 + rh2 */
+.else
 vpaddw %ymm\rh2,%ymm\rl2,%ymm\rl1 /* rl1 = rl2 + rh2 */
+.endif
 vpsubw %ymm\rh2,%ymm\rl2,%ymm\rh2 /* rh2 = rl2 - rh2 */
+.if \rh3 >= 8 && \rl3 < 8 /* see the note on operand order */
+vpaddw %ymm\rl3,%ymm\rh3,%ymm\rl2 /* rl2 = rl3 + rh3 */
+.else
 vpaddw %ymm\rh3,%ymm\rl3,%ymm\rl2 /* rl2 = rl3 + rh3 */
+.endif
 vpsubw %ymm\rh3,%ymm\rl3,%ymm\rh3 /* rh3 = rl3 - rh3 */
 
 vpsubw %ymm12,%ymm\rln,%ymm\rln /* rln = rh0 + rl0 - ymm12 = rl0 + (rh0 - ymm12) */
+.if 12 >= 8 && \rh0 < 8 /* see the note on operand order */
+vpaddw %ymm\rh0,%ymm12,%ymm\rh0 /* rh0 = rl0 - rh0 + ymm12 = rl0 - (rh0 - ymm12) */
+.else
 vpaddw %ymm12,%ymm\rh0,%ymm\rh0 /* rh0 = rl0 - rh0 + ymm12 = rl0 - (rh0 - ymm12) */
+.endif
 vpsubw %ymm13,%ymm\rl0,%ymm\rl0 /* rl0 = rl1 + rh1 - ymm13 = rl1 + (rh1 - ymm13) */
+.if 13 >= 8 && \rh1 < 8 /* see the note on operand order */
+vpaddw %ymm\rh1,%ymm13,%ymm\rh1 /* rh1 = rl1 - rh1 + ymm13 = rl1 - (rh1 - ymm13) */
+.else
 vpaddw %ymm13,%ymm\rh1,%ymm\rh1 /* rh1 = rl1 - rh1 + ymm13 = rl1 - (rh1 - ymm13) */
+.endif
 vpsubw %ymm14,%ymm\rl1,%ymm\rl1 /* rl1 = rh2 + rl2 - ymm14 = rl2 + (rh2 - ymm14) */
+.if 14 >= 8 && \rh2 < 8 /* see the note on operand order */
+vpaddw %ymm\rh2,%ymm14,%ymm\rh2 /* rh2 = rl2 - rh2 + ymm14 = rl2 - (rh2 - ymm14) */
+.else
 vpaddw %ymm14,%ymm\rh2,%ymm\rh2 /* rh2 = rl2 - rh2 + ymm14 = rl2 - (rh2 - ymm14) */
+.endif
 vpsubw %ymm15,%ymm\rl2,%ymm\rl2 /* rl2 = rh3 + rl3 - ymm15 = rl3 + (rh3 - ymm15) */
+.if 15 >= 8 && \rh3 < 8 /* see the note on operand order */
+vpaddw %ymm\rh3,%ymm15,%ymm\rh3 /* rh3 = rl3 - rh3 + ymm15 = rl3 - (rh3 - ymm15) */
+.else
 vpaddw %ymm15,%ymm\rh3,%ymm\rh3 /* rh3 = rl3 - rh3 + ymm15 = rl3 - (rh3 - ymm15) */
+.endif
 .endm
 
 .macro level0 off

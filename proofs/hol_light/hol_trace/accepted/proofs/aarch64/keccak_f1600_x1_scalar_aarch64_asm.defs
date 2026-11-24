@@ -1,0 +1,54 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# keccak_f1600_x1_scalar_aarch64_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# keccak_f1600_x1_scalar_mc: 1152 bytes
+# sha256 d45ed9162249bf1d687fd21eacabfaa52916ec434c24e5afc44655b53f67f1e9
+definition keccak_f1600_x1_scalar_mc
+  |- keccak_f1600_x1_scalar_mc
+     = #x[ff 03 02 d1 f3 53 02 a9 f5 5b 03 a9 f7 63 04 a9 f9 6b 05 a9 fb 73 06 a9 fd 7b 07 a9 fa 03
+          01 aa e1 07 00 f9 01 18 40 a9 0b 40 41 a9 15 08 42 a9 07 30 43 a9 11 58 44 a9 03 20 45 a9
+          0d 70 46 a9 17 10 47 a9 09 38 48 a9 13 60 49 a9 05 28 4a a9 0f 50 4b a9 19 60 40 f9 e0 03
+          00 f9 1e 03 19 ca 3b 01 0a ca c0 03 15 ca 7a 03 06 ca 5b 03 07 ca 1d 00 16 ca ba 03 17 ca
+          9d 00 05 ca be 03 01 ca 60 03 08 ca dd 03 02 ca 7e 02 14 ca de 03 10 ca 5b ff c0 ca 84 00
+          1b ca de 03 11 ca de 03 1c ca bd 03 03 ca 00 fc de ca de ff dd ca d6 02 1e ca f7 02 1e ca
+          f7 0f 00 f9 d7 01 0f ca ce 01 00 ca f7 02 0b ca ef 01 00 ca 21 00 1b ca f7 02 0c ca f7 02
+          0d ca 6b 01 00 ca bd ff d7 ca f7 fe da ca ba 01 00 ca 8d 03 17 ca 1c 03 1e ca 18 02 17 ca
+          b0 02 1e ca 35 03 1e ca 7e 02 17 ca 93 02 17 ca 34 02 17 ca 91 01 00 ca 40 00 1b ca c2 00
+          1d ca 06 01 1d ca 88 bf ed 8a 6c 00 1b ca a3 4d f1 8a a5 00 1b ca fb 0f 40 f9 39 16 e2 8a
+          29 01 1d ca 37 d3 c5 ca 63 60 c2 ca 08 09 d1 ca 51 01 1d ca 99 bd f6 8a fd 00 1d ca 8a 08
+          fb 8a a7 28 fc 8a 4a c9 d4 ca ed e4 cd ca 47 bc e5 8a 22 9f d8 ca 99 e6 eb 8a 25 66 e4 8a
+          39 d7 d1 ca 71 f1 f1 8a fc e4 dc ca 27 a9 ec 8a e7 64 d6 ca d6 e2 f8 8a 18 7f ef 8a d6 5e
+          cf ca 74 c3 f4 8a ef 41 e9 8a ec e9 cc ca af 6c db ca 85 a6 cb ca eb 07 40 f9 34 56 c4 ca
+          11 bf c9 ca 38 00 80 d2 09 24 f0 8a f8 0b 00 f9 b8 b3 e1 8a 3b c8 f5 8a 44 ff fd 8a 21 54
+          c4 ca 6b 01 40 f9 a4 e6 fe 8a 15 7b d5 ca 38 b1 d3 ca c9 15 e6 8a 29 ad c0 ca c0 98 e0 8a
+          21 00 0b ca 8b 8c da ca 04 bc d0 ca 00 8e f3 8a 70 af de ca db ab fa 8a 7a a6 ee 8a 13 30
+          ce ca 4e bb c6 ca 66 a7 dd ca e0 d1 cb ca 00 c0 cd ca 1a e5 c9 ca 1b 28 ce ca 1d fe dc ca
+          5a cf c6 ca fe ca d6 ca 40 7f ca ca bd 97 d3 ca 7b 17 cc ca de 8b d8 ca 00 6c c7 ca da 6b
+          d5 ca 5a 3f d9 ca 7e fb db 93 de e7 da ca 5a eb da 93 d0 03 10 ca dc ff dc ca fc 0f 00 f9
+          bd 93 d1 ca 3c f4 c2 ca d3 97 d3 ca bd 0b d4 ca 9c db c4 ca 5a df c0 ca 9c 9f c3 ca 9c 67
+          c5 ca 00 e0 c0 93 00 fc dd ca 9b f7 db ca 0d b8 cd ca bc ff dc ca dd 0b d4 ca 54 9f c3 ca
+          0b c8 cb ca 99 27 d9 ca 83 53 d5 ca 55 03 01 ca 69 c7 c9 ca 98 73 d8 ca c1 93 d1 ca 0e 20
+          ce ca 96 b3 d6 ca 68 e3 c8 ca 71 4f c7 ca 0f f8 cf ca 87 be f6 8a 44 db c4 ca 00 0c cc ca
+          9c eb d7 ca 57 f7 c2 ca 5a 67 c5 ca e2 9c d0 ca 27 a9 f4 8a fe 41 e9 8a e7 64 d6 ca cc eb
+          d4 ca d4 e2 f0 8a 7e af c6 ca 96 5e cf ca 66 aa ed 8a c6 a4 d1 ca a5 fd f1 8a a5 56 c5 ca
+          31 b2 f5 8a 7b 5f ca ca b5 ca f9 8a 74 67 e4 8a 0a 7e ef 8a b0 ae d3 ca 35 7a d9 ca 33 e7
+          f3 8a f9 0b 40 f9 51 bd c9 ca e9 07 40 f9 8f 6e dc ca 94 08 fc 8a 8a ca c1 ca 74 f1 fb 8a
+          94 56 c4 ca 84 c3 e1 8a 21 e4 eb 8a 3c 79 79 f8 e9 0f 40 f9 39 07 00 91 f9 0b 00 f9 3f 5f
+          00 f1 39 d4 db ca db bf fa 8a a1 00 1c ca 85 a4 cb ca 6b 8e cd ca 4d 2b f8 8a 7c e7 d8 ca
+          1b bf e9 8a f3 26 e3 8a a4 a7 ee 8a 78 b2 dd ca 7d 8c fd 8a ad e5 c9 ca b3 33 ce ca 3d 4d
+          e0 8a ce 15 e8 8a c9 ad d7 ca 8e b8 c8 ca 17 99 f7 8a 68 0b c0 ca e4 be c3 ca 03 14 fe 8a
+          77 d0 da ca a3 63 de ca 0d f2 ff 54 c6 ac c6 93 6b c9 cb 93 b5 52 d5 93 42 f4 c2 93 e7 4c
+          c7 93 8c 0d cc 93 31 92 d1 93 d6 b2 d6 93 63 9c c3 93 08 e1 c8 93 ad b9 cd 93 9c ff dc 93
+          f7 ea d7 93 84 d8 c4 93 29 c5 c9 93 ce 21 ce 93 73 96 d3 93 18 73 d8 93 a5 64 c5 93 4a 5d
+          ca 93 ef f9 cf 93 94 0a d4 93 39 27 d9 93 e0 03 40 f9 01 18 00 a9 0b 40 01 a9 15 08 02 a9
+          07 30 03 a9 11 58 04 a9 03 20 05 a9 0d 70 06 a9 17 10 07 a9 09 38 08 a9 13 60 09 a9 05 28
+          0a a9 0f 50 0b a9 19 60 00 f9 f3 53 42 a9 f5 5b 43 a9 f7 63 44 a9 f9 6b 45 a9 fb 73 46 a9
+          fd 7b 47 a9 ff 03 02 91 c0 03 5f d6]

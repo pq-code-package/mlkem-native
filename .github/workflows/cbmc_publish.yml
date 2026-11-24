@@ -1,0 +1,44 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+# When a commit lands on main, merge the CBMC results from its merge queue
+# run into gh-pages. PR reports use them as the baseline.
+
+name: CBMC publish
+permissions:
+  contents: read
+on:
+  push:
+    branches: ["main"]
+
+concurrency:
+  group: cbmc-publish
+  queue: max
+
+jobs:
+  publish:
+    name: Publish CBMC baselines
+    if: ${{ github.repository_owner == 'pq-code-package' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: gh-pages
+          path: gh-pages
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          path: source
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Publish CBMC results to gh-pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_PAGES_ROOT: ${{ github.workspace }}/gh-pages
+          SOURCE_ROOT: ${{ github.workspace }}/source
+        run: |
+          "$SOURCE_ROOT/.github/actions/cbmc/publish"

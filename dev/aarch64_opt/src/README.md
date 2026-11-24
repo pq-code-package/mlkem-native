@@ -15,3 +15,5 @@ If the "clean" sources [`../../aarch64_clean/src/*.S`](../../aarch64_clean/src/)
 3. Run `tests all --opt=OPT` to check that that the new assembly is still functional.
 
 Note: By default, [mlkem_rej_uniform_aarch64_asm.S](mlkem_rej_uniform_aarch64_asm.S) is not passed through SLOTHY: The Makefile simply copies this file from the "clean" directory unmodified. The target `rej_uniform_asm_with_slothy.S` can be used to force SLOTHY to run on this file. This can be used to test SLOTHY as and when SLOTHY can process it.
+
+The compression, decompression and `poly_frombytes` kernels (`mlkem_poly_compress_d{4,5,10,11}_aarch64_asm.S`, `mlkem_poly_decompress_d{4,5,10,11}_aarch64_asm.S`, `mlkem_poly_frombytes_aarch64_asm.S`) are not passed through SLOTHY yet either: the Makefile copies them unmodified from the "clean" directory.

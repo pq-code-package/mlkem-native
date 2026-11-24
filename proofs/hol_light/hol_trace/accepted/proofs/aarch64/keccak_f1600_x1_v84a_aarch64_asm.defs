@@ -1,0 +1,30 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# keccak_f1600_x1_v84a_aarch64_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# keccak_f1600_x1_v84a_mc: 428 bytes
+# sha256 e8843038318618ac3a19018d3611112d4ad70b74ad9c23d6fad63be9825d1e5c
+definition keccak_f1600_x1_v84a_mc
+  |- keccak_f1600_x1_v84a_mc
+     = #x[ff 03 01 d1 e8 27 00 6d ea 2f 01 6d ec 37 02 6d ee 3f 03 6d 00 04 40 6d 02 0c 41 6d 04 14
+          42 6d 06 1c 43 6d 08 24 44 6d 0a 2c 45 6d 0c 34 46 6d 0e 3c 47 6d 10 44 48 6d 12 4c 49 6d
+          14 54 4a 6d 16 5c 4b 6d 18 60 40 fd 02 03 80 d2 1e 28 05 ce 3d 2c 06 ce 5c 30 07 ce 7b 34
+          08 ce 9a 38 09 ce de 53 0f ce bd 57 10 ce 9c 5b 11 ce 7b 5f 12 ce 5a 63 13 ce d9 8f 7c ce
+          9c 8f 7a ce 5a 8f 7d ce bd 8f 7b ce 7b 8f 7e ce 1e 1c 3a 6e 40 08 9d ce 82 55 9d ce ac 9d
+          9c ce 6d e2 9b ce f3 22 9c ce f7 5d 9a ce 2f fc 99 ce 01 25 9c ce 08 4e 99 ce f0 e8 9d ce
+          47 f5 9a ce 6a 90 9c ce 43 ae 9c ce 32 c6 9d ce 71 d9 99 ce 2b b1 9b ce c9 0e 9d ce d6 65
+          9b ce 8e ba 9a ce 94 94 9b ce 04 cb 9b ce b8 fa 99 ce b5 70 9a ce db 50 99 ce 3f cc df 4d
+          45 2d 27 ce 66 1d 28 ce e7 20 29 ce 08 25 2a ce 29 29 2b ce ea 41 2c ce 0b 32 2d ce 8c 35
+          2e ce ad 39 2f ce ce 3d 30 ce 8f 56 31 ce b0 46 32 ce 31 4a 33 ce 52 4e 34 ce 73 52 35 ce
+          14 04 36 ce 35 58 37 ce d6 5e 38 ce f7 62 20 ce 18 03 21 ce c0 6f 22 ce 61 0b 23 ce 42 0c
+          24 ce 63 10 3e ce 84 78 3b ce 00 1c 3f 6e 42 04 00 d1 82 f7 ff b5 00 04 00 6d 02 0c 01 6d
+          04 14 02 6d 06 1c 03 6d 08 24 04 6d 0a 2c 05 6d 0c 34 06 6d 0e 3c 07 6d 10 44 08 6d 12 4c
+          09 6d 14 54 0a 6d 16 5c 0b 6d 18 60 00 fd e8 27 40 6d ea 2f 41 6d ec 37 42 6d ee 3f 43 6d
+          ff 03 01 91 c0 03 5f d6]

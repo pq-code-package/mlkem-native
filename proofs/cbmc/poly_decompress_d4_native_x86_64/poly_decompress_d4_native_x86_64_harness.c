@@ -9,7 +9,7 @@ int mlk_poly_decompress_d4_native(
 
 void harness(void)
 {
-  /* mlk_poly_decompress_d4 is only defined for MLKEM_K != 2 */
+  /* mlk_poly_decompress_d4 is only defined for MLKEM_K != 4 */
 #if MLKEM_K != 4
   int16_t *r;
   uint8_t *a;

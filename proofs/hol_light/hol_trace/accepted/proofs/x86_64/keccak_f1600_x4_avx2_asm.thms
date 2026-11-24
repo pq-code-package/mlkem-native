@@ -1,0 +1,161 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# keccak_f1600_x4_avx2_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem keccak_f1600_x4_avx2_asm KECCAK_F1600_X4_NOIBT_SUBROUTINE_CORRECT
+  |- !rc_pointer:int64 bitstate_in:int64 rho8_ptr:int64 rho56_ptr:int64 A1:(int64 list)
+      A2:(int64 list) A3:(int64 list) A4:(int64 list) pc:num stackpointer:int64 returnaddress:int64.
+       PAIRWISE (nonoverlapping : int64 # num -> int64 # num -> bool)
+         [(word pc : int64), LENGTH keccak_f1600_x4_avx2_tmc;
+          word_sub stackpointer (word 799 : int64), 799; bitstate_in, 800; rc_pointer, 192;
+          rho8_ptr, 32; rho56_ptr, 32; stackpointer, 8]
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) keccak_f1600_x4_avx2_tmc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = stackpointer
+               /\ read (memory :> bytes64 stackpointer) s = returnaddress
+               /\ C_ARGUMENTS [bitstate_in; rc_pointer; rho8_ptr; rho56_ptr] s
+               /\ (wordlist_from_memory (rc_pointer, 24) s : int64 list) = round_constants
+               /\ (wordlist_from_memory (rho8_ptr, 4) s : int64 list) = rho8_constant
+               /\ (wordlist_from_memory (rho56_ptr, 4) s : int64 list) = rho56_constant
+               /\ (wordlist_from_memory (bitstate_in, 25) s : int64 list) = A1
+               /\ (wordlist_from_memory (word_add bitstate_in (word 200 : int64), 25) s
+                    : int64 list)
+                  = A2
+               /\ (wordlist_from_memory (word_add bitstate_in (word 400 : int64), 25) s
+                    : int64 list)
+                  = A3
+               /\ (wordlist_from_memory (word_add bitstate_in (word 600 : int64), 25) s
+                    : int64 list)
+                  = A4)
+             (\s:x86state.
+               read RIP s = returnaddress
+               /\ read RSP s = word_add stackpointer (word 8 : int64)
+               /\ (wordlist_from_memory (bitstate_in, 25) s : int64 list) = keccak 24 A1
+               /\ (wordlist_from_memory (word_add bitstate_in (word 200 : int64), 25) s
+                    : int64 list)
+                  = keccak 24 A2
+               /\ (wordlist_from_memory (word_add bitstate_in (word 400 : int64), 25) s
+                    : int64 list)
+                  = keccak 24 A3
+               /\ (wordlist_from_memory (word_add bitstate_in (word 600 : int64), 25) s
+                    : int64 list)
+                  = keccak 24 A4)
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (bitstate_in, 800);
+                           memory :> bytes (word_sub stackpointer (word 799 : int64), 799)])
+
+theorem keccak_f1600_x4_avx2_asm KECCAK_F1600_X4_NOIBT_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> int64 -> int64 -> num -> int64 -> int64 ->
+          (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) rc_pointer:int64 bitstate_in:int64 rho8_ptr:int64
+        rho56_ptr:int64 pc:num stackpointer:int64 returnaddress:int64.
+         PAIRWISE (nonoverlapping : int64 # num -> int64 # num -> bool)
+           [(word pc : int64), LENGTH keccak_f1600_x4_avx2_tmc;
+            word_sub stackpointer (word 799 : int64), 799; bitstate_in, 800; rc_pointer, 192;
+            rho8_ptr, 32; rho56_ptr, 32; stackpointer, 8]
+         ==> ensures x86
+               (\s:x86state.
+                 bytes_loaded s (word pc : int64) keccak_f1600_x4_avx2_tmc
+                 /\ read RIP s = (word pc : int64)
+                 /\ read RSP s = stackpointer
+                 /\ read (memory :> bytes64 stackpointer) s = returnaddress
+                 /\ C_ARGUMENTS [bitstate_in; rc_pointer; rho8_ptr; rho56_ptr] s
+                 /\ read events s = e)
+               (\s:x86state.
+                 read RIP s = returnaddress
+                 /\ read RSP s = word_add stackpointer (word 8 : int64)
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2
+                         = f_events rc_pointer rho8_ptr rho56_ptr bitstate_in pc stackpointer
+                             returnaddress
+                      /\ memaccess_inbounds e2
+                           [bitstate_in, 800; rc_pointer, 192; rho8_ptr, 32; rho56_ptr, 32;
+                            word_sub stackpointer (word 799 : int64), 799; stackpointer, 8]
+                           [bitstate_in, 800; word_sub stackpointer (word 799 : int64), 799;
+                            stackpointer, 8]))
+               (\s:x86state s':x86state. T)
+
+theorem keccak_f1600_x4_avx2_asm KECCAK_F1600_X4_SUBROUTINE_CORRECT
+  |- !rc_pointer:int64 bitstate_in:int64 rho8_ptr:int64 rho56_ptr:int64 A1:(int64 list)
+      A2:(int64 list) A3:(int64 list) A4:(int64 list) pc:num stackpointer:int64 returnaddress:int64.
+       PAIRWISE (nonoverlapping : int64 # num -> int64 # num -> bool)
+         [(word pc : int64), LENGTH keccak_f1600_x4_avx2_mc;
+          word_sub stackpointer (word 799 : int64), 799; bitstate_in, 800; rc_pointer, 192;
+          rho8_ptr, 32; rho56_ptr, 32; stackpointer, 8]
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) keccak_f1600_x4_avx2_mc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = stackpointer
+               /\ read (memory :> bytes64 stackpointer) s = returnaddress
+               /\ C_ARGUMENTS [bitstate_in; rc_pointer; rho8_ptr; rho56_ptr] s
+               /\ (wordlist_from_memory (rc_pointer, 24) s : int64 list) = round_constants
+               /\ (wordlist_from_memory (rho8_ptr, 4) s : int64 list) = rho8_constant
+               /\ (wordlist_from_memory (rho56_ptr, 4) s : int64 list) = rho56_constant
+               /\ (wordlist_from_memory (bitstate_in, 25) s : int64 list) = A1
+               /\ (wordlist_from_memory (word_add bitstate_in (word 200 : int64), 25) s
+                    : int64 list)
+                  = A2
+               /\ (wordlist_from_memory (word_add bitstate_in (word 400 : int64), 25) s
+                    : int64 list)
+                  = A3
+               /\ (wordlist_from_memory (word_add bitstate_in (word 600 : int64), 25) s
+                    : int64 list)
+                  = A4)
+             (\s:x86state.
+               read RIP s = returnaddress
+               /\ read RSP s = word_add stackpointer (word 8 : int64)
+               /\ (wordlist_from_memory (bitstate_in, 25) s : int64 list) = keccak 24 A1
+               /\ (wordlist_from_memory (word_add bitstate_in (word 200 : int64), 25) s
+                    : int64 list)
+                  = keccak 24 A2
+               /\ (wordlist_from_memory (word_add bitstate_in (word 400 : int64), 25) s
+                    : int64 list)
+                  = keccak 24 A3
+               /\ (wordlist_from_memory (word_add bitstate_in (word 600 : int64), 25) s
+                    : int64 list)
+                  = keccak 24 A4)
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (bitstate_in, 800);
+                           memory :> bytes (word_sub stackpointer (word 799 : int64), 799)])
+
+theorem keccak_f1600_x4_avx2_asm KECCAK_F1600_X4_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> int64 -> int64 -> num -> int64 -> int64 ->
+          (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) rc_pointer:int64 bitstate_in:int64 rho8_ptr:int64
+        rho56_ptr:int64 pc:num stackpointer:int64 returnaddress:int64.
+         PAIRWISE (nonoverlapping : int64 # num -> int64 # num -> bool)
+           [(word pc : int64), LENGTH keccak_f1600_x4_avx2_mc;
+            word_sub stackpointer (word 799 : int64), 799; bitstate_in, 800; rc_pointer, 192;
+            rho8_ptr, 32; rho56_ptr, 32; stackpointer, 8]
+         ==> ensures x86
+               (\s:x86state.
+                 bytes_loaded s (word pc : int64) keccak_f1600_x4_avx2_mc
+                 /\ read RIP s = (word pc : int64)
+                 /\ read RSP s = stackpointer
+                 /\ read (memory :> bytes64 stackpointer) s = returnaddress
+                 /\ C_ARGUMENTS [bitstate_in; rc_pointer; rho8_ptr; rho56_ptr] s
+                 /\ read events s = e)
+               (\s:x86state.
+                 read RIP s = returnaddress
+                 /\ read RSP s = word_add stackpointer (word 8 : int64)
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2
+                         = f_events rc_pointer rho8_ptr rho56_ptr bitstate_in pc stackpointer
+                             returnaddress
+                      /\ memaccess_inbounds e2
+                           [bitstate_in, 800; rc_pointer, 192; rho8_ptr, 32; rho56_ptr, 32;
+                            word_sub stackpointer (word 799 : int64), 799; stackpointer, 8]
+                           [bitstate_in, 800; word_sub stackpointer (word 799 : int64), 799;
+                            stackpointer, 8]))
+               (\s:x86state s':x86state. T)

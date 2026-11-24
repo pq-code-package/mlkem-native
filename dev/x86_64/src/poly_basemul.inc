@@ -63,16 +63,16 @@ vpmullw _b, _qinv, _b_lo
 
 /* Compute low-parts of monomials in (a + bX) * (c + dX),
  * using Montgomery twists calculated before. */
-vpmullw _a_lo, _c,  _r0
-vpmullw _a_lo, _d,  _s0
-vpmullw _b_lo, _dz, _r1
-vpmullw _b_lo, _c,  _s1
+vpmullw _c, _a_lo,  _r0
+vpmullw _d, _a_lo,  _s0
+vpmullw _dz, _b_lo, _r1
+vpmullw _c, _b_lo,  _s1
 
 /* Compute the second high multiplication in Montgomery multiplication. */
 vpmulhw _r0, _q, _r0
-vpmulhw _s0, _q, _s0
-vpmulhw _r1, _q, _r1
-vpmulhw _s1, _q, _s1
+vpmulhw _q, _s0, _s0
+vpmulhw _q, _r1, _r1
+vpmulhw _q, _s1, _s1
 
 /* Compute high-parts of monomials in (a + bX) * (c + dX). */
 vpmulhw _a, _c,  _ac_hi

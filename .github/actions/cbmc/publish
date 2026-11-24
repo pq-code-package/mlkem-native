@@ -1,0 +1,189 @@
+#!/usr/bin/env bash
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+# Publish the CBMC results for one landed merge-queue tip.
+#
+# The merge-group run uploads one result artifact for every ML-KEM parameter
+# set in which proofs ran. Each result JSON contains only those proofs. This
+# script finds that run, validates the available result artifacts, and merges
+# the records in each JSON into the complete gh-pages baseline. Proofs absent
+# from a partial result keep their previous records.
+#
+# Every runtime and failure record stores the commit at which it was measured.
+# A delayed publisher keeps records that already come from a later commit.
+# The published JSON need not account for every intervening main commit: each
+# invocation amends the latest available gh-pages snapshot with its own result.
+#
+# The script takes no positional arguments. It requires these environment
+# variables:
+#
+# - GH_PAGES_ROOT: checkout of the gh-pages branch to update.
+# - GH_TOKEN: GitHub token used to inspect artifacts and push gh-pages.
+# - GITHUB_REPOSITORY: owner and repository name used by gh and git.
+# - GITHUB_SHA: landed main commit whose merge-group results are published.
+# - RUNNER_TEMP: temporary directory used for downloaded artifacts.
+# - SOURCE_ROOT: checkout of GITHUB_SHA, used to inspect the current proofs.
+#
+# On success, the script commits changed baselines and pushes them to gh-pages.
+# If another job updates gh-pages first, it discards the local merge, fetches
+# the new snapshot, recomputes the merge, and tries again, up to five attempts
+# in total. It never rebases a JSON change computed from an older snapshot. A
+# run without result artifacts changes nothing.
+#
+# Publication fails if GITHUB_SHA has no merge-queue run, for example after a
+# push that bypassed the queue. The baseline then picks up that commit's
+# changes only when later runs rerun the affected proofs.
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+# Emit a GitHub Actions error annotation and stop publication.
+fail()
+{
+  echo "::error::$*" >&2
+  exit 1
+}
+
+# Validate and merge every available parameter-set result artifact.
+merge_results()
+{
+  local artifacts=$1
+  local work_dir=$2
+  local artifact artifact_dir file_count parameter_set result
+  local result_name result_parameter_set target
+
+  while IFS= read -r artifact; do
+    artifact_dir="$work_dir/results/$artifact"
+    parameter_set=${artifact#cbmc-results-mlkem-k}
+    case "$parameter_set" in
+      2) result_name=mlkem-512.json ;;
+      3) result_name=mlkem-768.json ;;
+      4) result_name=mlkem-1024.json ;;
+      *) fail "Unexpected CBMC result artifact: $artifact" ;;
+    esac
+    result="$artifact_dir/dev/cbmc/$result_name"
+    file_count=$(find "$artifact_dir" -type f | wc -l)
+    if [ "$file_count" -ne 1 ] || [ ! -f "$result" ]; then
+      fail "$artifact must contain only dev/cbmc/$result_name"
+    fi
+    result_parameter_set=$(jq -r '.mlkem_k // empty' "$result")
+    if [ "$result_parameter_set" != "$parameter_set" ]; then
+      fail "$artifact contains MLKEM_K=$result_parameter_set"
+    fi
+    target=${result#"$artifact_dir/"}
+    "$MERGE_SCRIPT" "$target" "$result"
+  done <<<"$artifacts"
+}
+
+# Download the result artifacts for the landed merge-queue tip.
+prepare_results()
+{
+  local artifact_data invalid_artifacts
+
+  RUN_ID=$(
+    gh api \
+      "repos/$GITHUB_REPOSITORY/actions/workflows/all.yml/runs?event=merge_group&head_sha=$GITHUB_SHA" \
+      --jq '.workflow_runs | max_by(.created_at) | .id // empty'
+  )
+  if [ -z "$RUN_ID" ]; then
+    fail "$GITHUB_SHA has no merge queue run"
+  fi
+
+  artifact_data=$(
+    gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts?per_page=100"
+  )
+  WORK_DIR=$(mktemp -d "$RUNNER_TEMP/cbmc-publish.XXXXXX")
+  RESULT_ARTIFACTS=$(
+    jq -r '
+      .artifacts[].name
+      | select(startswith("cbmc-results-"))
+    ' <<<"$artifact_data" | sort
+  )
+  invalid_artifacts=$(
+    grep -Ev '^cbmc-results-mlkem-k[234]$' <<<"$RESULT_ARTIFACTS" || true
+  )
+  if [ -n "$invalid_artifacts" ]; then
+    printf '%s\n' "$invalid_artifacts"
+    fail "Unexpected CBMC result artifacts"
+  fi
+
+  if [ -n "$RESULT_ARTIFACTS" ]; then
+    gh run download "$RUN_ID" -R "$GITHUB_REPOSITORY" \
+      --pattern 'cbmc-results-*' \
+      --dir "$WORK_DIR/results"
+  fi
+}
+
+# Replace the local gh-pages checkout with the current remote branch.
+refresh_gh_pages()
+{
+  git fetch --no-tags "$REMOTE" gh-pages
+  git reset --hard FETCH_HEAD
+  git -C "$SOURCE_ROOT" fetch --no-tags origin main
+}
+
+# Merge the prepared result into the current snapshot and commit the update.
+commit_results()
+{
+  HAS_CHANGES=false
+  merge_results "$RESULT_ARTIFACTS" "$WORK_DIR"
+  git add dev/cbmc
+  if git diff --cached --quiet; then
+    echo "The current gh-pages snapshot already contains these results"
+    return
+  fi
+  git commit -m "Update CBMC results (${GITHUB_SHA::7})"
+  HAS_CHANGES=true
+}
+
+: "${GH_PAGES_ROOT:?}"
+: "${GH_TOKEN:?}"
+: "${GITHUB_REPOSITORY:?}"
+: "${GITHUB_SHA:?}"
+: "${RUNNER_TEMP:?}"
+: "${SOURCE_ROOT:?}"
+
+MERGE_SCRIPT="$SOURCE_ROOT/.github/actions/cbmc/merge"
+
+cd "$GH_PAGES_ROOT"
+
+prepare_results
+if [ -z "$RESULT_ARTIFACTS" ]; then
+  echo "The merge-queue run produced no CBMC results"
+  exit 0
+fi
+
+REMOTE="https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY"
+git config user.name "github-actions[bot]"
+git config user.email \
+  "41898282+github-actions[bot]@users.noreply.github.com"
+
+attempts=5
+for attempt in $(seq "$attempts"); do
+  refresh_gh_pages
+  base_sha=$(git rev-parse HEAD)
+  commit_results
+  if [ "$HAS_CHANGES" != "true" ]; then
+    exit 0
+  fi
+  local_sha=$(git rev-parse HEAD)
+  if git push "$REMOTE" HEAD:gh-pages; then
+    exit 0
+  fi
+
+  git fetch --no-tags "$REMOTE" gh-pages
+  remote_sha=$(git rev-parse FETCH_HEAD)
+  if [ "$remote_sha" = "$local_sha" ]; then
+    echo "The CBMC results were published despite the reported push failure"
+    exit 0
+  fi
+  if [ "$remote_sha" = "$base_sha" ]; then
+    fail "Failed to push CBMC results without a concurrent gh-pages update"
+  fi
+  if [ "$attempt" -eq "$attempts" ]; then
+    fail "gh-pages changed during each of $attempts publication attempts"
+  fi
+  echo "gh-pages changed during publication; recomputing the merge"
+done

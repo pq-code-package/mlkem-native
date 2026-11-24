@@ -1,0 +1,113 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mlkem_nttfrombytes_avx2_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mlkem_nttfrombytes_avx2_asm MLKEM_NTTFROMBYTES_NOIBT_SUBROUTINE_CORRECT
+  |- !r:int64 a:int64 l:((12 word) list) pc:num.
+       aligned 32 r
+       /\ nonoverlapping ((word pc : int64), LENGTH mlkem_frombytes_tmc) (a, 384)
+       /\ nonoverlapping ((word pc : int64), LENGTH mlkem_frombytes_tmc) (r, 512)
+       /\ nonoverlapping (a, 384) (r, 512)
+       /\ nonoverlapping ({stackpointer:int64}, 8) (r, 512)
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mlkem_frombytes_tmc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = {stackpointer:int64}
+               /\ read (memory :> bytes64 {stackpointer:int64}) s = {returnaddress:int64}
+               /\ C_ARGUMENTS [r; a] s
+               /\ read (memory :> bytes (a, 384)) s = num_of_wordlist l)
+             (\s:x86state.
+               read RIP s = {returnaddress:int64}
+               /\ read RSP s = word_add {stackpointer:int64} (word 8 : int64)
+               /\ (LENGTH l = 256
+                  ==> read (memory :> bytes (r, 512)) s
+                      = num_of_wordlist (MAP (word_zx : 12 word -> int16) (unpermute_list l))))
+             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [RSP]
+             ,, MAYCHANGE [memory :> bytes (r, 512)])
+
+theorem mlkem_nttfrombytes_avx2_asm MLKEM_NTTFROMBYTES_NOIBT_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> num -> int64 -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) r:int64 a:int64 pc:num stackpointer:int64
+        returnaddress:int64.
+         aligned 32 r
+         /\ nonoverlapping ((word pc : int64), LENGTH mlkem_frombytes_tmc) (a, 384)
+         /\ nonoverlapping ((word pc : int64), LENGTH mlkem_frombytes_tmc) (r, 512)
+         /\ nonoverlapping (a, 384) (r, 512)
+         /\ nonoverlapping (stackpointer, 8) (a, 384)
+         /\ nonoverlapping (stackpointer, 8) (r, 512)
+         ==> ensures x86
+               (\s:x86state.
+                 bytes_loaded s (word pc : int64) mlkem_frombytes_tmc
+                 /\ read RIP s = (word pc : int64)
+                 /\ read RSP s = stackpointer
+                 /\ read (memory :> bytes64 stackpointer) s = returnaddress
+                 /\ C_ARGUMENTS [r; a] s
+                 /\ read events s = e)
+               (\s:x86state.
+                 read RIP s = returnaddress
+                 /\ read RSP s = word_add stackpointer (word 8 : int64)
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events a r pc stackpointer returnaddress
+                      /\ memaccess_inbounds e2 [a, 384; r, 512; stackpointer, 8]
+                           [r, 512; stackpointer, 8]))
+               (\s:x86state s':x86state. T)
+
+theorem mlkem_nttfrombytes_avx2_asm MLKEM_NTTFROMBYTES_SUBROUTINE_CORRECT
+  |- !r:int64 a:int64 l:((12 word) list) pc:num.
+       aligned 32 r
+       /\ nonoverlapping ((word pc : int64), LENGTH mlkem_frombytes_mc) (a, 384)
+       /\ nonoverlapping ((word pc : int64), LENGTH mlkem_frombytes_mc) (r, 512)
+       /\ nonoverlapping (a, 384) (r, 512)
+       /\ nonoverlapping ({stackpointer:int64}, 8) (r, 512)
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mlkem_frombytes_mc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = {stackpointer:int64}
+               /\ read (memory :> bytes64 {stackpointer:int64}) s = {returnaddress:int64}
+               /\ C_ARGUMENTS [r; a] s
+               /\ read (memory :> bytes (a, 384)) s = num_of_wordlist l)
+             (\s:x86state.
+               read RIP s = {returnaddress:int64}
+               /\ read RSP s = word_add {stackpointer:int64} (word 8 : int64)
+               /\ (LENGTH l = 256
+                  ==> read (memory :> bytes (r, 512)) s
+                      = num_of_wordlist (MAP (word_zx : 12 word -> int16) (unpermute_list l))))
+             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [RSP]
+             ,, MAYCHANGE [memory :> bytes (r, 512)])
+
+theorem mlkem_nttfrombytes_avx2_asm MLKEM_NTTFROMBYTES_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> num -> int64 -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) r:int64 a:int64 pc:num stackpointer:int64
+        returnaddress:int64.
+         aligned 32 r
+         /\ nonoverlapping ((word pc : int64), LENGTH mlkem_frombytes_mc) (a, 384)
+         /\ nonoverlapping ((word pc : int64), LENGTH mlkem_frombytes_mc) (r, 512)
+         /\ nonoverlapping (a, 384) (r, 512)
+         /\ nonoverlapping (stackpointer, 8) (a, 384)
+         /\ nonoverlapping (stackpointer, 8) (r, 512)
+         ==> ensures x86
+               (\s:x86state.
+                 bytes_loaded s (word pc : int64) mlkem_frombytes_mc
+                 /\ read RIP s = (word pc : int64)
+                 /\ read RSP s = stackpointer
+                 /\ read (memory :> bytes64 stackpointer) s = returnaddress
+                 /\ C_ARGUMENTS [r; a] s
+                 /\ read events s = e)
+               (\s:x86state.
+                 read RIP s = returnaddress
+                 /\ read RSP s = word_add stackpointer (word 8 : int64)
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events a r pc stackpointer returnaddress
+                      /\ memaccess_inbounds e2 [a, 384; r, 512; stackpointer, 8]
+                           [r, 512; stackpointer, 8]))
+               (\s:x86state s':x86state. T)
