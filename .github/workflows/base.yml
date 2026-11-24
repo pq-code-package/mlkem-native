@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        system: [ubuntu-latest, ubuntu-24.04-arm]
+        system: [ubuntu-latest, ubuntu-26.04-arm]
     name: Linting
     runs-on: ${{ matrix.system }}
     steps:
@@ -31,7 +31,7 @@ jobs:
         external:
          - ${{ github.repository_owner != 'pq-code-package' }}
         target:
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'aarch64'
          - runner: ubuntu-latest
            name: 'x86_64'
@@ -47,7 +47,7 @@ jobs:
         exclude:
           - {external: true,
              target: {
-               runner: ubuntu-24.04-arm,
+               runner: ubuntu-26.04-arm,
                name: 'aarch64'
              }}
     name: Quickcheck (${{ matrix.target.name }})
@@ -74,7 +74,7 @@ jobs:
         external:
          - ${{ github.repository_owner != 'pq-code-package' }}
         target:
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'aarch64'
          - runner: ubuntu-latest
            name: 'x86_64'
@@ -82,7 +82,7 @@ jobs:
         exclude:
           - {external: true,
              target: {
-               runner: ubuntu-24.04-arm,
+               runner: ubuntu-26.04-arm,
                name: 'aarch64'
              }}
     name: Quickcheck ACVP (${{ matrix.target.name }}, ${{ matrix.acvp-version }})
@@ -103,7 +103,7 @@ jobs:
         external:
          - ${{ github.repository_owner != 'pq-code-package' }}
         target:
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'aarch64'
          - runner: ubuntu-latest
            name: 'x86_64'
@@ -119,7 +119,7 @@ jobs:
         exclude:
           - {external: true,
              target: {
-               runner: ubuntu-24.04-arm,
+               runner: ubuntu-26.04-arm,
                name: 'aarch64'
              }}
     name: Quickcheck bench (${{ matrix.target.name }})
@@ -157,14 +157,14 @@ jobs:
         external:
          - ${{ github.repository_owner != 'pq-code-package' }}
         target:
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'aarch64'
          - runner: ubuntu-latest
            name: 'x86_64'
         exclude:
           - {external: true,
              target: {
-               runner: ubuntu-24.04-arm,
+               runner: ubuntu-26.04-arm,
                name: 'aarch64'
              }}
     name: Quickcheck C90 (${{ matrix.target.name }})
@@ -243,7 +243,7 @@ jobs:
     name: Quickcheck lib
     strategy:
       matrix:
-        system: [macos-latest, xcode-27, macos-15-intel, ubuntu-latest, ubuntu-24.04-arm]
+        system: [macos-latest, xcode-27, macos-15-intel, ubuntu-latest, ubuntu-26.04-arm]
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -256,7 +256,7 @@ jobs:
     name: Examples
     strategy:
       matrix:
-        system: [macos-latest, xcode-27, macos-15-intel, ubuntu-latest, ubuntu-24.04-arm]
+        system: [macos-latest, xcode-27, macos-15-intel, ubuntu-latest, ubuntu-26.04-arm]
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -312,7 +312,7 @@ jobs:
              name: Simplified
            - arg: '--no-simplify'
              name: Unmodified
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     name: AArch64 dev backend (${{ matrix.backend.name }}, ${{ matrix.simplify.name }})
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -350,7 +350,7 @@ jobs:
         external:
          - ${{ github.repository_owner != 'pq-code-package' }}
         target:
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'aarch64'
          - runner: ubuntu-latest
            name: 'x86_64'

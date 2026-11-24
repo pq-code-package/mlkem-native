@@ -5,6 +5,8 @@ self-hosted-runner:
   labels:
     # actionlint 1.7.12 does not recognize the Xcode-versioned images yet
     - xcode-27
+    # actionlint 1.7.12 does not recognize the Ubuntu 26.04 images yet
+    - ubuntu-26.04-arm
     # PQCP runners
     - pqcp-arm64
     - pqcp-ppc64

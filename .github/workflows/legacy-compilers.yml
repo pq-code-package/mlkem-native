@@ -25,7 +25,7 @@ jobs:
       matrix:
         cflags: [ "-O0", "-Os", "-O3" ]
         target:
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'aarch64'
          - runner: ubuntu-latest
            name: 'x86_64'
@@ -579,7 +579,7 @@ jobs:
       fail-fast: false
       max-parallel: 10
       matrix:
-        system: [ubuntu-latest, ubuntu-24.04-arm]
+        system: [ubuntu-latest, ubuntu-26.04-arm]
         compiler:
           - { family: gcc,   version: "4.8", shell: gcc48 }
           - { family: gcc,   version: "4.9", shell: gcc49 }
