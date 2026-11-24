@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795523100745,
+  "lastUpdate": 1795523154855,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -69792,6 +69792,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 91504,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "rodchap@amazon.com",
+            "name": "Rod Chapman",
+            "username": "rod-chapman"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "04711228bb8c5c7f6fe81930c5e221215a78c236",
+          "message": "Document alignment for `MLK_CUSTOM_ALLOC`\n\nCustom allocators supply storage for large local structures. The\nallocation macros require `MLK_DEFAULT_ALIGN` alignment for every\nnon-NULL pointer they return. Plain `malloc()` does not guarantee that\nalignment.\n\nState the requirement for non-NULL pointers in the allocation comment\nand point to the heap and bump allocator examples.\n\nSigned-off-by: Rod Chapman <rodchap@amazon.com>\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-24T10:25:46Z",
+          "tree_id": "c853b7ed94596c2cbb34d652f51c0e73b4cea6b5",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/04711228bb8c5c7f6fe81930c5e221215a78c236"
+        },
+        "date": 1795522872274,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 27763,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 31986,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 41282,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 46541,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 50482,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 63422,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 68322,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 74205,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 91044,
             "unit": "cycles"
           }
         ]
