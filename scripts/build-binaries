@@ -82,6 +82,14 @@ COMMON_FLAGS = (
     "-Wno-redundant-decls",
 )
 
+BUILD_FLAGS = (
+    "-g",
+    "-gdwarf-4",
+    "-gsplit-dwarf",
+    "-fPIC",
+    "-fno-stack-protector",
+)
+
 
 class BuildError(RuntimeError):
     """A build or validation step failed."""
@@ -320,21 +328,15 @@ def build_layout(
         f"-fdebug-prefix-map={root}=.",
         f"-fdebug-prefix-map={root.resolve()}=.",
     )
-    split_debug_flags = (
-        "-g",
-        "-gdwarf-4",
-        "-gsplit-dwarf",
-        "-fPIC",
-        *debug_prefix_flags,
-    )
-
     if layout == "multilevel":
         objects_dir.mkdir(parents=True, exist_ok=True)
         example = root / "examples" / "multilevel_build"
         build_dir = os.path.relpath(objects_dir, example)
         environment = os.environ.copy()
         environment["CC"] = cc_name
-        environment["CFLAGS"] = " ".join((f"-O{optimization}", *split_debug_flags))
+        environment["CFLAGS"] = " ".join(
+            (f"-O{optimization}", *BUILD_FLAGS, *debug_prefix_flags)
+        )
         run(
             [
                 "make",
@@ -359,7 +361,8 @@ def build_layout(
                 cc_name,
                 *COMMON_FLAGS,
                 f"-O{optimization}",
-                *split_debug_flags,
+                *BUILD_FLAGS,
+                *debug_prefix_flags,
                 f"-I{example / 'mlkem_native'}",
                 "-c",
                 str(example / "mlkem_native_all.c"),
@@ -421,6 +424,8 @@ def build_layout(
             f"{shared_object} exports {exports}, expected {list(PUBLIC_SYMBOLS)}"
         )
     undefined_symbols = global_dynamic_symbols(shared_object, cwd=root, defined=False)
+    if any(symbol.startswith("__stack_chk_") for symbol in undefined_symbols):
+        raise BuildError(f"{shared_object} imports stack protector symbols")
     relocations = dynamic_relocations(shared_object, undefined_symbols, cwd=root)
 
     compile_test_program(
@@ -497,6 +502,7 @@ def source_commit(root):
 
 
 def build_manifest(source, stage, rebuild_command):
+    compile_flags = " ".join(BUILD_FLAGS)
     toolchains = {}
     artifacts = {layout: {} for layout in LAYOUTS}
 
@@ -550,12 +556,7 @@ def build_manifest(source, stage, rebuild_command):
         "matrix": {
             "layouts": list(LAYOUTS),
             "optimizations": [f"O{value}" for value in OPTIMIZATIONS],
-            "compile_flags": [
-                "-g",
-                "-gdwarf-4",
-                "-gsplit-dwarf",
-                "-fPIC",
-            ],
+            "compile_flags": list(BUILD_FLAGS),
             "primary_artifact": "libmlkem.so",
             "debug_artifact": "libmlkem.so.dwp",
             "artifact_count": ARTIFACT_COUNT,
@@ -605,8 +606,8 @@ def build_manifest(source, stage, rebuild_command):
                     "archive into a shared object."
                 ),
                 "compile_command": (
-                    "env CC=<cc> CFLAGS='-O<level> -g -gdwarf-4 "
-                    "-gsplit-dwarf -fPIC -fdebug-prefix-map=<root>=.' "
+                    f"env CC=<cc> CFLAGS='-O<level> {compile_flags} "
+                    "-fdebug-prefix-map=<root>=.' "
                     "make -C examples/multilevel_build "
                     "BUILD_DIR=<work>/objects AUTO=0 mlkem_objs -j2"
                 ),
@@ -620,8 +621,8 @@ def build_manifest(source, stage, rebuild_command):
                     "object."
                 ),
                 "compile_command": (
-                    "<cc> <warning-flags> -O<level> -g -gdwarf-4 "
-                    "-gsplit-dwarf -fPIC -fdebug-prefix-map=<root>=. "
+                    f"<cc> <warning-flags> -O<level> {compile_flags} "
+                    "-fdebug-prefix-map=<root>=. "
                     "-Iexamples/monolithic_build_multilevel/mlkem_native "
                     "-c examples/monolithic_build_multilevel/"
                     "mlkem_native_all.c -o <work>/mlkem_native.o"
@@ -636,6 +637,7 @@ def build_manifest(source, stage, rebuild_command):
                 f"Shared object is {platform.machine()} ET_DYN "
                 "with SONAME libmlkem.so.",
                 "DF_SYMBOLIC is set and no dynamic TEXTREL is present.",
+                "No stack protector symbols are imported.",
                 "No LOAD segment is both writable and executable.",
                 "Exactly the 21 public ML-KEM symbols are exported.",
                 "Every dynamic relocation targets an undefined symbol.",
