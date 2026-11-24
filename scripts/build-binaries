@@ -17,6 +17,7 @@ import json
 import os
 import platform
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -32,6 +33,11 @@ TOOLCHAINS = {
     "clang12": {"family": "Clang", "cc": "clang"},
     "clang17": {"family": "Clang", "cc": "clang"},
     "clang23": {"family": "Clang", "cc": "clang"},
+}
+
+ELF_MACHINES = {
+    "aarch64": "AArch64",
+    "x86_64": "Advanced Micro Devices X86-64",
 }
 
 LAYOUTS = ("multilevel", "multilevel-mono")
@@ -181,8 +187,9 @@ def validate_elf(shared_object, debug_package, *, cwd):
     header = run(["readelf", "-h", str(shared_object)], cwd=cwd)
     if not re.search(r"Type:\s+DYN", header):
         raise BuildError(f"{shared_object} is not an ET_DYN shared object")
-    if "AArch64" not in header:
-        raise BuildError(f"{shared_object} is not an AArch64 object")
+    host = platform.machine()
+    if not re.search(rf"^ *Machine: +{ELF_MACHINES[host]}$", header, re.M):
+        raise BuildError(f"{shared_object} is not a {host} object")
 
     dynamic = run(["readelf", "-d", str(shared_object)], cwd=cwd)
     if "SYMBOLIC" not in dynamic:
@@ -489,7 +496,7 @@ def source_commit(root):
     return run(["git", "rev-parse", "HEAD"], cwd=root).strip()
 
 
-def build_manifest(root, stage):
+def build_manifest(source, stage, rebuild_command):
     toolchains = {}
     artifacts = {layout: {} for layout in LAYOUTS}
 
@@ -510,13 +517,13 @@ def build_manifest(root, stage):
         "schema_version": 3,
         "generated_at": generated_at,
         "source": {
-            "commit": source_commit(root),
-            "root": str(root),
-            "host": " ".join(platform.uname()),
+            "commit": source_commit(source),
+            "root": str(source),
+            "host": f"{platform.system()} {platform.machine()}",
         },
         "rebuild": {
             "script": "scripts/build-binaries",
-            "command": "scripts/build-binaries",
+            "command": rebuild_command,
             "replacement": (
                 "The script stages and validates the full matrix before "
                 "replacing binaries/, and restores the prior directory if "
@@ -529,7 +536,7 @@ def build_manifest(root, stage):
                 "rationale": (
                     "Four generations with major-version labels 4, 8, 12, "
                     "and 16; GCC 4.9 is the oldest selected compiler with "
-                    "working split-DWARF output on AArch64."
+                    "working split-DWARF output in this matrix."
                 ),
             },
             "clang": {
@@ -626,7 +633,8 @@ def build_manifest(root, stage):
         "validation": {
             "status": "passed",
             "checks_per_artifact": [
-                "Shared object is AArch64 ET_DYN with SONAME libmlkem.so.",
+                f"Shared object is {platform.machine()} ET_DYN "
+                "with SONAME libmlkem.so.",
                 "DF_SYMBOLIC is set and no dynamic TEXTREL is present.",
                 "No LOAD segment is both writable and executable.",
                 "Exactly the 21 public ML-KEM symbols are exported.",
@@ -712,7 +720,7 @@ def safe_remove(path, root):
         shutil.rmtree(path)
 
 
-def coordinator(root):
+def coordinator(root, source):
     stage = root / ".binaries-build"
     backup = root / ".binaries-backup"
     output = root / "binaries"
@@ -744,14 +752,19 @@ def coordinator(root):
                     str(script),
                     "--worker",
                     compiler_id,
+                    "--source",
+                    str(source),
                     "--stage",
                     str(stage),
                 ],
-                cwd=root,
+                cwd=source,
                 capture=False,
             )
 
-        manifest = build_manifest(root, stage)
+        rebuild_command = "scripts/build-binaries"
+        if source != root:
+            rebuild_command += f" --source {shlex.quote(str(source))}"
+        manifest = build_manifest(source, stage, rebuild_command)
         for work_dir in stage.rglob(".work"):
             shutil.rmtree(work_dir)
         shutil.rmtree(stage / ".metadata")
@@ -789,6 +802,11 @@ def coordinator(root):
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "--source",
+        type=Path,
+        help="build from this checkout instead of the one containing the script",
+    )
+    parser.add_argument(
         "--worker",
         choices=TOOLCHAINS,
         help=argparse.SUPPRESS,
@@ -804,20 +822,23 @@ def parse_args():
 def main():
     args = parse_args()
     root = Path(__file__).resolve().parent.parent
+    source = args.source.resolve() if args.source is not None else root
+    if platform.system() != "Linux" or platform.machine() not in ELF_MACHINES:
+        raise BuildError("builds require Linux on AArch64 or x86_64")
 
     if args.worker is not None:
         if args.stage is None:
             raise BuildError("--worker requires --stage")
         compiler_id = args.worker
         worker(
-            root,
+            source,
             args.stage.resolve(),
             compiler_id,
             TOOLCHAINS[compiler_id]["cc"],
         )
         return
 
-    coordinator(root)
+    coordinator(root, source)
 
 
 if __name__ == "__main__":
