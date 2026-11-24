@@ -59,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [ ubuntu-24.04, ubuntu-24.04-arm, macos-latest ]
+        runner: [ ubuntu-24.04, ubuntu-26.04-arm, macos-latest ]
     name: build nix cache (${{ matrix.runner }})
     runs-on: ${{ matrix.runner }}
     steps:

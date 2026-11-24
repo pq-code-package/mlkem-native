@@ -37,59 +37,59 @@ jobs:
            arch: mac
            platform: native
            nix_shell: ci
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'aarch64'
            arch: aarch64
            platform: native
            nix_shell: ci
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'aarch64, no Neon'
            arch: aarch64
            platform: native
            nix_shell: ci
            cflags: '-march=armv8-a+nosimd'
            extra_args: '--no-auto'
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'x86_64, cross'
            arch: x86_64
            platform: linux/x86_64
            nix_shell: cross-x86_64
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'x86_64, cross, no AVX2'
            arch: x86_64
            platform: linux/x86_64-no-avx2
            nix_shell: cross-x86_64
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'riscv64, cross, VLEN=128'
            arch: riscv64
            platform: linux/riscv64-rvv128
            nix_shell: cross-riscv64
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'riscv64, cross, VLEN=256'
            arch: riscv64
            platform: linux/riscv64-rvv256
            nix_shell: cross-riscv64
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'riscv64, cross, VLEN=512'
            arch: riscv64
            platform: linux/riscv64-rvv512
            nix_shell: cross-riscv64
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'riscv64, cross, VLEN=1024'
            arch: riscv64
            platform: linux/riscv64-rvv1024
            nix_shell: cross-riscv64
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'riscv32, cross'
            arch: riscv32
            platform: linux/riscv32
            nix_shell: cross-riscv32
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'ppc64le, cross, POWER8'
            arch: ppc64le
            platform: linux/ppc64le-power8
            nix_shell: cross-ppc64le
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'ppc64le, cross, POWER7 fallback'
            arch: ppc64le
            platform: linux/ppc64le-power7
@@ -267,7 +267,7 @@ jobs:
       matrix:
         cflags: [ "-O0", "-Os", "-O3" ]
         target:
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'aarch64'
          - runner: ubuntu-latest
            name: 'x86_64'
@@ -462,7 +462,7 @@ jobs:
         target:
           - runner: ubuntu-latest
             name: x86_64
-          - runner: ubuntu-24.04-arm
+          - runner: ubuntu-26.04-arm
             name: aarch64
         cflags: ['-O3', '-Os']
         exclude:
@@ -501,7 +501,7 @@ jobs:
         target:
           - runner: ubuntu-latest
             name: x86_64
-          - runner: ubuntu-24.04-arm
+          - runner: ubuntu-26.04-arm
             name: aarch64
         cflags: ['-O3', '-Os']
         exclude:
@@ -542,14 +542,14 @@ jobs:
         external:
          - ${{ github.repository_owner != 'pq-code-package' }}
         target:
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'ubuntu-latest (aarch64)'
          - runner: ubuntu-latest
            name: 'ubuntu-latest (x86_64)'
         exclude:
           - {external: true,
              target: {
-               runner: ubuntu-24.04-arm,
+               runner: ubuntu-26.04-arm,
                name: 'ubuntu-latest (aarch64)',
              }}
           - {external: true,
@@ -602,14 +602,14 @@ jobs:
         external:
          - ${{ github.repository_owner != 'pq-code-package' }}
         target:
-         - runner: ubuntu-24.04-arm
+         - runner: ubuntu-26.04-arm
            name: 'aarch64'
          - runner: ubuntu-latest
            name: 'x86_64'
         exclude:
           - {external: true,
              target: {
-               runner: ubuntu-24.04-arm,
+               runner: ubuntu-26.04-arm,
                name: 'aarch64'
              }}
     name: Check API consistency
@@ -825,7 +825,7 @@ jobs:
             nix_shell: 'cross-autogen'
             nix_cache: 'true'
             extra_args: '--force-cross'
-          - system: ubuntu-24.04-arm
+          - system: ubuntu-26.04-arm
             nix_shell: 'cross-autogen'
             nix_cache: 'true'
             extra_args: '--force-cross'
@@ -876,7 +876,7 @@ jobs:
             nix_shell: 'hol_light-cross-aarch64'
             nix_cache: 'true'
             extra_args: '--force-cross aarch64 x86_64'
-          - system: ubuntu-24.04-arm
+          - system: ubuntu-26.04-arm
             nix_shell: 'hol_light-cross-x86_64'
             nix_cache: 'true'
             extra_args: '--force-cross aarch64 x86_64'

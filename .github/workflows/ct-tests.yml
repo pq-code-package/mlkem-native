@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       max-parallel: 10
       matrix:
-        system: [ubuntu-latest, ubuntu-24.04-arm]
+        system: [ubuntu-latest, ubuntu-26.04-arm]
         # Oldest available + 3 latest per family; intermediate versions run in legacy-compilers.
         nix-shell:
           - valgrind-varlat_clang6
