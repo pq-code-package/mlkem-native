@@ -13,6 +13,8 @@
 /* Part of backend API */
 #define MLK_USE_NATIVE_FIPS202_X1
 /* Guard for assembly file */
+/* Only needed if the built-in FIPS202 code is used. */
+#if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)
 #define MLK_FIPS202_AARCH64_NEED_X1_V84A
 
 #if !defined(__ASSEMBLER__)
@@ -32,4 +34,5 @@ static MLK_INLINE int mlk_keccak_f1600_x1_native(uint64_t *state)
 }
 #endif /* !__ASSEMBLER__ */
 
+#endif /* !MLK_CONFIG_FIPS202_CUSTOM_HEADER */
 #endif /* !MLK_DEV_FIPS202_AARCH64_X1_V84A_H */
