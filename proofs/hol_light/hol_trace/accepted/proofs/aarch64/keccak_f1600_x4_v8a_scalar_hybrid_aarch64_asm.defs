@@ -9,8 +9,8 @@
 # with functions in binaries, through proofs/hol_light/bind.yml.
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 
-# keccak_f1600_x4_v8a_scalar_mc: 3876 bytes
-# sha256 37f341dc88063ac70a03797b63d860910077e80ce858e3a570aa9174f09fb4ef
+# keccak_f1600_x4_v8a_scalar_mc: 3892 bytes
+# sha256 98abf45532cc5efa6e786eb7a9d387b032a7f1a62abcd25d11a3950529a8b3ce
 definition keccak_f1600_x4_v8a_scalar_mc
   |- keccak_f1600_x4_v8a_scalar_mc
      = #x[ff 83 03 d1 f3 53 03 a9 f5 5b 04 a9 f7 63 05 a9 f9 6b 06 a9 fb 73 07 a9 fd 7b 08 a9 e8 27
@@ -140,6 +140,6 @@ definition keccak_f1600_x4_v8a_scalar_mc
           19 29 c9 4e 5a 29 cb 4e 19 68 81 ac 1b 69 c9 4e 5c 69 cb 4e 9b ac 9f 4c 99 29 cd 4e da 29
           cf 4e 19 68 81 ac 9b 69 cd 4e dc 69 cf 4e 9b ac 9f 4c 19 2a d1 4e 5a 2a d3 4e 19 68 81 ac
           1b 6a d1 4e 5c 6a d3 4e 9b ac 9f 4c 99 2a d5 4e da 2a d7 4e 19 68 81 ac 9b 6a d5 4e dc 6a
-          d7 4e 9b ac 9f 4c 18 00 00 fd 19 6b d8 4e 99 00 00 fd e8 27 49 6d ea 2f 4a 6d ec 37 4b 6d
-          ee 3f 4c 6d f3 53 43 a9 f5 5b 44 a9 f7 63 45 a9 f9 6b 46 a9 fb 73 47 a9 fd 7b 48 a9 ff 83
-          03 91 c0 03 5f d6]
+          d7 4e 9b ac 9f 4c 18 00 00 fd 19 6b d8 4e 99 00 00 fd ff 7f 00 a9 ff 7f 01 a9 ff 13 00 f9
+          ff 6b 00 f9 e8 27 49 6d ea 2f 4a 6d ec 37 4b 6d ee 3f 4c 6d f3 53 43 a9 f5 5b 44 a9 f7 63
+          45 a9 f9 6b 46 a9 fb 73 47 a9 fd 7b 48 a9 ff 83 03 91 c0 03 5f d6]

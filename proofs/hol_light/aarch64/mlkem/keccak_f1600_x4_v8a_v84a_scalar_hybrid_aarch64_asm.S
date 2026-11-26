@@ -943,6 +943,10 @@ Lmlk_keccak_f1600_x4_v8a_v84a_scalar_hybrid_done:
         str d24, [x0]
         trn2 v25.2d, v24.2d, v24.2d
         str d25, [x4]
+        stp xzr, xzr, [sp]
+        stp xzr, xzr, [sp, #0x10]
+        str xzr, [sp, #0x20]
+        str xzr, [sp, #0xd0]
         ldp d8, d9, [sp, #0x90]
         .cfi_restore d8
         .cfi_restore d9

@@ -977,6 +977,10 @@ let keccak_f1600_x4_v8a_scalar_mc = define_assert_from_elf
   0xfd000018;       (* arm_STR D24 X0 (Immediate_Offset (word 0)) *)
   0x4ed86b19;       (* arm_TRN2 Q25 Q24 Q24 64 128 *)
   0xfd000099;       (* arm_STR D25 X4 (Immediate_Offset (word 0)) *)
+  0xa9007fff;       (* arm_STP XZR XZR SP (Immediate_Offset (iword (&0))) *)
+  0xa9017fff;       (* arm_STP XZR XZR SP (Immediate_Offset (iword (&16))) *)
+  0xf90013ff;       (* arm_STR XZR SP (Immediate_Offset (word 32)) *)
+  0xf9006bff;       (* arm_STR XZR SP (Immediate_Offset (word 208)) *)
   0x6d4927e8;       (* arm_LDP D8 D9 SP (Immediate_Offset (iword (&144))) *)
   0x6d4a2fea;       (* arm_LDP D10 D11 SP (Immediate_Offset (iword (&160))) *)
   0x6d4b37ec;       (* arm_LDP D12 D13 SP (Immediate_Offset (iword (&176))) *)
@@ -1433,7 +1437,7 @@ let KECCAK_F1600_X4_V8A_SCALAR_HYBRID_CORRECT = prove
   ASM_REWRITE_TAC[round_constants; CONS_11; GSYM CONJ_ASSOC] THEN
   REWRITE_TAC[GSYM round_constants] THEN
   ENSURES_INIT_TAC "s0" THEN
-  ARM_STEPS_TAC KECCAK_F1600_X4_V8A_SCALAR_HYBRID_EXEC (1--83) THEN
+  ARM_STEPS_TAC KECCAK_F1600_X4_V8A_SCALAR_HYBRID_EXEC (1--87) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
   CONV_TAC(ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV) THEN
   CONV_TAC(ONCE_DEPTH_CONV NORMALIZE_RELATIVE_ADDRESS_CONV) THEN

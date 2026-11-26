@@ -425,6 +425,10 @@ mlk_keccak_f1600_x1_scalar_initial:
     ldr input_addr, [sp, #STACK_LOC_INPUT]
     store_state
 
+    // Zeroize the stack locals
+    stp xzr, xzr, [sp, #STACK_LOC_INPUT]
+    stp xzr, xzr, [sp, #STACK_LOC_COUNT]
+
     restore_gprs
     free_stack
     ret

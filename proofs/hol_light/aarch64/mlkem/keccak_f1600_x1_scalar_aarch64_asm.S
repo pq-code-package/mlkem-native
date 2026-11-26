@@ -346,6 +346,8 @@ Lmlk_keccak_f1600_x1_scalar_loop:
         stp x5, x10, [x0, #0xa0]
         stp x15, x20, [x0, #0xb0]
         str x25, [x0, #0xc0]
+        stp xzr, xzr, [sp]
+        stp xzr, xzr, [sp, #0x10]
         ldp x19, x20, [sp, #0x20]
         .cfi_restore x19
         .cfi_restore x20

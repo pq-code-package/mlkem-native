@@ -300,6 +300,8 @@ let keccak_f1600_x1_scalar_mc = define_assert_from_elf
   0xa90a2805;       (* arm_STP X5 X10 X0 (Immediate_Offset (iword (&160))) *)
   0xa90b500f;       (* arm_STP X15 X20 X0 (Immediate_Offset (iword (&176))) *)
   0xf9006019;       (* arm_STR X25 X0 (Immediate_Offset (word 192)) *)
+  0xa9007fff;       (* arm_STP XZR XZR SP (Immediate_Offset (iword (&0))) *)
+  0xa9017fff;       (* arm_STP XZR XZR SP (Immediate_Offset (iword (&16))) *)
   0xa94253f3;       (* arm_LDP X19 X20 SP (Immediate_Offset (iword (&32))) *)
   0xa9435bf5;       (* arm_LDP X21 X22 SP (Immediate_Offset (iword (&48))) *)
   0xa94463f7;       (* arm_LDP X23 X24 SP (Immediate_Offset (iword (&64))) *)
@@ -478,7 +480,7 @@ let KECCAK_F1600_X1_SCALAR_CORRECT = prove
     (*** The tail of deferred rotations and writeback ***)
 
     GHOST_REGLIST_TAC THEN
-    ARM_SIM_TAC KECCAK_F1600_X1_SCALAR_EXEC (1--38) THEN
+    ARM_SIM_TAC KECCAK_F1600_X1_SCALAR_EXEC (1--40) THEN
     CONV_TAC(LAND_CONV WORDLIST_FROM_MEMORY_CONV) THEN
     ASM_REWRITE_TAC[] THEN
     FIRST_X_ASSUM(fun th -> GEN_REWRITE_TAC RAND_CONV [SYM th]) THEN
