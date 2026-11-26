@@ -39,7 +39,7 @@ keccak_f1600_x1_scalar_aarch64_asm:
   arch: aarch64
   function: keccak_f1600_x1_scalar_aarch64_asm
   sha256:
-    keccak_f1600_x1_scalar_mc: d45ed9162249bf1d687fd21eacabfaa52916ec434c24e5afc44655b53f67f1e9
+    keccak_f1600_x1_scalar_mc: fdf7128bc3a63139df84170e9104c95724b26fd8103d8be4d8a2db29c43009c5
 keccak_f1600_x1_v84a_aarch64_asm:
   arch: aarch64
   function: keccak_f1600_x1_v84a_aarch64_asm
@@ -54,8 +54,8 @@ keccak_f1600_x4_avx2_asm:
   arch: x86_64
   function: keccak_f1600_x4_avx2_asm
   sha256:
-    keccak_f1600_x4_avx2_mc: 2bd09e9e4371ed5b6d497e4ed38c0b421d4b4cc6d922705969234f4ef5877c20
-    keccak_f1600_x4_avx2_tmc: 104052a6386f98adeb204ea627900283570d40550f22c3c71bfc9b3b83b5ef57
+    keccak_f1600_x4_avx2_mc: 3148bd9a466cb3bdb88a641928f80e7ac6a0ec9619ef152445decd760c707753
+    keccak_f1600_x4_avx2_tmc: 748d899957e8b2d313aedcb8913bbe898af69b7e3b339d72f721b5182bb206ff
 keccak_f1600_x4_avx512_asm:
   arch: x86_64
   function: keccak_f1600_x4_avx512_asm
@@ -66,12 +66,12 @@ keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm:
   arch: aarch64
   function: keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm
   sha256:
-    keccak_f1600_x4_v8a_scalar_mc: 37f341dc88063ac70a03797b63d860910077e80ce858e3a570aa9174f09fb4ef
+    keccak_f1600_x4_v8a_scalar_mc: 98abf45532cc5efa6e786eb7a9d387b032a7f1a62abcd25d11a3950529a8b3ce
 keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm:
   arch: aarch64
   function: keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm
   sha256:
-    keccak_f1600_x4_v8a_v84a_scalar_mc: 82b65b521af101118eeabaf1fda5bed7dfb5179d38fb132d24daa2d3873356e4
+    keccak_f1600_x4_v8a_v84a_scalar_mc: 6dc6d146f6e2c3b2dfa654c50be8736472a5c7679cc2739a22998f6bab0d41e7
 ntt_aarch64_asm:
   arch: aarch64
   function: mlkem_ntt_aarch64_asm

@@ -2453,6 +2453,12 @@ mlk_keccak_f1600_x4_v8a_scalar_hybrid_done:
     store_input_scalar 1
     store_input_vector
 
+    // Zeroize the stack locals
+    stp xzr, xzr, [sp, #STACK_OFFSET_INPUT]
+    stp xzr, xzr, [sp, #STACK_OFFSET_CONST_VECTOR]
+    str xzr, [sp, #STACK_OFFSET_OUTER]
+    str xzr, [sp, #STACK_LOC_0]
+
     restore_vregs
     restore_gprs
     free_stack

@@ -9,8 +9,8 @@
 # with functions in binaries, through proofs/hol_light/bind.yml.
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 
-# keccak_f1600_x4_avx2_mc: 2514 bytes
-# sha256 2bd09e9e4371ed5b6d497e4ed38c0b421d4b4cc6d922705969234f4ef5877c20
+# keccak_f1600_x4_avx2_mc: 2721 bytes
+# sha256 3148bd9a466cb3bdb88a641928f80e7ac6a0ec9619ef152445decd760c707753
 definition keccak_f1600_x4_avx2_mc
   |- keccak_f1600_x4_avx2_mc
      = #x[f3 0f 1e fa 49 89 e3 48 83 e4 e0 48 81 ec 00 03 00 00 c5 fe 6f 07 c5 fe 6f 9f c8 00 00 00
@@ -96,7 +96,14 @@ definition keccak_f1600_x4_avx2_mc
           48 01 00 00 c4 e3 6d 46 eb 20 c4 e3 6d 46 d3 31 c5 fe 6f 9c 24 c0 01 00 00 c4 e3 7d 46 e1
           20 c4 e3 7d 46 c1 31 c5 fe 7f af a0 00 00 00 c4 c3 7d 39 df 01 c5 fe 7f a7 68 01 00 00 c5
           fe 7f 97 30 02 00 00 c5 fe 7f 87 f8 02 00 00 c5 f9 d6 9f c0 00 00 00 c5 f9 17 9f 88 01 00
-          00 c5 79 d6 bf 50 02 00 00 c5 79 17 bf 18 03 00 00 c5 f8 77 4c 89 dc c3]
+          00 c5 79 d6 bf 50 02 00 00 c5 79 17 bf 18 03 00 00 c5 fd ef c0 c5 fe 7f 04 24 c5 fe 7f 44
+          24 20 c5 fe 7f 44 24 40 c5 fe 7f 44 24 60 c5 fe 7f 84 24 80 00 00 00 c5 fe 7f 84 24 a0 00
+          00 00 c5 fe 7f 84 24 c0 00 00 00 c5 fe 7f 84 24 e0 00 00 00 c5 fe 7f 84 24 00 01 00 00 c5
+          fe 7f 84 24 20 01 00 00 c5 fe 7f 84 24 40 01 00 00 c5 fe 7f 84 24 60 01 00 00 c5 fe 7f 84
+          24 80 01 00 00 c5 fe 7f 84 24 a0 01 00 00 c5 fe 7f 84 24 c0 01 00 00 c5 fe 7f 84 24 e0 01
+          00 00 c5 fe 7f 84 24 00 02 00 00 c5 fe 7f 84 24 20 02 00 00 c5 fe 7f 84 24 40 02 00 00 c5
+          fe 7f 84 24 60 02 00 00 c5 fe 7f 84 24 80 02 00 00 c5 fe 7f 84 24 a0 02 00 00 c5 fe 7f 84
+          24 c0 02 00 00 c5 fe 7f 84 24 e0 02 00 00 c5 f8 77 4c 89 dc c3]
 
 definition keccak_f1600_x4_avx2_tmc
   |- keccak_f1600_x4_avx2_tmc = TRIM_LIST (4, 0) keccak_f1600_x4_avx2_mc
