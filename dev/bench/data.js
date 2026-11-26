@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795682106629,
+  "lastUpdate": 1795682139024,
   "repoUrl": "https://github.com/pq-code-package/mlkem-native",
   "entries": {
     "Arm Cortex-A76 (Raspberry Pi 5) benchmarks": [
@@ -15530,6 +15530,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-KEM-1024 decaps",
             "value": 139618,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "5c9388ff7f2e3a313cb8f0447d17c22efebb9f49",
+          "message": "FIPS202: Zeroize Keccak assembly stack locals on return\n\nThe scalar and hybrid AArch64 Keccak routines and the x86_64 AVX2\nKeccak x4 routine use stack locals during the permutation. Those\nlocals retain their contents after the routines return.\n\nClear the 32 bytes of scalar AArch64 stack locals, the 48 bytes of\nlocals in each AArch64 hybrid, and the 768-byte aligned AVX2 frame\nafter writing back the state.\n\nPorted from pq-code-package/mldsa-native#1498.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-26T06:01:52Z",
+          "tree_id": "e60b398c9faa3a8d7d1132e35c42baf33ed1eeae",
+          "url": "https://github.com/pq-code-package/mlkem-native/commit/5c9388ff7f2e3a313cb8f0447d17c22efebb9f49"
+        },
+        "date": 1795681925868,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-KEM-512 keypair",
+            "value": 39115,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 encaps",
+            "value": 46717,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-512 decaps",
+            "value": 56898,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 keypair",
+            "value": 69520,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 encaps",
+            "value": 77140,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-768 decaps",
+            "value": 92781,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 keypair",
+            "value": 110477,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 encaps",
+            "value": 121243,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-KEM-1024 decaps",
+            "value": 140063,
             "unit": "cycles"
           }
         ]
