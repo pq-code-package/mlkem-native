@@ -1,0 +1,1005 @@
+#!/usr/bin/env python3
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+"""Rebuild the pre-built multilevel library matrix.
+
+The coordinator stages the native compiler matrix and the RV32IM builds,
+validates every shared object and split DWARF package, generates the manifest,
+and replaces binaries/ only after the whole staged tree passes.
+
+On AArch64, the native matrix goes under binaries/aarch64/ and the
+existing x86-64 and RV32IM matrices are carried forward. On x86-64, the
+script rebuilds the x86-64 and RV32IM matrices and carries forward AArch64.
+"""
+
+import argparse
+import datetime
+import hashlib
+import json
+import os
+import platform
+import re
+import shlex
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+
+TOOLCHAINS = {
+    "gcc49": {"family": "GCC", "cc": "gcc"},
+    "gcc8": {"family": "GCC", "cc": "gcc"},
+    "gcc12": {"family": "GCC", "cc": "gcc"},
+    "gcc16": {"family": "GCC", "cc": "gcc"},
+    "clang6": {"family": "Clang", "cc": "clang"},
+    "clang12": {"family": "Clang", "cc": "clang"},
+    "clang17": {"family": "Clang", "cc": "clang"},
+    "clang23": {"family": "Clang", "cc": "clang"},
+}
+
+ELF_MACHINES = {
+    "aarch64": "AArch64",
+    "riscv32": "RISC-V",
+    "x86_64": "Advanced Micro Devices X86-64",
+}
+
+LAYOUTS = ("multilevel", "multilevel-mono")
+OPTIMIZATIONS = ("0", "2", "3", "s")
+RV32IM_OPTIMIZATIONS = ("2", "s")
+RV32IM_TARGET_FLAGS = (
+    "--target=riscv32-linux-musl",
+    "-march=rv32im",
+    "-mabi=ilp32",
+    "-mno-relax",
+)
+ARTIFACTS_PER_TOOLCHAIN = len(LAYOUTS) * len(OPTIMIZATIONS)
+ARTIFACT_COUNT = len(TOOLCHAINS) * ARTIFACTS_PER_TOOLCHAIN
+RV32IM_ARTIFACT_COUNT = len(LAYOUTS) * len(RV32IM_OPTIMIZATIONS)
+PUBLIC_FUNCTIONS = (
+    "check_pk",
+    "check_sk",
+    "dec",
+    "enc",
+    "enc_derand",
+    "keypair",
+    "keypair_derand",
+)
+PUBLIC_SYMBOLS = tuple(
+    sorted(
+        f"mlkem{level}_{function}"
+        for level in (512, 768, 1024)
+        for function in PUBLIC_FUNCTIONS
+    )
+)
+
+COMMON_FLAGS = (
+    "-Wall",
+    "-Wextra",
+    "-Werror=unused-result",
+    "-Wpedantic",
+    "-Werror",
+    "-Wmissing-prototypes",
+    "-Wshadow",
+    "-Wpointer-arith",
+    "-Wredundant-decls",
+    "-Wconversion",
+    "-Wsign-conversion",
+    "-Wno-long-long",
+    "-Wno-unknown-pragmas",
+    "-Wno-unused-command-line-argument",
+    "-fomit-frame-pointer",
+    "-std=c99",
+    "-pedantic",
+    "-Wno-redundant-decls",
+)
+
+BUILD_FLAGS = (
+    "-g",
+    "-gdwarf-4",
+    "-gsplit-dwarf",
+    "-fPIC",
+)
+
+
+def build_flags(machine):
+    stack_protector = (
+        "-fstack-protector-strong" if machine == "aarch64" else "-fno-stack-protector"
+    )
+    return (*BUILD_FLAGS, stack_protector)
+
+
+def toolchain_compile_flags(machine, compiler_id):
+    if machine == "aarch64" and compiler_id == "clang6":
+        # Clang 6 saves the canary but omits the check in SelectionDAG.
+        # Use the LLVM IR stack-protector pass for the check on return.
+        return ("-mllvm", "-enable-selectiondag-sp=false")
+    return ()
+
+
+class BuildError(RuntimeError):
+    """A build or validation step failed."""
+
+
+def run(
+    command,
+    *,
+    cwd,
+    env=None,
+    capture=True,
+    log_file=None,
+):
+    if log_file is not None:
+        with log_file.open("w", encoding="utf-8") as output:
+            result = subprocess.run(
+                command,
+                cwd=cwd,
+                env=env,
+                stdout=output,
+                stderr=subprocess.STDOUT,
+                text=True,
+                check=False,
+            )
+        if result.returncode != 0:
+            raise BuildError(
+                f"{command[0]} failed with status {result.returncode}; see {log_file}"
+            )
+        return ""
+
+    result = subprocess.run(
+        command,
+        cwd=cwd,
+        env=env,
+        stdout=subprocess.PIPE if capture else None,
+        stderr=subprocess.STDOUT if capture else None,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = result.stdout.strip() if result.stdout else "no output"
+        raise BuildError(
+            f"{' '.join(map(str, command))} failed with status "
+            f"{result.returncode}:\n{detail}"
+        )
+    return result.stdout if capture else ""
+
+
+def sha256(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as input_file:
+        for block in iter(lambda: input_file.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def first_line(command, *, cwd):
+    output = run(command, cwd=cwd)
+    return output.splitlines()[0]
+
+
+def global_dynamic_symbols(shared_object, *, cwd, defined):
+    mode = "--defined-only" if defined else "--undefined-only"
+    output = run(
+        ["nm", "-D", "-P", mode, str(shared_object)],
+        cwd=cwd,
+    )
+    return sorted(
+        {
+            line.split()[0].split("@", 1)[0]
+            for line in output.splitlines()
+            if line.split()
+        }
+    )
+
+
+def dynamic_relocations(shared_object, undefined_symbols, *, cwd):
+    output = run(["readelf", "-Wr", str(shared_object)], cwd=cwd)
+    relocations = []
+    bad_relocations = []
+    undefined = set(undefined_symbols)
+
+    for line in output.splitlines():
+        fields = line.split()
+        if not fields or not re.fullmatch(r"[0-9a-fA-F]+", fields[0]):
+            continue
+        relocation_type = fields[2]
+        target = fields[4] if len(fields) >= 5 else ""
+        target = target.split("@", 1)[0]
+        relocations.append({"type": relocation_type, "target": target})
+        if target not in undefined:
+            bad_relocations.append(line)
+
+    if bad_relocations:
+        raise BuildError(
+            f"{shared_object} retains non-external dynamic relocations:\n"
+            + "\n".join(bad_relocations)
+        )
+    return relocations
+
+
+def validate_elf(shared_object, debug_package, *, cwd, machine):
+    header = run(["readelf", "-h", str(shared_object)], cwd=cwd)
+    if not re.search(r"Type:\s+DYN", header):
+        raise BuildError(f"{shared_object} is not an ET_DYN shared object")
+    if not re.search(rf"^ *Machine: +{ELF_MACHINES[machine]}$", header, re.M):
+        raise BuildError(f"{shared_object} is not a {machine} object")
+    if machine == "riscv32":
+        attributes = run(["readelf", "-A", str(shared_object)], cwd=cwd)
+        if (
+            not re.search(r"^ *Class: +ELF32$", header, re.M)
+            or not re.search(r"^ *Flags: +0x0$", header, re.M)
+            or not re.search(
+                r'Tag_RISCV_arch: "rv32i\d+p\d+_m\d+p\d+(?:_zmmul\d+p\d+)?"',
+                attributes,
+            )
+        ):
+            raise BuildError(f"{shared_object} is not RV32IM with the ILP32 ABI")
+
+    dynamic = run(["readelf", "-d", str(shared_object)], cwd=cwd)
+    if "SYMBOLIC" not in dynamic:
+        raise BuildError(f"{shared_object} lacks symbolic binding")
+    if "libmlkem.so" not in dynamic or "SONAME" not in dynamic:
+        raise BuildError(f"{shared_object} lacks the libmlkem.so SONAME")
+    if "TEXTREL" in dynamic:
+        raise BuildError(f"{shared_object} has dynamic text relocations")
+
+    program_headers = run(["readelf", "-Wl", str(shared_object)], cwd=cwd)
+    for line in program_headers.splitlines():
+        fields = line.split()
+        if not fields or fields[0] != "LOAD":
+            continue
+        flags = "".join(fields[6:-1])
+        if "W" in flags and "E" in flags:
+            raise BuildError(f"{shared_object} has a writable-executable LOAD segment")
+
+    sections = run(["readelf", "-SW", str(shared_object)], cwd=cwd)
+    if ".debug_info" not in sections:
+        raise BuildError(f"{shared_object} lacks split-DWARF skeleton data")
+
+    debug_sections = run(["readelf", "-SW", str(debug_package)], cwd=cwd)
+    for required in (".debug_info.dwo", ".debug_cu_index"):
+        if required not in debug_sections:
+            raise BuildError(f"{debug_package} lacks {required}")
+
+
+def dwo_id(dwo_file, *, cwd):
+    output = run(
+        ["readelf", "--debug-dump=info", str(dwo_file)],
+        cwd=cwd,
+    )
+    match = re.search(r"DW_AT_GNU_dwo_id\s*:\s*(0x[0-9a-fA-F]+)", output)
+    if match is None:
+        if b".debug_info.dwo" not in dwo_file.read_bytes():
+            return None
+        raise BuildError(f"could not read a DWO ID from {dwo_file}")
+    return match.group(1)
+
+
+def unique_dwo_files(dwo_files, *, cwd):
+    by_id = {}
+    unique = []
+
+    for dwo_file in dwo_files:
+        identifier = dwo_id(dwo_file, cwd=cwd)
+        if identifier is None:
+            continue
+        digest = sha256(dwo_file)
+        if identifier in by_id:
+            previous_digest, previous_path = by_id[identifier]
+            if digest != previous_digest:
+                raise BuildError(
+                    f"DWO ID {identifier} has differing contents in "
+                    f"{previous_path} and {dwo_file}"
+                )
+            continue
+        by_id[identifier] = (digest, dwo_file)
+        unique.append(dwo_file)
+
+    return unique
+
+
+def compile_test_program(
+    *,
+    root,
+    cc_name,
+    layout,
+    optimization,
+    artifact_dir,
+    work_dir,
+    test_archive,
+):
+    if layout == "multilevel":
+        example = root / "examples" / "multilevel_build"
+    else:
+        example = root / "examples" / "monolithic_build_multilevel"
+
+    test_binary = work_dir / "test_binary"
+    compiler = [cc_name]
+    link_flags = [f"-L{artifact_dir}", "-Wl,-rpath,$ORIGIN/..", "-lmlkem"]
+    runner = [str(test_binary)]
+    if test_archive is not None:
+        # The test runtime's musl requires atomics. The archive being
+        # tested contains the same RV32IM objects as the shared library.
+        compiler = [
+            "zig",
+            "cc",
+            "-target",
+            "riscv32-linux-musl",
+            "-mcpu=generic_rv32+m+a-c-d-f",
+            "-mabi=ilp32",
+        ]
+        link_flags = ["-static", str(test_archive)]
+        runner.insert(0, "qemu-riscv32")
+    run(
+        [
+            *compiler,
+            f"-O{optimization}",
+            "-g",
+            "-gdwarf-4",
+            f"-I{example / 'mlkem_native'}",
+            str(example / "main.c"),
+            str(example / "test_only_rng" / "notrandombytes.c"),
+            *link_flags,
+            "-o",
+            str(test_binary),
+        ],
+        cwd=root,
+        log_file=work_dir / "test-link.log",
+    )
+
+    environment = os.environ.copy()
+    if test_archive is None:
+        environment["LD_LIBRARY_PATH"] = str(artifact_dir)
+    output = run(runner, cwd=root, env=environment)
+    if not output.rstrip().endswith("All tests passed!"):
+        raise BuildError(f"runtime test did not pass for {artifact_dir}")
+    (work_dir / "run.log").write_text(output, encoding="utf-8")
+
+
+def build_layout(
+    *,
+    root,
+    stage,
+    compiler_id,
+    cc_name,
+    layout,
+    optimization,
+):
+    rv32im = compiler_id == "rv32im"
+    machine = "riscv32" if rv32im else platform.machine()
+    flags = (*build_flags(machine), *toolchain_compile_flags(machine, compiler_id))
+    relative_dir = Path(layout) / compiler_id / f"O{optimization}"
+    if rv32im:
+        relative_dir = Path("rv32im") / layout / f"O{optimization}"
+    elif platform.machine() == "aarch64":
+        relative_dir = Path("aarch64") / relative_dir
+    artifact_dir = stage / relative_dir
+    work_dir = artifact_dir / ".work"
+    objects_dir = work_dir / "objects"
+    intermediate_archive = work_dir / "libmlkem.a"
+    shared_object = artifact_dir / "libmlkem.so"
+    debug_package = artifact_dir / "libmlkem.so.dwp"
+    export_map = stage / "libmlkem.map"
+
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    work_dir.mkdir(parents=True, exist_ok=True)
+
+    debug_prefix_flags = (
+        f"-fdebug-prefix-map={root}=.",
+        f"-fdebug-prefix-map={root.resolve()}=.",
+    )
+    target_flags = []
+    if rv32im:
+        includes = Path(os.environ["RV32IM_LIBC_INCLUDE"])
+        target_flags.extend(RV32IM_TARGET_FLAGS)
+        for directory in (
+            "riscv32-linux-musl",
+            "generic-musl",
+            "riscv-linux-any",
+            "any-linux-any",
+        ):
+            target_flags.extend(("-isystem", str(includes / directory)))
+
+    if layout == "multilevel":
+        objects_dir.mkdir(parents=True, exist_ok=True)
+        example = root / "examples" / "multilevel_build"
+        build_dir = os.path.relpath(objects_dir, example)
+        environment = os.environ.copy()
+        environment["CC"] = cc_name
+        environment["CFLAGS"] = shlex.join(
+            (f"-O{optimization}", *flags, *debug_prefix_flags, *target_flags)
+        )
+        run(
+            [
+                "make",
+                "-C",
+                str(example),
+                f"BUILD_DIR={build_dir}",
+                "AUTO=0",
+                "mlkem_objs",
+                "-j2",
+            ],
+            cwd=root,
+            env=environment,
+            log_file=work_dir / "build.log",
+        )
+        object_files = sorted(objects_dir.rglob("*.o"))
+        dwo_files = sorted(objects_dir.rglob("*.dwo"))
+    else:
+        example = root / "examples" / "monolithic_build_multilevel"
+        object_file = work_dir / "mlkem_native.o"
+        run(
+            [
+                cc_name,
+                *COMMON_FLAGS,
+                f"-O{optimization}",
+                *flags,
+                *debug_prefix_flags,
+                *target_flags,
+                f"-I{example / 'mlkem_native'}",
+                "-c",
+                str(example / "mlkem_native_all.c"),
+                "-o",
+                str(object_file),
+            ],
+            cwd=root,
+            log_file=work_dir / "build.log",
+        )
+        object_files = [object_file]
+        dwo_files = [work_dir / "mlkem_native.dwo"]
+
+    if not object_files or len(dwo_files) != len(object_files):
+        raise BuildError(
+            f"{layout}/{compiler_id}/O{optimization} produced "
+            f"{len(object_files)} objects and {len(dwo_files)} DWO files"
+        )
+    if not all(path.is_file() for path in dwo_files):
+        raise BuildError(f"missing DWO output under {work_dir}")
+
+    run(
+        ["ar", "rcsD", str(intermediate_archive), *map(str, object_files)],
+        cwd=root,
+    )
+    run(
+        [
+            "ld.lld" if rv32im else "ld",
+            "-shared",
+            "-Bsymbolic",
+            "-soname",
+            "libmlkem.so",
+            f"--version-script={export_map}",
+            "--whole-archive",
+            str(intermediate_archive),
+            "--no-whole-archive",
+            "-o",
+            str(shared_object),
+        ],
+        cwd=root,
+    )
+
+    packaged_dwo_files = unique_dwo_files(dwo_files, cwd=root)
+    if not packaged_dwo_files:
+        raise BuildError(f"no compilation units to package under {work_dir}")
+    run(
+        [
+            "dwp",
+            "-o",
+            str(debug_package),
+            *map(str, packaged_dwo_files),
+        ],
+        cwd=root,
+    )
+
+    validate_elf(shared_object, debug_package, cwd=root, machine=machine)
+    exports = global_dynamic_symbols(shared_object, cwd=root, defined=True)
+    if exports != list(PUBLIC_SYMBOLS):
+        raise BuildError(
+            f"{shared_object} exports {exports}, expected {list(PUBLIC_SYMBOLS)}"
+        )
+    undefined_symbols = global_dynamic_symbols(shared_object, cwd=root, defined=False)
+    if machine == "aarch64":
+        if "__stack_chk_fail" not in undefined_symbols:
+            raise BuildError(f"{shared_object} does not import __stack_chk_fail")
+    elif any(symbol.startswith("__stack_chk_") for symbol in undefined_symbols):
+        raise BuildError(f"{shared_object} imports stack protector symbols")
+    relocations = dynamic_relocations(shared_object, undefined_symbols, cwd=root)
+
+    compile_test_program(
+        root=root,
+        cc_name=cc_name,
+        layout=layout,
+        optimization=optimization,
+        artifact_dir=artifact_dir,
+        work_dir=work_dir,
+        test_archive=intermediate_archive if rv32im else None,
+    )
+
+    output_prefix = Path("binaries") / relative_dir
+    return {
+        "path": str(output_prefix / "libmlkem.so"),
+        "size_bytes": shared_object.stat().st_size,
+        "sha256": sha256(shared_object),
+        "debug": {
+            "path": str(output_prefix / "libmlkem.so.dwp"),
+            "size_bytes": debug_package.stat().st_size,
+            "sha256": sha256(debug_package),
+            "source_dwo_count": len(dwo_files),
+            "packaged_unit_count": len(packaged_dwo_files),
+        },
+        "dynamic_exports": len(exports),
+        "dynamic_relocations": {
+            "count": len(relocations),
+            "undefined_symbols": undefined_symbols,
+        },
+    }
+
+
+def worker(root, stage, compiler_id, cc_name):
+    metadata_dir = stage / ".metadata"
+    metadata_dir.mkdir(parents=True, exist_ok=True)
+    artifacts = {}
+
+    print(f"{compiler_id}: {first_line([cc_name, '--version'], cwd=root)}")
+    rv32im = compiler_id == "rv32im"
+    optimizations = RV32IM_OPTIMIZATIONS if rv32im else OPTIMIZATIONS
+    for optimization in optimizations:
+        print(f"{compiler_id}: building O{optimization}", flush=True)
+        for layout in LAYOUTS:
+            artifacts.setdefault(layout, {})[f"O{optimization}"] = build_layout(
+                root=root,
+                stage=stage,
+                compiler_id=compiler_id,
+                cc_name=cc_name,
+                layout=layout,
+                optimization=optimization,
+            )
+
+    metadata = {
+        "toolchain": {
+            "family": "Clang" if rv32im else TOOLCHAINS[compiler_id]["family"],
+            "version_line": first_line([cc_name, "--version"], cwd=root),
+            "nix_shell": ".#binary-rv32im" if rv32im else f".#{compiler_id}",
+            "cc": cc_name,
+            "ar": first_line(["ar", "--version"], cwd=root),
+            "ld": first_line(["ld.lld" if rv32im else "ld", "--version"], cwd=root),
+            "dwp": first_line(["dwp", "--version"], cwd=root),
+        },
+        "artifacts": artifacts,
+    }
+    (metadata_dir / f"{compiler_id}.json").write_text(
+        json.dumps(metadata, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    print(
+        f"{compiler_id}: all {len(LAYOUTS) * len(optimizations)} artifacts passed",
+        flush=True,
+    )
+
+
+def source_commit(root):
+    return run(["git", "rev-parse", "HEAD"], cwd=root).strip()
+
+
+def build_manifest(source, stage, rebuild_command, previous, *, rebuild_rv32im):
+    machine = platform.machine()
+    native_flags = build_flags(machine)
+    compile_flags = " ".join(native_flags)
+    if machine == "aarch64":
+        compile_flags += " <toolchain-flags>"
+    toolchains = {}
+    artifacts = {layout: {} for layout in LAYOUTS}
+
+    for compiler_id in TOOLCHAINS:
+        metadata_path = stage / ".metadata" / f"{compiler_id}.json"
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        toolchains[compiler_id] = metadata["toolchain"]
+        extra_flags = toolchain_compile_flags(machine, compiler_id)
+        if extra_flags:
+            toolchains[compiler_id]["extra_compile_flags"] = list(extra_flags)
+        for layout in LAYOUTS:
+            artifacts[layout][compiler_id] = metadata["artifacts"][layout]
+
+    if rebuild_rv32im:
+        rv32im_metadata = json.loads(
+            (stage / ".metadata" / "rv32im.json").read_text(encoding="utf-8")
+        )
+    else:
+        rv32im_metadata = previous["rv32im"]
+    generated_at = (
+        datetime.datetime.now(datetime.timezone.utc)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z")
+    )
+    manifest = {
+        "schema_version": 3,
+        "generated_at": generated_at,
+        "source": {
+            "commit": source_commit(source),
+            "root": str(source),
+            "host": f"{platform.system()} {platform.machine()}",
+        },
+        "rebuild": {
+            "script": "scripts/build-binaries",
+            "command": rebuild_command,
+            "replacement": (
+                "The script stages and validates the full matrix before "
+                "replacing binaries/, and restores the prior directory if "
+                "replacement validation fails."
+            ),
+        },
+        "selection": {
+            "gcc": {
+                "shells": ["gcc49", "gcc8", "gcc12", "gcc16"],
+                "rationale": (
+                    "Four generations with major-version labels 4, 8, 12, "
+                    "and 16; GCC 4.9 is the oldest selected compiler with "
+                    "working split-DWARF output in this matrix."
+                ),
+            },
+            "clang": {
+                "shells": ["clang6", "clang12", "clang17", "clang23"],
+                "rationale": (
+                    "Oldest and newest shells plus the nearest integer third "
+                    "points; major-version gaps are 6, 5, and 6."
+                ),
+            },
+        },
+        "matrix": {
+            "layouts": list(LAYOUTS),
+            "optimizations": [f"O{value}" for value in OPTIMIZATIONS],
+            "compile_flags": list(native_flags),
+            "primary_artifact": "libmlkem.so",
+            "debug_artifact": "libmlkem.so.dwp",
+            "artifact_count": ARTIFACT_COUNT,
+            "debug_artifact_count": ARTIFACT_COUNT,
+        },
+        "link": {
+            "intermediate_archive_command": (
+                "ar rcsD <intermediate-libmlkem.a> <object-files>"
+            ),
+            "command": (
+                "ld -shared -Bsymbolic -soname libmlkem.so "
+                "--version-script=binaries/libmlkem.map --whole-archive "
+                "<intermediate-libmlkem.a> --no-whole-archive "
+                "-o <artifact>/libmlkem.so"
+            ),
+            "internal_relocations": "resolved",
+            "dynamic_relocations": (
+                "Every target is validated as undefined in the shared object."
+            ),
+            "exports": {
+                "count": len(PUBLIC_SYMBOLS),
+                "symbols": list(PUBLIC_SYMBOLS),
+            },
+        },
+        "debug": {
+            "format": "DWARF 4 split DWARF package",
+            "compile_flags": "-g -gdwarf-4 -gsplit-dwarf",
+            "package_command": (
+                "dwp -o <artifact>/libmlkem.so.dwp <unique-dwo-inputs>"
+            ),
+            "empty_units": (
+                "Compiler-generated DWO files without .debug_info.dwo are "
+                "omitted because they contain no compilation unit."
+            ),
+            "duplicate_dwo_ids": (
+                "Byte-identical duplicate DWO IDs from repeated multilevel "
+                "translation units are deduplicated before packaging."
+            ),
+        },
+        "toolchains": toolchains,
+        "recipes": {
+            "multilevel": {
+                "source": "examples/multilevel_build",
+                "description": (
+                    "Compile separate source files for all three parameter "
+                    "sets, archive every object, and final-link the complete "
+                    "archive into a shared object."
+                ),
+                "compile_command": (
+                    f"env CC=<cc> CFLAGS='-O<level> {compile_flags} "
+                    "-fdebug-prefix-map=<root>=.' "
+                    "make -C examples/multilevel_build "
+                    "BUILD_DIR=<work>/objects AUTO=0 mlkem_objs -j2"
+                ),
+                "automatic_host_isa_flags": False,
+            },
+            "multilevel-mono": {
+                "source": ("examples/monolithic_build_multilevel/mlkem_native_all.c"),
+                "description": (
+                    "Compile the single multilevel translation unit, archive "
+                    "it, and final-link the complete archive into a shared "
+                    "object."
+                ),
+                "compile_command": (
+                    f"<cc> <warning-flags> -O<level> {compile_flags} "
+                    "-fdebug-prefix-map=<root>=. "
+                    "-Iexamples/monolithic_build_multilevel/mlkem_native "
+                    "-c examples/monolithic_build_multilevel/"
+                    "mlkem_native_all.c -o <work>/mlkem_native.o"
+                ),
+                "automatic_host_isa_flags": False,
+            },
+        },
+        "artifacts": artifacts,
+        "rv32im": {
+            "isa": "rv32im",
+            "abi": "ilp32",
+            "optimizations": [f"O{level}" for level in RV32IM_OPTIMIZATIONS],
+            "compile_flags": [*build_flags("riscv32"), *RV32IM_TARGET_FLAGS],
+            "headers": "ILP32 musl from the pinned Zig package.",
+            "artifact_count": RV32IM_ARTIFACT_COUNT,
+            "debug_artifact_count": RV32IM_ARTIFACT_COUNT,
+            "validation": (
+                "The shared object is ELF32 RV32IM with no compressed instructions. "
+                "The matching example links the same objects into an executable "
+                "and runs in QEMU using the ILP32 musl test runtime."
+            ),
+            **rv32im_metadata,
+        },
+        "validation": {
+            "status": "passed",
+            "checks_per_artifact": [
+                f"Native shared object is {platform.machine()} ET_DYN "
+                "with SONAME libmlkem.so.",
+                "DF_SYMBOLIC is set and no dynamic TEXTREL is present.",
+                "Imports the stack protector handler __stack_chk_fail."
+                if machine == "aarch64"
+                else "No stack protector symbols are imported.",
+                "No LOAD segment is both writable and executable.",
+                "Exactly the 21 public ML-KEM symbols are exported.",
+                "Every dynamic relocation targets an undefined symbol.",
+                "The DWP package has .debug_info.dwo and .debug_cu_index.",
+                "The matching example links and reports All tests passed!.",
+            ],
+        },
+    }
+    if machine == "aarch64":
+        native_keys = (
+            "generated_at",
+            "source",
+            "rebuild",
+            "matrix",
+            "toolchains",
+            "recipes",
+            "artifacts",
+            "validation",
+        )
+        aarch64 = {key: manifest.pop(key) for key in native_keys}
+        manifest = {**previous, "rv32im": manifest["rv32im"]} if previous else manifest
+        manifest["aarch64"] = aarch64
+    elif "aarch64" in previous:
+        manifest["aarch64"] = previous["aarch64"]
+
+    (stage / "builds.json").write_text(
+        json.dumps(manifest, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return manifest
+
+
+def iter_native_artifacts(matrix):
+    for layout in LAYOUTS:
+        for compiler_id in TOOLCHAINS:
+            for optimization in OPTIMIZATIONS:
+                yield matrix["artifacts"][layout][compiler_id][f"O{optimization}"]
+
+
+def iter_manifest_artifacts(manifest):
+    if "artifacts" in manifest:
+        yield from iter_native_artifacts(manifest)
+    if "aarch64" in manifest:
+        yield from iter_native_artifacts(manifest["aarch64"])
+    for layout in LAYOUTS:
+        for optimization in RV32IM_OPTIMIZATIONS:
+            yield manifest["rv32im"]["artifacts"][layout][f"O{optimization}"]
+
+
+def validate_tree(tree, manifest):
+    primary_files = sorted(tree.rglob("libmlkem.so"))
+    debug_files = sorted(tree.rglob("libmlkem.so.dwp"))
+    forbidden = [
+        *tree.rglob("*.a"),
+        *tree.rglob("*.o"),
+        *tree.rglob("*.dwo"),
+    ]
+    artifacts = list(iter_manifest_artifacts(manifest))
+    artifact_count = len(artifacts)
+    if len(primary_files) != artifact_count or len(debug_files) != artifact_count:
+        raise BuildError(
+            f"expected {artifact_count} shared objects and "
+            f"{artifact_count} DWP files, found "
+            f"{len(primary_files)} and {len(debug_files)}"
+        )
+    if forbidden:
+        raise BuildError(
+            "final tree contains intermediate files: "
+            + ", ".join(map(str, forbidden[:10]))
+        )
+
+    for artifact in artifacts:
+        shared_object = tree / Path(artifact["path"]).relative_to("binaries")
+        debug = artifact["debug"]
+        debug_package = tree / Path(debug["path"]).relative_to("binaries")
+        for path, metadata in (
+            (shared_object, artifact),
+            (debug_package, debug),
+        ):
+            if not path.is_file():
+                raise BuildError(f"manifest path does not exist: {path}")
+            if path.stat().st_size != metadata["size_bytes"]:
+                raise BuildError(f"size mismatch for {path}")
+            if sha256(path) != metadata["sha256"]:
+                raise BuildError(f"SHA-256 mismatch for {path}")
+
+
+def write_checksums(stage):
+    files = sorted(
+        [
+            *stage.rglob("libmlkem.so"),
+            *stage.rglob("libmlkem.so.dwp"),
+            stage / "builds.json",
+            stage / "libmlkem.map",
+        ]
+    )
+    lines = [f"{sha256(path)}  {path.relative_to(stage)}" for path in files]
+    (stage / "SHA256SUMS").write_text(
+        "\n".join(lines) + "\n",
+        encoding="utf-8",
+    )
+
+
+def safe_remove(path, root):
+    if path.parent != root or path.name not in {
+        ".binaries-build",
+        ".binaries-backup",
+    }:
+        raise BuildError(f"refusing to remove unexpected path {path}")
+    if path.exists():
+        shutil.rmtree(path)
+
+
+def coordinator(root, source):
+    stage = root / ".binaries-build"
+    backup = root / ".binaries-backup"
+    output = root / "binaries"
+    script = Path(__file__).resolve()
+
+    if backup.exists():
+        if output.exists():
+            safe_remove(backup, root)
+        else:
+            print(
+                f"Restoring interrupted replacement from {backup}",
+                flush=True,
+            )
+            backup.rename(output)
+    safe_remove(stage, root)
+    previous_path = output / "builds.json"
+    previous = (
+        json.loads(previous_path.read_text(encoding="utf-8"))
+        if previous_path.is_file()
+        else {}
+    )
+    machine = platform.machine()
+    rebuild_rv32im = machine != "aarch64" or "rv32im" not in previous
+    if machine == "aarch64" and previous:
+        shutil.copytree(output, stage, ignore=shutil.ignore_patterns("aarch64"))
+    else:
+        stage.mkdir()
+        if "aarch64" in previous:
+            shutil.copytree(output / "aarch64", stage / "aarch64")
+    shutil.copy2(root / "scripts" / "libmlkem.map", stage / "libmlkem.map")
+
+    print(f"Staging a complete rebuild under {stage}", flush=True)
+    try:
+        compilers = (*TOOLCHAINS, "rv32im") if rebuild_rv32im else TOOLCHAINS
+        for compiler_id in compilers:
+            rv32im = compiler_id == "rv32im"
+            run(
+                [
+                    "nix",
+                    "develop",
+                    ".#binary-rv32im" if rv32im else f".#{compiler_id}",
+                    "-c",
+                    "python3",
+                    str(script),
+                    "--worker",
+                    compiler_id,
+                    "--source",
+                    str(source),
+                    "--stage",
+                    str(stage),
+                ],
+                cwd=root if rv32im else source,
+                capture=False,
+            )
+
+        rebuild_command = "scripts/build-binaries"
+        if source != root:
+            rebuild_command += f" --source {shlex.quote(str(source))}"
+        manifest = build_manifest(
+            source, stage, rebuild_command, previous, rebuild_rv32im=rebuild_rv32im
+        )
+        for work_dir in stage.rglob(".work"):
+            shutil.rmtree(work_dir)
+        shutil.rmtree(stage / ".metadata")
+        write_checksums(stage)
+
+        validate_tree(stage, manifest)
+
+        print("All staged artifacts passed; replacing binaries/", flush=True)
+        if output.exists():
+            output.rename(backup)
+        try:
+            stage.rename(output)
+            validate_tree(output, manifest)
+        except Exception:
+            if output.exists():
+                shutil.rmtree(output)
+            if backup.exists():
+                backup.rename(output)
+            raise
+        safe_remove(backup, root)
+    except Exception:
+        print(
+            f"Build failed; existing {output} was not replaced. "
+            f"Staging data remains at {stage}.",
+            file=sys.stderr,
+        )
+        raise
+
+    print(f"Rebuilt {ARTIFACT_COUNT} {machine} shared objects with DWP files.")
+    if rebuild_rv32im:
+        print(f"Rebuilt {RV32IM_ARTIFACT_COUNT} RV32IM shared objects with DWP files.")
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--source",
+        type=Path,
+        help="build from this checkout instead of the one containing the script",
+    )
+    parser.add_argument(
+        "--worker",
+        choices=(*TOOLCHAINS, "rv32im"),
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        "--stage",
+        type=Path,
+        help=argparse.SUPPRESS,
+    )
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    root = Path(__file__).resolve().parent.parent
+    source = args.source.resolve() if args.source is not None else root
+    if platform.system() != "Linux" or platform.machine() not in ("aarch64", "x86_64"):
+        raise BuildError("builds require Linux on AArch64 or x86_64")
+
+    if args.worker is not None:
+        if args.stage is None:
+            raise BuildError("--worker requires --stage")
+        compiler_id = args.worker
+        worker(
+            source,
+            args.stage.resolve(),
+            compiler_id,
+            "clang" if compiler_id == "rv32im" else TOOLCHAINS[compiler_id]["cc"],
+        )
+        return
+
+    coordinator(root, source)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except BuildError as error:
+        print(f"error: {error}", file=sys.stderr)
+        sys.exit(1)

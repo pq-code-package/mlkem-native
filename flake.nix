@@ -164,6 +164,18 @@
           devShells.cross-riscv32 = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchain_riscv32; };
           };
+          devShells.binary-rv32im = util.mkShellNoCC {
+            packages = [
+              pkgs.llvmPackages.clang-unwrapped
+              pkgs.llvmPackages.lld
+              pkgs.binutils-unwrapped
+              pkgs.gnumake
+              pkgs.qemu
+              pkgs.zig_0_16
+              util.pythonEnv
+            ];
+            RV32IM_LIBC_INCLUDE = "${pkgs.zig_0_16}/lib/zig/libc/include";
+          };
           devShells.cross-ppc64le = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchain_ppc64le; };
           };

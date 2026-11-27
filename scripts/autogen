@@ -3415,7 +3415,10 @@ def get_syscaps():
 
 
 def check_macro_typos():
-    files = get_all_files()
+    files = filter(
+        lambda filename: not filename.startswith("binaries/"),
+        get_all_files(),
+    )
     syscaps = get_syscaps()
 
     macros = set(map(lambda t: t[1], get_defines(all=True)))

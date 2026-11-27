@@ -68,7 +68,7 @@ git ls-files -- ":/*.c" ":/*.h" | xargs -P "$nproc" -I {} sh -c '
 info "Expanding tabs"
 expand-tabs()
 {
-  git ls-files -- ":/" ":/!:Makefile" ":/!:**/Makefile" ":/!:**/Makefile.*" ":/!:Makefile.*" ":/!:*.mk" ":/!:*.patch" ":/!:*.S" ":/!:*.inc" ":/!:nix/valgrind/*.txt" | xargs -P "$nproc" -I {} sh -c '
+  git ls-files -- ":/" ":/!:binaries/**" ":/!:Makefile" ":/!:**/Makefile" ":/!:**/Makefile.*" ":/!:Makefile.*" ":/!:*.mk" ":/!:*.patch" ":/!:*.S" ":/!:*.inc" ":/!:nix/valgrind/*.txt" | xargs -P "$nproc" -I {} sh -c '
     if [ ! -L "$1" ] && grep -Pq '"'"'\t'"'"' "$1"; then
       tmp=$(mktemp)
       expand -t 4 "$1" > "$tmp" && mv "$tmp" "$1"
@@ -80,7 +80,7 @@ expand-tabs
 info "Checking for eol"
 check-eol()
 {
-  git ls-files -- ":/" ":/!:*.png" | xargs -P "$nproc" -I {} sh -c '
+  git ls-files -- ":/" ":/!:binaries/**" ":/!:*.png" | xargs -P "$nproc" -I {} sh -c '
     # Ignore symlinks
     if [[ ! -L "$1" && $(tail -c1 "$1" | wc -l) == 0 ]]; then
       echo "" >>"$1"
